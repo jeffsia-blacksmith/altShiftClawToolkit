@@ -1,0 +1,15 @@
+name: "Error Handler"
+description: "Extracts errors from execution and appends to result"
+runs:
+  using: "composite"
+  steps:
+    - name: Check for errors
+      run: |
+        if [ -s error.log ]; then
+          echo -e "\n\n### ⚠️ Execution Notice\n" >> result.md
+          cat error.log >> result.md
+          echo "Errors appended to result."
+        else
+          echo "No errors found."
+        fi
+      shell: bash

@@ -1,0 +1,43 @@
+name: Agent Runner
+on:
+  repository_dispatch:
+    types: [coding-agent]
+    
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          
+      - name: Install Copilot CLI
+        run: npm install -g @github/copilot
+        
+      - name: Run Copilot CLI
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROMPT: ${{ github.event.client_payload.prompt }}
+        run: |
+          echo "Executing task..."
+          copilot -p "$PROMPT" > result.md 2> error.log || true
+          
+      - name: Handle Errors
+        uses: ./actions/error-handler-action
+        
+      - name: Update Issue Comment
+        uses: ./actions/update-comment-action
+        with:
+          body_file: "result.md"
+          
+      - name: Commit artifacts to branch
+        uses: ./actions/commit-push-issue-branch-action
+        with:
+          commit_message: "chore: update agent task artifacts"

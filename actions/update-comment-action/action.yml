@@ -1,0 +1,25 @@
+name: "Update Issue Comment"
+description: "Updates a GitHub issue comment with results or creates a new one"
+inputs:
+  body_file:
+    description: "File containing the content body"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Post or Update Comment
+      env:
+        GH_TOKEN: ${{ github.token }}
+        ISSUE_NUMBER: ${{ github.event.client_payload.issue_number }}
+      run: |
+        if [ -z "$ISSUE_NUMBER" ]; then
+          echo "No issue number provided in payload, skipping comment update."
+          exit 0
+        fi
+        
+        # Read the result from the file
+        BODY=$(cat "${{ inputs.body_file }}")
+        
+        # Create a new comment on the issue
+        gh issue comment "$ISSUE_NUMBER" --body "$BODY"
+      shell: bash
