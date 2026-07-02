@@ -467,15 +467,28 @@ jobs:
           fi
 
           echo "Setting up Telegram bot commands..."
-          cmd_response="$(
+          # Set English default commands
+          cmd_response_en="$(
             curl --silent \
               -X POST \
               "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setMyCommands" \
               -H "Content-Type: application/json" \
-              -d '{"commands":[{"command":"start","description":"🚀 初始化並查看小龍蝦列表"},{"command":"list","description":"📋 列出所有值班中的小龍蝦"},{"command":"new","description":"➕ 建立新的小龍蝦"},{"command":"current","description":"🦞 顯示目前值班中的小龍蝦"},{"command":"status","description":"📊 顯示目前小龍蝦狀態摘要"},{"command":"edit","description":"✏️ 編輯目前的小龍蝦"},{"command":"close","description":"🔒 關閉目前的小龍蝦"},{"command":"clear","description":"🧹 清除目前小龍蝦的記憶"},{"command":"llm","description":"🧠 設定 AI 供應商與模型"},{"command":"skills","description":"🛠️ 安裝與管理小龍蝦技能"},{"command":"templates","description":"📄 安裝小龍蝦範本"},{"command":"schedules","description":"⏰ 列出所有排程"},{"command":"workflow","description":"🔄 查詢小龍蝦任務狀態"},{"command":"enable","description":"▶️ 啟用目前的小龍蝦"},{"command":"disable","description":"⏸️ 停用目前的小龍蝦"},{"command":"autoupdate","description":"⬆️ 更新龍蝦堡核心"},{"command":"version","description":"🏷️ 查詢龍蝦堡核心版本"},{"command":"help","description":"❓ 顯示所有指令說明"}]}'
+              -d '{"commands":[{"command":"start","description":"🚀 Initialize and view claw list"},{"command":"list","description":"📋 List all active claws"},{"command":"status","description":"📊 Show current claw status summary"},{"command":"current","description":"🦞 Show current active claw"},{"command":"llm","description":"🧠 Setup AI provider and model"},{"command":"skills","description":"🛠️ Install and manage agent skills"},{"command":"templates","description":"📄 Install lobster templates"},{"command":"help","description":"❓ Show usage instructions and help"},{"command":"new","description":"➕ Create a new claw"},{"command":"edit","description":"✏️ Edit current claw"},{"command":"close","description":"🔒 Close current claw"},{"command":"clear","description":"🧹 Clear current claw memory"},{"command":"schedules","description":"⏰ List all schedules"},{"command":"workflow","description":"🔄 Check workflow status"},{"command":"enable","description":"▶️ Enable current claw"},{"command":"disable","description":"⏸️ Disable current claw"},{"command":"autoupdate","description":"⬆️ Update lobster core"},{"command":"version","description":"🏷️ Check core version"}]}'
           )"
-          if [[ "$(echo "${cmd_response}" | jq -r '.ok // false')" != "true" ]]; then
-            echo "::warning::Telegram bot commands 設定失敗: $(echo "${cmd_response}" | jq -r '.description // "unknown error"')"
+          if [[ "$(echo "${cmd_response_en}" | jq -r '.ok // false')" != "true" ]]; then
+            echo "::warning::Telegram default (EN) bot commands 設定失敗: $(echo "${cmd_response_en}" | jq -r '.description // "unknown error"')"
+          fi
+
+          # Set Chinese (zh) commands
+          cmd_response_zh="$(
+            curl --silent \
+              -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setMyCommands" \
+              -H "Content-Type: application/json" \
+              -d '{"language_code":"zh","commands":[{"command":"start","description":"🚀 初始化並查看小龍蝦列表"},{"command":"list","description":"📋 列出所有值班中的小龍蝦"},{"command":"status","description":"📊 顯示目前小龍蝦狀態摘要"},{"command":"current","description":"🦞 顯示目前值班中的小龍蝦"},{"command":"llm","description":"🧠 設定 AI 供應商與模型"},{"command":"skills","description":"🛠️ 安裝與管理小龍蝦技能"},{"command":"templates","description":"📄 安裝小龍蝦範本"},{"command":"help","description":"❓ 顯示所有指令說明"},{"command":"new","description":"➕ 建立新的小龍蝦"},{"command":"edit","description":"✏️ 編輯目前的小龍蝦"},{"command":"close","description":"🔒 關閉目前的小龍蝦"},{"command":"clear","description":"🧹 清除目前小龍蝦的記憶"},{"command":"schedules","description":"⏰ 列出所有排程"},{"command":"workflow","description":"🔄 查詢小龍蝦任務狀態"},{"command":"enable","description":"▶️ 啟用目前的小龍蝦"},{"command":"disable","description":"⏸️ 停用目前的小龍蝦"},{"command":"autoupdate","description":"⬆️ 更新龍蝦堡核心"},{"command":"version","description":"🏷️ 查詢龍蝦堡核心版本"}]}'
+          )"
+          if [[ "$(echo "${cmd_response_zh}" | jq -r '.ok // false')" != "true" ]]; then
+            echo "::warning::Telegram Chinese (ZH) bot commands 設定失敗: $(echo "${cmd_response_zh}" | jq -r '.description // "unknown error"')"
           fi
 
       - name: Publish summary
