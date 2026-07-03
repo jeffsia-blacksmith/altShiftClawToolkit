@@ -13,6 +13,10 @@ inputs:
   body_file:
     description: "File containing the content body (legacy)"
     required: false
+  brain_meta:
+    description: "HTML comment tag for downstream identification"
+    required: false
+    default: '<!-- githubclaw-brain-result: {"source":"githubclaw-worker-brain"} -->'
 runs:
   using: "composite"
   steps:
@@ -21,24 +25,47 @@ runs:
         GH_TOKEN: ${{ github.token }}
         INPUT_ISSUE_NUMBER: ${{ inputs.issue_number }}
         PAYLOAD_ISSUE_NUMBER: ${{ github.event.client_payload.issue_number }}
+        INPUT_COMMENT_ID: ${{ inputs.comment_id }}
+        PAYLOAD_COMMENT_ID: ${{ github.event.client_payload.comment_id }}
         INPUT_MESSAGE_FILE: ${{ inputs.message_file }}
         INPUT_BODY_FILE: ${{ inputs.body_file }}
+        INPUT_BRAIN_META: ${{ inputs.brain_meta }}
       run: |
         ISSUE_NUMBER="${INPUT_ISSUE_NUMBER:-$PAYLOAD_ISSUE_NUMBER}"
-        if [ -z "$ISSUE_NUMBER" ]; then
-          echo "No issue number provided in inputs or payload, skipping comment update."
-          exit 0
-        fi
+        COMMENT_ID="${INPUT_COMMENT_ID:-$PAYLOAD_COMMENT_ID}"
         
         FILE_PATH="${INPUT_MESSAGE_FILE:-$INPUT_BODY_FILE}"
-        if [ -z "$FILE_PATH" ] || [ ! -f "$FILE_PATH" ]; then
-          echo "Message file ($FILE_PATH) not found or empty, skipping comment update."
+        if [ -z "$FILE_PATH" ] || [ ! -f "$FILE_PATH" ] || [ ! -s "$FILE_PATH" ]; then
+          echo "Message file ($FILE_PATH) not found or empty, using fallback."
+          BODY="⚠️ 執行完畢，但未產生或找不到結果檔案。"
+        else
+          BODY=$(cat "$FILE_PATH")
+        fi
+        
+        # Append brain_meta if not already present
+        BRAIN_META="${INPUT_BRAIN_META}"
+        if [ -n "$BRAIN_META" ] && [[ "$BODY" != *"$BRAIN_META"* ]] && [[ "$BODY" != *"githubclaw-brain-result"* ]]; then
+          BODY="${BODY}"$'\n\n'"${BRAIN_META}"
+        fi
+        
+        if [ -n "$COMMENT_ID" ] && [ "$COMMENT_ID" != "null" ] && [ "$COMMENT_ID" != "0" ]; then
+          echo "Updating existing comment #$COMMENT_ID..."
+          for attempt in {1..5}; do
+            if gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${COMMENT_ID}" -f body="$BODY"; then
+              echo "Comment #$COMMENT_ID updated successfully."
+              exit 0
+            fi
+            echo "Failed to update comment (attempt $attempt/5), retrying in 6s..."
+            sleep 6
+          done
+          echo "Warning: Could not update comment #$COMMENT_ID after 5 attempts. Falling back to creating new comment..."
+        fi
+        
+        if [ -z "$ISSUE_NUMBER" ] || [ "$ISSUE_NUMBER" = "null" ]; then
+          echo "No issue number provided, cannot create new comment."
           exit 0
         fi
         
-        # Read the result from the file
-        BODY=$(cat "$FILE_PATH")
-        
-        # Create a new comment on the issue
+        echo "Creating new comment on issue #$ISSUE_NUMBER..."
         gh issue comment "$ISSUE_NUMBER" --body "$BODY"
       shell: bash
