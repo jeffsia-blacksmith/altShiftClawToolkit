@@ -16,6 +16,8 @@ runs:
       run: |
         OUTPUT_FILE="${{ inputs.output_file }}"
         RESULT_FILE="${{ inputs.result_file }}"
+        OUTPUT_FILE="${OUTPUT_FILE:-error.log}"
+        RESULT_FILE="${RESULT_FILE:-result.md}"
         if [ -s "$OUTPUT_FILE" ]; then
           echo -e "\n\n### ⚠️ Execution Notice\n" >> "$RESULT_FILE"
           cat "$OUTPUT_FILE" >> "$RESULT_FILE"

@@ -44,7 +44,10 @@ runs:
         
         # Append brain_meta if not already present
         BRAIN_META="${INPUT_BRAIN_META}"
-        if [ -n "$BRAIN_META" ] && [[ "$BODY" != *"$BRAIN_META"* ]] && [[ "$BODY" != *"githubclaw-brain-result"* ]]; then
+        if [ -z "$BRAIN_META" ]; then
+          BRAIN_META='<!-- githubclaw-brain-result: {"source":"githubclaw-worker-brain"} -->'
+        fi
+        if [[ "$BODY" != *"$BRAIN_META"* ]] && [[ "$BODY" != *"githubclaw-brain-result"* ]]; then
           BODY="${BODY}"$'\n\n'"${BRAIN_META}"
         fi
         
