@@ -1,0 +1,57 @@
+{
+  "providers": [
+    {
+      "id": "openai",
+      "label": "OpenAI",
+      "secretName": "OPENAI_API_KEY",
+      "models": [
+        { "value": "gpt-4o",               "label": "GPT-4o" },
+        { "value": "gpt-4o-mini",          "label": "GPT-4o Mini" },
+        { "value": "o3",                   "label": "o3" },
+        { "value": "o4-mini",              "label": "o4-mini" }
+      ]
+    },
+    {
+      "id": "anthropic",
+      "label": "Anthropic",
+      "secretName": "ANTHROPIC_API_KEY",
+      "models": [
+        { "value": "claude-opus-4-5",      "label": "Claude Opus 4.5" },
+        { "value": "claude-sonnet-4-5",    "label": "Claude Sonnet 4.5" },
+        { "value": "claude-haiku-3-5",     "label": "Claude Haiku 3.5" }
+      ]
+    },
+    {
+      "id": "google",
+      "label": "Google Gemini",
+      "secretName": "GEMINI_API_KEY",
+      "models": [
+        { "value": "gemini-2.5-pro",       "label": "Gemini 2.5 Pro" },
+        { "value": "gemini-2.5-flash",     "label": "Gemini 2.5 Flash" },
+        { "value": "gemini-2.0-flash",     "label": "Gemini 2.0 Flash" }
+      ]
+    },
+    {
+      "id": "groq",
+      "label": "Groq",
+      "secretName": "GROQ_API_KEY",
+      "models": [
+        { "value": "moonshotai/kimi-k2-instruct",  "label": "Kimi K2" },
+        { "value": "llama-3.3-70b-versatile",      "label": "Llama 3.3 70B" },
+        { "value": "llama3-8b-8192",               "label": "Llama 3 8B" }
+      ]
+    },
+    {
+      "id": "openrouter",
+      "label": "OpenRouter",
+      "secretName": "OPENROUTER_API_KEY",
+      "models": [
+        { "value": "anthropic/claude-opus-4-5",    "label": "Claude Opus 4.5 (OR)" },
+        { "value": "google/gemini-2.5-pro",        "label": "Gemini 2.5 Pro (OR)" },
+        { "value": "openai/gpt-4o",                "label": "GPT-4o (OR)" },
+        { "value": "deepseek/deepseek-r1-0528",    "label": "DeepSeek R1 (OR)" },
+        { "value": "moonshotai/kimi-k2",           "label": "Kimi K2 (OR)" }
+      ]
+    }
+  ]
+}
