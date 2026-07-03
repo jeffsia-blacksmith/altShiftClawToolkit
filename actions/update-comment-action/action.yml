@@ -1,24 +1,43 @@
 name: "Update Issue Comment"
 description: "Updates a GitHub issue comment with results or creates a new one"
 inputs:
+  issue_number:
+    description: "The issue number to comment on"
+    required: false
+  comment_id:
+    description: "The comment ID or task ID"
+    required: false
+  message_file:
+    description: "File containing the message/result content"
+    required: false
   body_file:
-    description: "File containing the content body"
-    required: true
+    description: "File containing the content body (legacy)"
+    required: false
 runs:
   using: "composite"
   steps:
     - name: Post or Update Comment
       env:
         GH_TOKEN: ${{ github.token }}
-        ISSUE_NUMBER: ${{ github.event.client_payload.issue_number }}
+        INPUT_ISSUE_NUMBER: ${{ inputs.issue_number }}
+        PAYLOAD_ISSUE_NUMBER: ${{ github.event.client_payload.issue_number }}
+        INPUT_MESSAGE_FILE: ${{ inputs.message_file }}
+        INPUT_BODY_FILE: ${{ inputs.body_file }}
       run: |
+        ISSUE_NUMBER="${INPUT_ISSUE_NUMBER:-$PAYLOAD_ISSUE_NUMBER}"
         if [ -z "$ISSUE_NUMBER" ]; then
-          echo "No issue number provided in payload, skipping comment update."
+          echo "No issue number provided in inputs or payload, skipping comment update."
+          exit 0
+        fi
+        
+        FILE_PATH="${INPUT_MESSAGE_FILE:-$INPUT_BODY_FILE}"
+        if [ -z "$FILE_PATH" ] || [ ! -f "$FILE_PATH" ]; then
+          echo "Message file ($FILE_PATH) not found or empty, skipping comment update."
           exit 0
         fi
         
         # Read the result from the file
-        BODY=$(cat "${{ inputs.body_file }}")
+        BODY=$(cat "$FILE_PATH")
         
         # Create a new comment on the issue
         gh issue comment "$ISSUE_NUMBER" --body "$BODY"
