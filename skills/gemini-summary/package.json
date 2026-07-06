@@ -4,11 +4,11 @@
   "description": "統一摘要 skill — 自動偵測 URL/PDF/影片並產生繁體中文 Markdown 摘要",
   "type": "module",
   "scripts": {
-    "build": "bun build src/summarize.js --outfile scripts/summarize.js --target node --minify",
+    "build": "npx -y bun build src/summarize.js --outfile scripts/summarize.js --target node --minify",
     "summarize": "node scripts/summarize.js"
   },
   "dependencies": {
-    "@google/genai": ">=1.33.0",
+    "@google/genai": "^2.0.0",
     "@mozilla/readability": "^0.6.0",
     "linkedom": "^0.18.0"
   },

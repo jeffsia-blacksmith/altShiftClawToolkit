@@ -91,19 +91,41 @@ async function main() {
     const status = await client.interactions.get(interactionId);
 
     if (status.status === "completed") {
-      const outputs = status.outputs ?? status.output;
-      if (outputs && outputs.length > 0) {
-        const last = outputs[outputs.length - 1];
-        if (last.text) {
-          process.stdout.write(last.text);
-        } else {
-          for (const part of outputs) {
-            if (part.type === "text" && part.text) {
-              process.stdout.write(part.text);
+      if (status.output_text) {
+        process.stdout.write(status.output_text);
+        process.stdout.write("\n");
+      } else if (status.steps && status.steps.length > 0) {
+        for (const step of status.steps) {
+          if (step.type === "model_output" || step.type === "text" || step.content) {
+            if (step.text) {
+              process.stdout.write(step.text);
+            } else if (Array.isArray(step.content)) {
+              for (const part of step.content) {
+                if (part.type === "text" && part.text) {
+                  process.stdout.write(part.text);
+                } else if (part.text) {
+                  process.stdout.write(part.text);
+                }
+              }
             }
           }
         }
         process.stdout.write("\n");
+      } else {
+        const outputs = status.outputs ?? status.output;
+        if (outputs && outputs.length > 0) {
+          const last = outputs[outputs.length - 1];
+          if (last.text) {
+            process.stdout.write(last.text);
+          } else {
+            for (const part of outputs) {
+              if (part.type === "text" && part.text) {
+                process.stdout.write(part.text);
+              }
+            }
+          }
+          process.stdout.write("\n");
+        }
       }
       console.error("研究完成！");
       return;

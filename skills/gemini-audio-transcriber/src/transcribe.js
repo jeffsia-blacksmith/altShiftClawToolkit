@@ -107,6 +107,23 @@ async function resolveAudioInput(rawInput) {
   );
 }
 
+function createMediaPart(uri, mimeType) {
+  if (uri && uri.startsWith("data:")) {
+    return {
+      inlineData: {
+        mimeType,
+        data: uri.replace(/^data:[^;]+;base64,/, ""),
+      },
+    };
+  }
+  return {
+    fileData: {
+      fileUri: uri,
+      mimeType,
+    },
+  };
+}
+
 async function main() {
   const rawInput = process.argv[2];
   if (!rawInput) {
@@ -149,34 +166,35 @@ async function main() {
   console.error(`正在分析音訊：${rawInput}`);
   console.error("請稍候，Gemini 正在處理音訊...\n");
 
-  const stream = await client.interactions.create({
+  const stream = await client.models.generateContentStream({
     model: "gemini-3-flash-preview",
-    input: [
+    contents: [
       {
-        type: "text",
-        text: [
-          "請仔細聆聽這段音訊內容，並完成以下任務：",
-          "",
-          "1. 將所有語音內容轉錄為繁體中文逐字稿",
-          "2. 如果音訊中有多位說話者，請用「說話者 A」「說話者 B」等標記區分每位說話者的發言",
-          "3. 保留語意完整，不遺漏重要內容",
-          "4. 如果音訊品質不佳導致某段無法辨識，請用「[無法辨識]」標記",
-          "5. 輸出格式為繁體中文 Markdown",
-          "",
-          "請直接輸出逐字稿內容，不需要額外的前言或說明。",
-        ].join("\n"),
-      },
-      {
-        type: "audio",
-        uri: audioInput.uri,
-        mime_type: audioInput.mimeType,
+        role: "user",
+        parts: [
+          {
+            text: [
+              "請仔細聆聽這段音訊內容，並完成以下任務：",
+              "",
+              "1. 將所有語音內容轉錄為繁體中文逐字稿",
+              "2. 如果音訊中有多位說話者，請用「說話者 A」「說話者 B」等標記區分每位說話者的發言",
+              "3. 保留語意完整，不遺漏重要內容",
+              "4. 如果音訊品質不佳導致某段無法辨識，請用「[無法辨識]」標記",
+              "5. 輸出格式為繁體中文 Markdown",
+              "",
+              "請直接輸出逐字稿內容，不需要額外的前言或說明。",
+            ].join("\n"),
+          },
+          createMediaPart(audioInput.uri, audioInput.mimeType),
+        ],
       },
     ],
-    stream: true,
   });
 
   for await (const chunk of stream) {
-    if (
+    if (chunk.text) {
+      process.stdout.write(chunk.text);
+    } else if (
       chunk.event_type === "content.delta" &&
       chunk.delta?.type === "text" &&
       chunk.delta.text

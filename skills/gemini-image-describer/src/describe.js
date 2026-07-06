@@ -131,6 +131,23 @@ async function resolveImageInput(rawInput) {
   throw new Error(`輸入既非可讀取的本地檔案，也非有效的圖片 URL：${rawInput}`);
 }
 
+function createMediaPart(uri, mimeType) {
+  if (uri && uri.startsWith("data:")) {
+    return {
+      inlineData: {
+        mimeType,
+        data: uri.replace(/^data:[^;]+;base64,/, ""),
+      },
+    };
+  }
+  return {
+    fileData: {
+      fileUri: uri,
+      mimeType,
+    },
+  };
+}
+
 async function main() {
   const rawInput = process.argv[2];
   if (!rawInput) {
@@ -199,12 +216,7 @@ async function main() {
               "請確保輸出完整且結構清楚。",
             ].join("\n"),
           },
-          {
-            inlineData: {
-              mimeType: imageInput.mimeType,
-              data: imageInput.uri.replace(/^data:[^;]+;base64,/, ""),
-            },
-          },
+          createMediaPart(imageInput.uri, imageInput.mimeType),
         ],
       },
     ],

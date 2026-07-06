@@ -140,9 +140,28 @@ function isRemoteUrl(value) {
   }
 }
 
-async function streamInteraction(stream) {
+function createMediaPart(uri, mimeType) {
+  if (uri && uri.startsWith("data:")) {
+    return {
+      inlineData: {
+        mimeType,
+        data: uri.replace(/^data:[^;]+;base64,/, ""),
+      },
+    };
+  }
+  return {
+    fileData: {
+      fileUri: uri,
+      mimeType,
+    },
+  };
+}
+
+async function streamContentResponse(stream) {
   for await (const chunk of stream) {
-    if (
+    if (chunk.text) {
+      process.stdout.write(chunk.text);
+    } else if (
       chunk.event_type === "content.delta" &&
       chunk.delta?.type === "text" &&
       chunk.delta.text
@@ -401,15 +420,24 @@ async function handleUrl(input, client) {
       preview: prepared.text.slice(0, 280),
     },
     model: MODELS.url,
-    interactionInput: buildUrlPrompt({
-      url,
-      title: article.title,
-      siteName: article.siteName,
-      byline: article.byline,
-      excerpt: article.excerpt,
-      content: prepared.text,
-      truncated: prepared.truncated,
-    }),
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: buildUrlPrompt({
+              url,
+              title: article.title,
+              siteName: article.siteName,
+              byline: article.byline,
+              excerpt: article.excerpt,
+              content: prepared.text,
+              truncated: prepared.truncated,
+            }),
+          },
+        ],
+      },
+    ],
     cleanup: null,
   };
 }
@@ -564,9 +592,14 @@ async function handlePdf(input, client) {
   return {
     dryRunInfo,
     model: MODELS.pdf,
-    interactionInput: [
-      { type: "text", text: buildPdfPrompt() },
-      { type: "document", uri, mime_type: pdfInput.mimeType },
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: buildPdfPrompt() },
+          createMediaPart(uri, pdfInput.mimeType),
+        ],
+      },
     ],
     cleanup: async () => {
       await client.files.delete({ name: uploadedFileName }).catch(() => {});
@@ -682,9 +715,14 @@ async function handleVideo(input) {
           : videoInput.uri,
     },
     model: MODELS.video,
-    interactionInput: [
-      { type: "text", text: buildVideoPrompt() },
-      { type: "video", uri: videoInput.uri, mime_type: videoInput.mimeType },
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: buildVideoPrompt() },
+          createMediaPart(videoInput.uri, videoInput.mimeType),
+        ],
+      },
     ],
     cleanup: null,
   };
@@ -821,9 +859,14 @@ async function handleAudio(input, client) {
   return {
     dryRunInfo,
     model: MODELS.audio,
-    interactionInput: [
-      { type: "text", text: buildAudioPrompt() },
-      { type: "document", uri: uploadedFile.uri, mime_type: audioInput.mimeType },
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: buildAudioPrompt() },
+          createMediaPart(uploadedFile.uri, audioInput.mimeType),
+        ],
+      },
     ],
     cleanup: async () => {
       await client.files.delete({ name: uploadedFileName }).catch(() => {});
@@ -946,13 +989,12 @@ async function main() {
   // Stream the summary
   console.error("正在請 Gemini 產生摘要...");
   try {
-    const stream = await client.interactions.create({
+    const stream = await client.models.generateContentStream({
       model: result.model,
-      input: result.interactionInput,
-      generation_config: { max_output_tokens: 65536 },
-      stream: true,
+      contents: result.contents,
+      config: { maxOutputTokens: 65536 },
     });
-    await streamInteraction(stream);
+    await streamContentResponse(stream);
   } finally {
     if (result.cleanup) await result.cleanup();
   }
