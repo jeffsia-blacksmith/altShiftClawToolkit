@@ -43,8 +43,8 @@ description: 為 GitHubClawToolkit 的 skill 或 template 目錄生成 githubcla
 4. **category**：根據功能選擇合適分類（見 schema.md 中的合法值清單）
 5. **tags**：3-6 個相關標籤，使用小寫英文
 6. **version**：優先從 `package.json` 取得，無則預設 `1.0.0`
-7. **support_url**：固定為 `https://github.com/duotify/GitHubClawToolkit/issues`
-8. **homepage**：固定為 `https://learn.duotify.com/courses/githubclaw`
+7. **support_url**：固定為 `https://github.com/jeffsia-blacksmith/altShiftClawToolkit/issues`
+8. **homepage**：固定為 `https://github.com/jeffsia-blacksmith/altShiftClawToolkit`
 9. **requireEnv**：從 SKILL.md 的 `required_env` 欄位、README 中的環境變數說明、或 scripts 中的 `process.env` 提取
 
 ### 步驟 4：生成 JSON
@@ -77,8 +77,8 @@ description: 為 GitHubClawToolkit 的 skill 或 template 目錄生成 githubcla
   "category": "content",
   "tags": ["summarization", "gemini", "content-analysis", "multilingual"],
   "version": "1.0.0",
-  "support_url": "https://github.com/duotify/GitHubClawToolkit/issues",
-  "homepage": "https://learn.duotify.com/courses/githubclaw",
+  "support_url": "https://github.com/jeffsia-blacksmith/altShiftClawToolkit/issues",
+  "homepage": "https://github.com/jeffsia-blacksmith/altShiftClawToolkit",
   "requireEnv": ["GEMINI_API_KEY"]
 }
 ```

@@ -121,12 +121,12 @@ jobs:
             "${RUNNER_TEMP}/github-claw-worker-package/GitHubClawCore/index.js" \
             "${GITHUB_WORKSPACE}/index.js"
 
-      - name: Sync installed templates from GitHubClawToolkit
+      - name: Sync installed templates from altShiftClawToolkit
         run: |
           set -euo pipefail
 
           TOOLKIT_REPO="https://github.com/jeffsia-blacksmith/altShiftClawToolkit.git"
-          TOOLKIT_DIR="${RUNNER_TEMP}/GitHubClawToolkit"
+          TOOLKIT_DIR="${RUNNER_TEMP}/altShiftClawToolkit"
           LOCAL_TEMPLATE_DIR="${GITHUB_WORKSPACE}/templates"
 
           mkdir -p "${LOCAL_TEMPLATE_DIR}"
@@ -136,14 +136,14 @@ jobs:
           )
 
           if [[ "${#INSTALLED_TEMPLATES[@]}" -eq 0 ]]; then
-            echo "沒有偵測到已安裝 templates/*，略過 GitHubClawToolkit 同步。"
+            echo "沒有偵測到已安裝 templates/*，略過 altShiftClawToolkit 同步。"
             exit 0
           fi
 
           git clone --depth 1 "$TOOLKIT_REPO" "$TOOLKIT_DIR"
 
           if [[ ! -d "${TOOLKIT_DIR}/templates" ]]; then
-            echo "::error::GitHubClawToolkit 目錄缺少 templates"
+            echo "::error::altShiftClawToolkit 目錄缺少 templates"
             exit 1
           fi
 
@@ -172,7 +172,7 @@ jobs:
           done
 
           {
-            echo "### 模板同步結果（GitHubClawToolkit）"
+            echo "### 模板同步結果（altShiftClawToolkit）"
             echo ""
             if (( ${#updated_templates[@]} > 0 )); then
               echo "#### 已更新模板"

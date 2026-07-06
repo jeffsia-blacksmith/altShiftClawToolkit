@@ -55,7 +55,7 @@
       "apiKey": "OPENROUTER_API_KEY",
       "headers": {
         "HTTP-Referer": "https://github.com/jeffsia-blacksmith/altShiftClawToolkit",
-        "X-Title": "GitHubClawToolkit"
+        "X-Title": "altShiftClawToolkit"
       },
       "compat": {
         "supportsDeveloperRole": false,

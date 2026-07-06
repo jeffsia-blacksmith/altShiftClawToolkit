@@ -85,12 +85,12 @@
 ### support_url（必填）
 
 - **類型**：string
-- **固定值**：`https://github.com/duotify/GitHubClawToolkit/issues`
+- **固定值**：`https://github.com/jeffsia-blacksmith/altShiftClawToolkit/issues`
 
 ### homepage（必填）
 
 - **類型**：string
-- **固定值**：`https://learn.duotify.com/courses/githubclaw`
+- **固定值**：`https://github.com/jeffsia-blacksmith/altShiftClawToolkit`
 
 ### requireEnv（必填）
 
