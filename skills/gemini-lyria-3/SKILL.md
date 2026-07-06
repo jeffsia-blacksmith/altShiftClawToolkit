@@ -64,11 +64,11 @@ node .agents/skills/gemini-lyria-3/scripts/generate-track.js
 
 1. 確認使用者提供了歌詞內容或文字提示詞。
 2. 將歌詞或提示詞寫入暫時文字檔（例如 `./lyrics.txt`）。
-3. 設定 `ISSUE_DIR` 為音訊輸出目錄（建議使用 `./music-output` 或 issue 的 artifacts 目錄）。
+3. 設定 `ISSUE_DIR` 為音訊輸出目錄（在自動化任務中請務必設定為 `artifacts/${COMMENT_ID}`；一般執行可預設為 `./music-output`）。並且務必將最終文字報告寫入 `artifacts/${COMMENT_ID}/result.md`。
 4. 確認環境中已設定 `GEMINI_API_KEY`。
 5. 執行腳本：
    ```sh
-   PROMPT_FILE="./lyrics.txt" ISSUE_DIR="./music-output" node .agents/skills/gemini-lyria-3/scripts/generate-track.js
+   PROMPT_FILE="./lyrics.txt" ISSUE_DIR="artifacts/${COMMENT_ID:-music-output}" node .agents/skills/gemini-lyria-3/scripts/generate-track.js
    ```
 6. 解析 stdout 中 `Saved: <path>` 行取得生成的音軌路徑。
 7. 以 Markdown 連結格式回報每個音軌，加上 `githubclaw-artifacts` metadata 供 Telegram relay 使用。

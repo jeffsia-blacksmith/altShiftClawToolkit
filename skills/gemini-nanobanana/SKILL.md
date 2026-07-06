@@ -17,7 +17,7 @@ description: Use this skill when users ask to generate, edit, or compose images 
 - Resolution: default **1K**.
 - Output mode: default **Images only**.
 - Google Search grounding tool: default **Disabled**; enable with `--google-search` when needed.
-- Output directory: default `nanobanana-output/`, unless the prompt explicitly asks for another location.
+- Output directory: default `nanobanana-output/`, unless the prompt explicitly asks for another location. When running inside an automated agent task (e.g. when `COMMENT_ID` environment variable is present or when instructed to report to `result.md`), ALWAYS specify `--output-dir "artifacts/${COMMENT_ID}"` and write the final markdown response report to `artifacts/${COMMENT_ID}/result.md`.
 - 512px rule: send `imageConfig.imageSize` as string `"512"` in API calls (never numeric `512`).
 
 ## Read references intentionally
@@ -43,16 +43,16 @@ After successful generation, **always** report results in this format:
 
 ### Example (single image)
 
-Assuming `GITHUB_REPO=test/baoclaw-5`, `BRANCH=issue-3`:
+Assuming `GITHUB_REPO=test/baoclaw-5`, `BRANCH=issue-3`, `COMMENT_ID=4153431460`:
 
 ```
 ✅ 圖片已產出
 
-![一杯抹茶拿鐵](https://github.com/test/baoclaw-5/blob/issue-3/issue-3/artifacts/4153431460/matcha-latte-01.jpg?raw=true)
+![一杯抹茶拿鐵](https://github.com/test/baoclaw-5/blob/issue-3/artifacts/4153431460/matcha-latte-01.jpg?raw=true)
 
 - 格式：JPEG · 1408×768 · 757 KB
 
-<!-- githubclaw-artifacts: {"images":[{"branch":"issue-3","path":"issue-3/artifacts/4153431460/matcha-latte-01.jpg"}],"html":[]} -->
+<!-- githubclaw-artifacts: {"images":[{"branch":"issue-3","path":"artifacts/4153431460/matcha-latte-01.jpg"}],"html":[]} -->
 ```
 
 ### Example (multiple images)
@@ -60,13 +60,13 @@ Assuming `GITHUB_REPO=test/baoclaw-5`, `BRANCH=issue-3`:
 ```
 ✅ 圖片已產出
 
-![圖 1](https://github.com/test/baoclaw-5/blob/issue-3/issue-3/artifacts/4153431460/cute-puppy-01.jpg?raw=true)
-![圖 2](https://github.com/test/baoclaw-5/blob/issue-3/issue-3/artifacts/4153431460/cute-puppy-02.jpg?raw=true)
+![圖 1](https://github.com/test/baoclaw-5/blob/issue-3/artifacts/4153431460/cute-puppy-01.jpg?raw=true)
+![圖 2](https://github.com/test/baoclaw-5/blob/issue-3/artifacts/4153431460/cute-puppy-02.jpg?raw=true)
 
 - 圖 1：JPEG · 1408×768 · 703 KB
 - 圖 2：JPEG · 1408×768 · 512 KB
 
-<!-- githubclaw-artifacts: {"images":[{"branch":"issue-3","path":"issue-3/artifacts/4153431460/cute-puppy-01.jpg"},{"branch":"issue-3","path":"issue-3/artifacts/4153431460/cute-puppy-02.jpg"}],"html":[]} -->
+<!-- githubclaw-artifacts: {"images":[{"branch":"issue-3","path":"artifacts/4153431460/cute-puppy-01.jpg"},{"branch":"issue-3","path":"artifacts/4153431460/cute-puppy-02.jpg"}],"html":[]} -->
 ```
 
 ### Why this format
@@ -77,9 +77,8 @@ Assuming `GITHUB_REPO=test/baoclaw-5`, `BRANCH=issue-3`:
 
 ## Execution pattern
 - Default to Node.js wrapper flows for regular usage, especially when payload control is needed.
-- Quick path (agent runs from `issue-N/`; resolve the repo root first):
-  - `REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "../..")` then
-    `node "$REPO_ROOT/.agents/skills/gemini-nanobanana/scripts/gemini-nanobanana-cli.js" --prompt "..."`
+- Quick path (agent runs from workspace root):
+  - `node ".agents/skills/gemini-nanobanana/scripts/gemini-nanobanana-cli.js" --prompt "..." --output-dir "artifacts/${COMMENT_ID:-nanobanana-output}"`
   - Add references via repeated `-i/--image` (up to 14).
   - Enable grounding via `--google-search` when prompt needs fresh web context.
 - The API key (`GEMINI_NANOBANANA_API_KEY` / `GEMINI_API_KEY`) is injected by the workflow environment; do **not** hardcode it. The CLI reads it automatically from the environment.

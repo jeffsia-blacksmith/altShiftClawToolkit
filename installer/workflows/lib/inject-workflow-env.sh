@@ -27,13 +27,13 @@
 # 用法:
 #   inject-workflow-env.sh <workflow-file> <VAR1,VAR2,...> [step-id]
 #
-#   step-id 預設為 "copilot_task"（issue-N.yml 的主要執行 step）
+#   step-id 預設為 "pi_task"（issue-N.yml 的主要執行 step）
 
 set -euo pipefail
 
 WORKFLOW_FILE="${1:?Usage: inject-workflow-env.sh <workflow-file> <env-vars> [step-id]}"
 ENV_VARS_RAW="${2:?Usage: inject-workflow-env.sh <workflow-file> <env-vars> [step-id]}"
-STEP_ID="${3:-copilot_task}"
+STEP_ID="${3:-pi_task}"
 
 python3 - "$WORKFLOW_FILE" "$ENV_VARS_RAW" "$STEP_ID" <<'PYEOF'
 import sys, re
@@ -90,7 +90,7 @@ def inject(workflow_file, env_vars_raw, step_id):
     # 新 key 插入在最後一個現有 key 之後。
     step_line_idx = None
     for i, line in enumerate(lines):
-        if re.search(rf'\bid:\s*{re.escape(step_id)}\b', line):
+        if re.search(rf'\bid:\s*(?:{re.escape(step_id)}|pi_task|copilot_task)\b', line):
             step_line_idx = i
             break
 

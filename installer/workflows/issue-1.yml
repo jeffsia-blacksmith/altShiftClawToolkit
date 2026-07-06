@@ -230,6 +230,21 @@ jobs:
             HAS_ERROR=1
           fi
 
+          # 如果沒有產生 result.md，自動從 output.jsonl 或 error.log 擷取 AI 的回覆內容或報錯原因做為補救
+          if [[ ! -s "artifacts/${COMMENT_ID}/result.md" ]]; then
+            echo "Notice: result.md is missing or empty. Attempting intelligent fallback from output.jsonl/error.log..."
+            if [[ -f "artifacts/${COMMENT_ID}/output.jsonl" ]]; then
+              jq -r 'select(.type == "message_end" or .type == "turn_end" or .type == "result" or .type == "agent_end") | (.message?.content // .content // .text // .result // empty) | if type == "array" then map(select(.type == "text") | .text) | join("\n") elif type == "string" then . else empty end' \
+                "artifacts/${COMMENT_ID}/output.jsonl" 2>/dev/null | tail -n 1 > "artifacts/${COMMENT_ID}/result.md" || true
+            fi
+            if [[ ! -s "artifacts/${COMMENT_ID}/result.md" && -s "artifacts/${COMMENT_ID}/error.log" ]]; then
+              echo -e "### ⚠️ 執行提示\n\n產生結果失敗，以下為系統排錯日誌：\n" > "artifacts/${COMMENT_ID}/result.md"
+              cat "artifacts/${COMMENT_ID}/error.log" >> "artifacts/${COMMENT_ID}/result.md" || true
+            elif [[ ! -s "artifacts/${COMMENT_ID}/result.md" ]]; then
+              echo "⚠️ AI 未能返回有意義的文字結果或檔案，請檢查指令或 API 授權金鑰是否已正確設定。" > "artifacts/${COMMENT_ID}/result.md"
+            fi
+          fi
+
           if [[ $EXIT_CODE -ne 0 || $HAS_ERROR -ne 0 ]]; then
             if [[ -s "artifacts/${COMMENT_ID}/result.md" ]]; then
               echo "Warning: Pi exited with code ${EXIT_CODE} or reported errorMessage, but result.md was generated."
