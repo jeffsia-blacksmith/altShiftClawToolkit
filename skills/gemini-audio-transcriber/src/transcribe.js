@@ -167,7 +167,7 @@ async function main() {
   console.error("請稍候，Gemini 正在處理音訊...\n");
 
   const stream = await client.models.generateContentStream({
-    model: "gemini-3-flash-preview",
+    model: process.env.GEMINI_AUDIO_MODEL || "gemini-3.5-flash",
     contents: [
       {
         role: "user",

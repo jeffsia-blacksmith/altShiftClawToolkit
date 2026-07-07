@@ -22,10 +22,10 @@ import { fileURLToPath } from "node:url";
 // ---------------------------------------------------------------------------
 
 const MODELS = {
-  url: "gemini-3-flash-preview",
-  pdf: "gemini-3-flash-preview",
-  video: "gemini-3-flash-preview",
-  audio: "gemini-3-flash-preview",
+  url: process.env.GEMINI_SUMMARY_MODEL || "gemini-3.5-flash",
+  pdf: process.env.GEMINI_SUMMARY_MODEL || "gemini-3.5-flash",
+  video: process.env.GEMINI_SUMMARY_MODEL || "gemini-3.5-flash",
+  audio: process.env.GEMINI_SUMMARY_MODEL || "gemini-3.5-flash",
 };
 
 const MAX_CONTENT_LENGTH = 120_000;
