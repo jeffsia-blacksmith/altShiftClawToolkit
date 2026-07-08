@@ -4,11 +4,11 @@
 /**
  * Gemini Lyria-3 音樂生成 CLI（零依賴）
  *
- * 環境變數：
+ * 環境变數：
  *   GEMINI_API_KEY  — Google Gemini API 金鑰（必填）
  *   PROMPT_FILE     — 含歌詞或提示詞的文字檔路徑（必填）
- *   ISSUE_DIR       — 音訊輸出目錄（必填）
- *   NAME_PREFIX     — 輸出檔案名稱前綴（選填，預設：track）
+ *   ISSUE_DIR       — 音訊输出目錄（必填）
+ *   NAME_PREFIX     — 输出檔案名稱前綴（選填，預設：track）
  *   LYRIA_MODEL / MODEL — 使用的模型（選填，預設：lyria-3-pro-preview）
  */
 
@@ -37,10 +37,10 @@ async function main() {
   if (!apiKey) throw new Error("缺少 GEMINI_API_KEY");
 
   const promptFile = process.env.PROMPT_FILE;
-  if (!promptFile) throw new Error("缺少 PROMPT_FILE 環境變數");
+  if (!promptFile) throw new Error("缺少 PROMPT_FILE 環境变數");
 
   const issueDir = process.env.ISSUE_DIR;
-  if (!issueDir) throw new Error("缺少 ISSUE_DIR 環境變數");
+  if (!issueDir) throw new Error("缺少 ISSUE_DIR 環境变數");
 
   const namePrefix = process.env.NAME_PREFIX || "track";
   const model =
@@ -113,7 +113,7 @@ async function main() {
     throw new Error("API 未回傳任何音訊資料。原始回應：" + JSON.stringify(json ?? body));
   }
 
-  console.error(`共生成 ${savedFiles.length} 個音軌檔案`);
+  console.error(`共生成 ${savedFiles.length} 个音軌檔案`);
 }
 
 main().catch((error) => {

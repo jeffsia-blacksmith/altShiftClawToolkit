@@ -49,9 +49,9 @@ the following format:
 git add .
 git commit -m "type(scope): 簡短摘要
 
-詳細說明：
-- 變更項目 1：說明具體修改內容與原因
-- 變更項目 2：說明具體修改內容與原因
+詳細说明：
+- 变更項目 1：说明具体修改內容與原因
+- 变更項目 2：说明具体修改內容與原因
 
 技術細節：
 - 採用的技術方案與理由
@@ -59,7 +59,7 @@ git commit -m "type(scope): 簡短摘要
 
 影響範圍：
 - 受影響的模組或功能
-- 是否有破壞性變更"
+- 是否有破壞性变更"
 ```
 
 - **type**: Use English (feat / fix / refactor / docs / chore / test)
@@ -79,18 +79,18 @@ If this PR is linked to an issue, update the issue with technical context
   ## 技術分析
 
   ### 問題根因
-  （說明問題的根本原因，不只是表面症狀）
+  （说明問題的根本原因，不只是表面症狀）
 
   ### 解決方案
-  （說明採用的技術方案與原因）
+  （说明採用的技術方案與原因）
 
   ### 影響評估
   - 受影響的模組：...
-  - 破壞性變更：有 / 無
+  - 破壞性变更：有 / 無
   - 效能影響：...
 
-  ### 測試驗證
-  （說明如何驗證修改是正確的）
+  ### 測試验证
+  （说明如何验证修改是正確的）
   ```
 - This ensures the issue serves as a complete technical record, not just a
   one-line description.
@@ -112,20 +112,20 @@ structure strictly. If no template exists, use the following default:
 
 ```markdown
 ## 概述
-（一段話說明這個 PR 做了什麼）
+（一段話说明這个 PR 做了什麼）
 
 ## 問題描述
-（這個 PR 要解決什麼問題？連結相關 Issue）
+（這个 PR 要解決什麼問題？連結相關 Issue）
 
 ## 解決方案
 （採用了什麼技術方案？為什麼？）
 
-## 變更內容
-- [ ] 變更項目 1
-- [ ] 變更項目 2
+## 变更內容
+- [ ] 变更項目 1
+- [ ] 变更項目 2
 
 ## 測試方式
-（如何驗證這些變更是正確的？）
+（如何验证這些变更是正確的？）
 
 ## 相關連結
 - Issue: #xxx
@@ -158,14 +158,14 @@ EOF
 
 # 2. Create the PR
 gh pr create \
-  --title "type(scope): 繁體中文簡短摘要" \
+  --title "type(scope): 繁体中文簡短摘要" \
   --body-file /tmp/pr-body.md
 
 # 3. Clean up
 rm /tmp/pr-body.md
 ```
 
-- **Title format**: `type(scope): 繁體中文摘要`
+- **Title format**: `type(scope): 繁体中文摘要`
 - If linked to an issue, include `Fixes #xxx` in the body and add `--assignee @me`
 
 ## Principles

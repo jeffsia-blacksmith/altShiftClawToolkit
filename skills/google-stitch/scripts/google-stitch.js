@@ -1,4 +1,4 @@
-const zo = "google_stitch", Xo = "透過提示詞使用 Google Stitch（Gemini 多模態生成）自動生成設計圖片與 HTML。輸入設計描述後，同時返回 base64 編碼的設計圖片與對應的 HTML 原始碼。適用於快速設計原型、UI 草圖、行銷素材等場景。", Qo = { type: "object", properties: { prompt: { type: "string", description: "設計描述提示詞。請詳細描述你想要的設計風格、內容、顏色、版面配置等。例如：「一個現代感的電商首頁，深藍色背景，白色文字，包含 Hero Banner 和三欄產品展示」。" }, aspectRatio: { type: "string", enum: ["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"], description: "生成圖片的長寬比。預設為 16:9。" }, imageSize: { type: "string", enum: ["512", "1K", "2K", "4K"], description: "生成圖片的解析度。預設為 1K。" }, model: { type: "string", enum: ["gemini-3.1-flash-image-preview", "gemini-3-pro-image-preview"], description: "使用的 Gemini 圖片生成模型。gemini-3.1-flash-image-preview 為 Nano Banana 2（速度快、成本低）；gemini-3-pro-image-preview 為 Nano Banana Pro（品質更高、支援 4K）。預設為 gemini-3.1-flash-image-preview。" } }, required: ["prompt"], additionalProperties: !1 }, Zo = { secrets: { apiKey: "GEMINI_API_KEY" } }, jo = {
+const zo = "google_stitch", Xo = "透過提示詞使用 Google Stitch（Gemini 多模態生成）自動生成設計圖片與 HTML。输入設計描述后，同時返回 base64 編碼的設計圖片與對應的 HTML 原始碼。適用於快速設計原型、UI 草圖、行銷素材等場景。", Qo = { type: "object", properties: { prompt: { type: "string", description: "設計描述提示詞。請詳細描述你想要的設計風格、內容、顏色、版面配置等。例如：「一个現代感的電商首頁，深藍色背景，白色文字，包含 Hero Banner 和三欄產品展示」。" }, aspectRatio: { type: "string", enum: ["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"], description: "生成圖片的長寬比。預設為 16:9。" }, imageSize: { type: "string", enum: ["512", "1K", "2K", "4K"], description: "生成圖片的解析度。預設為 1K。" }, model: { type: "string", enum: ["gemini-3.1-flash-image-preview", "gemini-3-pro-image-preview"], description: "使用的 Gemini 圖片生成模型。gemini-3.1-flash-image-preview 為 Nano Banana 2（速度快、成本低）；gemini-3-pro-image-preview 為 Nano Banana Pro（品質更高、支援 4K）。預設為 gemini-3.1-flash-image-preview。" } }, required: ["prompt"], additionalProperties: !1 }, Zo = { secrets: { apiKey: "GEMINI_API_KEY" } }, jo = {
   name: zo,
   description: Xo,
   inputSchema: Qo,
@@ -11373,11 +11373,11 @@ const vf = "gemini-3.1-flash-image-preview", Rf = "16:9", Pf = "1K", Wo = (n) =>
   const t = n.code;
   if (typeof t == "number") return t;
 }, jt = (n, e = {}) => Object.assign(new Error(n), { name: "StitchApiError", ...e }), Nf = (n) => [
-  "你是一位專業 UI/UX 設計師與前端工程師。",
+  "你是一位專業 UI/UX 設計师與前端工程师。",
   "請根據以下設計需求，完成兩項任務：",
   "",
   "【任務一】生成一張高品質的設計圖片，視覺化呈現下方描述的設計。",
-  "【任務二】輸出對應的完整 HTML 原始碼（包含內嵌 CSS），",
+  "【任務二】输出對應的完整 HTML 原始碼（包含內嵌 CSS），",
   "讓瀏覽器能直接渲染出與設計圖一致的頁面。",
   "HTML 必須：",
   "- 是完整可獨立運行的單一 HTML 檔案",
@@ -11388,7 +11388,7 @@ const vf = "gemini-3.1-flash-image-preview", Rf = "16:9", Pf = "1K", Wo = (n) =>
   "設計需求：",
   n,
   "",
-  "請先輸出設計圖片，再輸出 HTML 原始碼。",
+  "請先输出設計圖片，再输出 HTML 原始碼。",
   "HTML 原始碼請以 ```html 和 ``` 包裹。"
 ].join(`
 `), Df = (n) => {

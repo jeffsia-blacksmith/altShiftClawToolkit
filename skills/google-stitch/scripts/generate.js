@@ -18,13 +18,13 @@ function printUsage() {
       "  --aspect-ratio <value>   例如 16:9、9:16、1:1",
       "  --image-size <value>     例如 512、1K、2K、4K",
       "  --model <value>          gemini-3.1-flash-image-preview | gemini-3-pro-image-preview",
-      "  --output-dir <path>      輸出目錄，預設 ./google-stitch-output",
-      "  --html-out <path>        自訂 HTML 輸出檔案",
-      "  --image-out <path>       自訂圖片輸出檔案",
+      "  --output-dir <path>      输出目錄，預設 ./google-stitch-output",
+      "  --html-out <path>        自訂 HTML 输出檔案",
+      "  --image-out <path>       自訂圖片输出檔案",
       "",
-      "環境變數：",
+      "環境变數：",
       "  GEMINI_API_KEY / GOOGLE_API_KEY",
-      "  GOOGLE_STITCH_DRY_RUN=1  只輸出執行計畫，不呼叫 API",
+      "  GOOGLE_STITCH_DRY_RUN=1  只输出執行計畫，不呼叫 API",
     ].join("\n"),
   );
 }
