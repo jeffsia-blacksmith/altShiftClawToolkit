@@ -1,79 +1,79 @@
 ---
 name: githubclaw-json-generator
-description: 為 GitHubClawToolkit 的 skill 或 template 目錄生成 githubclaw.json metadata 檔案。當使用者新增、更新 skill/template 並需要建立或更新 githubclaw.json 時觸发。也適用於批次為多个 skill/template 產生 githubclaw.json 的情境。不適用於與 GitHubClawToolkit 無關的一般 JSON 生成需求。
+description: 为 GitHubClawToolkit 的 skill 或 template 目录生成 githubclaw.json metadata 档案。当使用者新增、更新 skill/template 并需要建立或更新 githubclaw.json 时触发。也适用于批次为多个 skill/template 产生 githubclaw.json 的情境。不适用于与 GitHubClawToolkit 无关的一般 JSON 生成需求。
 ---
 
 # GitHubClaw JSON Generator
 
-為 GitHubClawToolkit repo 中的 skill 或 template 目錄產生標準化的 `githubclaw.json` metadata 檔案，供 GitHubClawCore 統一解析使用。
+为 GitHubClawToolkit repo 中的 skill 或 template 目录产生标准化的 `githubclaw.json` metadata 档案，供 GitHubClawCore 统一解析使用。
 
-## 執行流程
+## 执行流程
 
-### 步驟 1：確認目標目錄
+### 步骤 1：确认目标目录
 
-確認使用者指定的目標路徑。目標必須是 `skills/` 或 `templates/` 下的某个子目錄。
+确认使用者指定的目标路径。目标必须是 `skills/` 或 `templates/` 下的某个子目录。
 
-- 若使用者未指定，詢問要為哪个 skill 或 template 產生 `githubclaw.json`。
-- 若使用者要求批次處理，逐一對每个目錄執行步驟 2–5。
+- 若使用者未指定，询问要为哪个 skill 或 template 产生 `githubclaw.json`。
+- 若使用者要求批次处理，逐一对每个目录执行步骤 2–5。
 
-### 步驟 2：掃描目標目錄
+### 步骤 2：扫描目标目录
 
-讀取目標目錄中的關鍵檔案以提取資訊：
+读取目标目录中的关键档案以提取资讯：
 
-**Skill 目錄優先讀取：**
+**Skill 目录优先读取：**
 - `SKILL.md`（提取 name、description、required_env）
 - `README.md`（提取描述、用途说明）
 - `package.json`（提取 version）
-- `scripts/` 目錄內容（判断功能性質）
+- `scripts/` 目录内容（判断功能性质）
 
-**Template 目錄優先讀取：**
-- `AGENTS.md`（提取描述、架構说明）
+**Template 目录优先读取：**
+- `AGENTS.md`（提取描述、架构说明）
 - `README.md`（提取描述、用途说明）
-- `.copilot/config.json`（Copilot 框架設定）
-- `.codex/config.toml`（Codex 框架設定）
-- `.agents/skills/` 目錄內容（判断內含技能）
+- `.copilot/config.json`（Copilot 框架设定）
+- `.codex/config.toml`（Codex 框架设定）
+- `.agents/skills/` 目录内容（判断内含技能）
 
-### 步驟 3：決定各欄位值
+### 步骤 3：决定各栏位值
 
-參閱 `references/schema.md` 取得完整欄位規格。核心規則：
+参阅 `references/schema.md` 取得完整栏位规格。核心规则：
 
-1. **name**：使用英文，對應目錄名稱但可加空格（如 `gemini-summary` → `Gemini Summary`）
-2. **tagline**：一句繁体中文簡介，不超過 50 字
-3. **description**：繁体中文詳細描述，2-4 句話说明功能與適用情境
-4. **category**：根據功能選擇合適分類（見 schema.md 中的合法值清單）
-5. **tags**：3-6 个相關標籤，使用小寫英文
-6. **version**：優先从 `package.json` 取得，無則預設 `1.0.0`
-7. **support_url**：固定為 `https://github.com/jeffsia-blacksmith/altShiftClawToolkit/issues`
-8. **homepage**：固定為 `https://github.com/jeffsia-blacksmith/altShiftClawToolkit`
-9. **requireEnv**：从 SKILL.md 的 `required_env` 欄位、README 中的環境变數说明、或 scripts 中的 `process.env` 提取
+1. **name**：使用英文，对应目录名称但可加空格（如 `gemini-summary` → `Gemini Summary`）
+2. **tagline**：一句繁体中文简介，不超过 50 字
+3. **description**：繁体中文详细描述，2-4 句话说明功能与适用情境
+4. **category**：根据功能选择合适分类（见 schema.md 中的合法值清单）
+5. **tags**：3-6 个相关标签，使用小写英文
+6. **version**：优先从 `package.json` 取得，无则预设 `1.0.0`
+7. **support_url**：固定为 `https://github.com/jeffsia-blacksmith/altShiftClawToolkit/issues`
+8. **homepage**：固定为 `https://github.com/jeffsia-blacksmith/altShiftClawToolkit`
+9. **requireEnv**：从 SKILL.md 的 `required_env` 栏位、README 中的环境变数说明、或 scripts 中的 `process.env` 提取
 
-### 步驟 4：生成 JSON
+### 步骤 4：生成 JSON
 
-讀取 `assets/githubclaw.template.json` 作為結構範本，填入步驟 3 決定的值，將結果寫入目標目錄的 `githubclaw.json`。
+读取 `assets/githubclaw.template.json` 作为结构范本，填入步骤 3 决定的值，将结果写入目标目录的 `githubclaw.json`。
 
-確保 JSON 格式正確：
-- 使用 2 空格縮排
-- 檔案結尾換行
-- 無多餘逗號
+确保 JSON 格式正确：
+- 使用 2 空格缩排
+- 档案结尾换行
+- 无多余逗号
 
-### 步驟 5：验证
+### 步骤 5：验证
 
-執行以下验证：
-- JSON 語法正確（可用 `python3 -m json.tool` 验证）
-- 所有必填欄位皆存在且非空
-- `category` 值在合法清單內
-- `tags` 為非空陣列
-- `requireEnv` 為陣列（可為空）
+执行以下验证：
+- JSON 语法正确（可用 `python3 -m json.tool` 验证）
+- 所有必填栏位皆存在且非空
+- `category` 值在合法清单内
+- `tags` 为非空阵列
+- `requireEnv` 为阵列（可为空）
 
-若验证失敗，修正后重新寫入。
+若验证失败，修正后重新写入。
 
-## 输出格式範例
+## 输出格式范例
 
 ```json
 {
   "name": "Gemini Summary",
-  "tagline": "多格式內容摘要工具，自動辨識输入類型並输出繁体中文摘要",
-  "description": "Gemini Summary 可自動偵測输入來源類型（網頁、PDF、影片、音訊），透過 Google Gemini API 產生繁体中文摘要。支援多種格式，一鍵取得精簡重點整理。",
+  "tagline": "多格式内容摘要工具，自动辨识输入类型并输出繁体中文摘要",
+  "description": "Gemini Summary 可自动侦测输入来源类型（网页、PDF、影片、音讯），透过 Google Gemini API 产生繁体中文摘要。支援多种格式，一键取得精简重点整理。",
   "category": "content",
   "tags": ["summarization", "gemini", "content-analysis", "multilingual"],
   "version": "1.0.0",
@@ -83,12 +83,12 @@ description: 為 GitHubClawToolkit 的 skill 或 template 目錄生成 githubcla
 }
 ```
 
-## 錯誤處理
+## 错误处理
 
-| 狀況 | 處理方式 |
+| 状况 | 处理方式 |
 |------|---------|
-| 目標目錄不存在 | 提示使用者確認路徑 |
-| 目標目錄無任何描述檔案 | 請使用者提供 name、tagline、description |
-| 已存在 `githubclaw.json` | 詢問使用者是否要覆蓋更新 |
-| 無法判断 category | 預設使用 `data`，並提示使用者確認 |
-| 無法判断 requireEnv | 預設為空陣列 `[]`，並提示使用者確認 |
+| 目标目录不存在 | 提示使用者确认路径 |
+| 目标目录无任何描述档案 | 请使用者提供 name、tagline、description |
+| 已存在 `githubclaw.json` | 询问使用者是否要覆盖更新 |
+| 无法判断 category | 预设使用 `data`，并提示使用者确认 |
+| 无法判断 requireEnv | 预设为空阵列 `[]`，并提示使用者确认 |

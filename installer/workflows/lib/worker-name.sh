@@ -124,7 +124,7 @@ resolve_existing_worker_name() {
   success="$(printf '%s' "$response" | jq -r '.success // false')"
   if [[ "$success" != "true" ]]; then
     errors="$(printf '%s' "$response" | jq -c '.errors // []')"
-    echo "::error::無法列出 Cloudflare Workers: ${errors}" >&2
+    echo "::error::无法列出 Cloudflare Workers: ${errors}" >&2
     return 2
   fi
 

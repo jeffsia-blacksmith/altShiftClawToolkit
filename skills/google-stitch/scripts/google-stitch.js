@@ -1,4 +1,4 @@
-const zo = "google_stitch", Xo = "透過提示詞使用 Google Stitch（Gemini 多模態生成）自動生成設計圖片與 HTML。输入設計描述后，同時返回 base64 編碼的設計圖片與對應的 HTML 原始碼。適用於快速設計原型、UI 草圖、行銷素材等場景。", Qo = { type: "object", properties: { prompt: { type: "string", description: "設計描述提示詞。請詳細描述你想要的設計風格、內容、顏色、版面配置等。例如：「一个現代感的電商首頁，深藍色背景，白色文字，包含 Hero Banner 和三欄產品展示」。" }, aspectRatio: { type: "string", enum: ["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"], description: "生成圖片的長寬比。預設為 16:9。" }, imageSize: { type: "string", enum: ["512", "1K", "2K", "4K"], description: "生成圖片的解析度。預設為 1K。" }, model: { type: "string", enum: ["gemini-3.1-flash-image-preview", "gemini-3-pro-image-preview"], description: "使用的 Gemini 圖片生成模型。gemini-3.1-flash-image-preview 為 Nano Banana 2（速度快、成本低）；gemini-3-pro-image-preview 為 Nano Banana Pro（品質更高、支援 4K）。預設為 gemini-3.1-flash-image-preview。" } }, required: ["prompt"], additionalProperties: !1 }, Zo = { secrets: { apiKey: "GEMINI_API_KEY" } }, jo = {
+const zo = "google_stitch", Xo = "透过提示词使用 Google Stitch（Gemini 多模态生成）自动生成设计图片与 HTML。输入设计描述后，同时返回 base64 编码的设计图片与对应的 HTML 原始码。适用于快速设计原型、UI 草图、行销素材等场景。", Qo = { type: "object", properties: { prompt: { type: "string", description: "设计描述提示词。请详细描述你想要的设计风格、内容、颜色、版面配置等。例如：「一个现代感的电商首页，深蓝色背景，白色文字，包含 Hero Banner 和三栏产品展示」。" }, aspectRatio: { type: "string", enum: ["1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"], description: "生成图片的长宽比。预设为 16:9。" }, imageSize: { type: "string", enum: ["512", "1K", "2K", "4K"], description: "生成图片的解析度。预设为 1K。" }, model: { type: "string", enum: ["gemini-3.1-flash-image-preview", "gemini-3-pro-image-preview"], description: "使用的 Gemini 图片生成模型。gemini-3.1-flash-image-preview 为 Nano Banana 2（速度快、成本低）；gemini-3-pro-image-preview 为 Nano Banana Pro（品质更高、支援 4K）。预设为 gemini-3.1-flash-image-preview。" } }, required: ["prompt"], additionalProperties: !1 }, Zo = { secrets: { apiKey: "GEMINI_API_KEY" } }, jo = {
   name: zo,
   description: Xo,
   inputSchema: Qo,
@@ -11373,23 +11373,23 @@ const vf = "gemini-3.1-flash-image-preview", Rf = "16:9", Pf = "1K", Wo = (n) =>
   const t = n.code;
   if (typeof t == "number") return t;
 }, jt = (n, e = {}) => Object.assign(new Error(n), { name: "StitchApiError", ...e }), Nf = (n) => [
-  "你是一位專業 UI/UX 設計师與前端工程师。",
-  "請根據以下設計需求，完成兩項任務：",
+  "你是一位专业 UI/UX 设计师与前端工程师。",
+  "请根据以下设计需求，完成两项任务：",
   "",
-  "【任務一】生成一張高品質的設計圖片，視覺化呈現下方描述的設計。",
-  "【任務二】输出對應的完整 HTML 原始碼（包含內嵌 CSS），",
-  "讓瀏覽器能直接渲染出與設計圖一致的頁面。",
-  "HTML 必須：",
-  "- 是完整可獨立運行的單一 HTML 檔案",
-  "- 使用內嵌 <style> 標籤管理樣式",
-  "- 採用響應式設計原則",
-  "- 不依賴外部框架或 CDN",
+  "【任务一】生成一张高品质的设计图片，视觉化呈现下方描述的设计。",
+  "【任务二】输出对应的完整 HTML 原始码（包含内嵌 CSS），",
+  "让浏览器能直接渲染出与设计图一致的页面。",
+  "HTML 必须：",
+  "- 是完整可独立运行的单一 HTML 档案",
+  "- 使用内嵌 <style> 标签管理样式",
+  "- 采用响应式设计原则",
+  "- 不依赖外部框架或 CDN",
   "",
-  "設計需求：",
+  "设计需求：",
   n,
   "",
-  "請先输出設計圖片，再输出 HTML 原始碼。",
-  "HTML 原始碼請以 ```html 和 ``` 包裹。"
+  "请先输出设计图片，再输出 HTML 原始码。",
+  "HTML 原始码请以 ```html 和 ``` 包裹。"
 ].join(`
 `), Df = (n) => {
   const e = n.match(/```html\s*([\s\S]*?)```/i);

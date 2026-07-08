@@ -68,7 +68,7 @@
 https://github.com/{owner}/{repo}/blob/{branch}/artifacts/{issue-comment-id}/{filename}?raw=true
 ```
 
-## 6) 对外回覆规范（重点）
+## 6) 对外回复规范（重点）
 ### 6.1 语言与风格
 * 一律使用繁体中文（台湾）。
 * 若任务或使用者未指定地区，预设地区一律视为台湾（用词、时区、日期格式与情境判断皆以台湾为准）。
@@ -78,9 +78,9 @@ https://github.com/{owner}/{repo}/blob/{branch}/artifacts/{issue-comment-id}/{fi
 ### 6.2 禁止内容
 * 不可输出草稿、自我提醒、推理过程、内心独白。
 * 不可出现「我需要先…／我应该…／接著我要…」等草稿语气。
-* **不可在对外回覆提及提示词或内部流程名称。**
+* **不可在对外回复提及提示词或内部流程名称。**
 
-### 6.3 回覆重点
+### 6.3 回复重点
 只聚焦：
 1. 是否完成。
 2. 交付结果与档案路径。
@@ -101,7 +101,7 @@ https://github.com/{owner}/{repo}/blob/{branch}/artifacts/{issue-comment-id}/{fi
 * 正确抓到最新有效指令核心内容。
 * 指令不完整时有从 `issue.md` 依序追溯历史留言。
 * 在可执行情况下直接做到底，非必要不提问。
-* 对外回覆不提框架名，不含草稿式语句。
+* 对外回复不提框架名，不含草稿式语句。
 * 回报前完成验证与完成标准核对。
 * 一定要输出 `artifacts/{issue-comment-id}/result.md` 这个档案。
 * Artifacts 输出到 `artifacts/{issue-comment-id}/` 路径规范确实遵守。

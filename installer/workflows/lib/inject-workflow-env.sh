@@ -2,32 +2,32 @@
 # inject-workflow-env.sh
 #
 # 【用途】
-#   安裝 skill 時，將技能所需的 secret 環境變數注入到 issue-N.yml 的兩個位置：
+#   安装 skill 时，将技能所需的 secret 环境变数注入到 issue-N.yml 的两个位置：
 #
-#   注入點 1 — 頂層 env: 區塊（從 GitHub Secret 讀值）：
+#   注入点 1 — 顶层 env: 区块（从 GitHub Secret 读值）：
 #     env:
 #       OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"   ← 新增
 #
-#   注入點 2 — 指定 step 的 env: 區塊（從頂層 env 繼承值）：
+#   注入点 2 — 指定 step 的 env: 区块（从顶层 env 继承值）：
 #     - id: <step-id>
 #       env:
 #         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}       ← 新增
 #
-# 【資料來源】
-#   技能的 githubclaw.json 裡的 requireEnv 陣列（由 skills.yml Step 4 讀取）
-#   經 skills.yml Step 4 轉成逗號分隔字串，存入 $REQUIRED_ENVS，再傳給本腳本。
+# 【资料来源】
+#   技能的 githubclaw.json 里的 requireEnv 阵列（由 skills.yml Step 4 读取）
+#   经 skills.yml Step 4 转成逗号分隔字串，存入 $REQUIRED_ENVS，再传给本脚本。
 #
 # 【idempotent】
-#   已存在的 key 不會重複插入，可安全重跑。
+#   已存在的 key 不会重复插入，可安全重跑。
 #
-# 【實作策略】
-#   使用 Python3（ubuntu-latest 內建，無需安裝任何套件）逐行解析 YAML。
-#   逐行處理可保留所有原始註解與縮排格式（PyYAML round-trip 會破壞註解）。
+# 【实作策略】
+#   使用 Python3（ubuntu-latest 内建，无需安装任何套件）逐行解析 YAML。
+#   逐行处理可保留所有原始注解与缩排格式（PyYAML round-trip 会破坏注解）。
 #
 # 用法:
 #   inject-workflow-env.sh <workflow-file> <VAR1,VAR2,...> [step-id]
 #
-#   step-id 預設為 "pi_task"（issue-N.yml 的主要執行 step）
+#   step-id 预设为 "pi_task"（issue-N.yml 的主要执行 step）
 
 set -euo pipefail
 
@@ -39,7 +39,7 @@ python3 - "$WORKFLOW_FILE" "$ENV_VARS_RAW" "$STEP_ID" <<'PYEOF'
 import sys, re
 
 def inject(workflow_file, env_vars_raw, step_id):
-    # 將逗號分隔字串轉成 list，過濾掉非法識別字
+    # 将逗号分隔字串转成 list，过滤掉非法识别字
     env_vars = [
         v.strip() for v in env_vars_raw.split(',')
         if v.strip() and re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', v.strip())
@@ -51,10 +51,10 @@ def inject(workflow_file, env_vars_raw, step_id):
     with open(workflow_file, 'r') as f:
         lines = f.readlines()
 
-    # ── 注入點 1：頂層 env: 區塊 ──────────────────────────────────────
-    # 掃描所有行，找到 "env:"（頂層，無縮排），
-    # 接著收集其下 2 空格縮排的 KEY: 行，記錄最後一個 KEY 的位置，
-    # 新 key 插入在最後一個現有 key 之後。
+    # ── 注入点 1：顶层 env: 区块 ──────────────────────────────────────
+    # 扫描所有行，找到 "env:"（顶层，无缩排），
+    # 接著收集其下 2 空格缩排的 KEY: 行，记录最后一个 KEY 的位置，
+    # 新 key 插入在最后一个现有 key 之后。
     top_keys = set()
     top_insert_after = None
     in_top_env = False
@@ -64,7 +64,7 @@ def inject(workflow_file, env_vars_raw, step_id):
             in_top_env = True
             continue
         if in_top_env:
-            # 遇到其他頂層 key（無縮排、非空白、非註解）代表 env 區塊結束
+            # 遇到其他顶层 key（无缩排、非空白、非注解）代表 env 区块结束
             if stripped and not stripped[0].isspace() and not stripped.startswith('#'):
                 in_top_env = False
                 continue
@@ -84,10 +84,10 @@ def inject(workflow_file, env_vars_raw, step_id):
     else:
         print('⚠️  Top-level env block not found')
 
-    # ── 注入點 2：指定 step 的 env: 區塊 ──────────────────────────────
-    # 先找到 "id: <step_id>" 那一行，記下其縮排深度（即 step 屬性的縮排層）。
-    # 再往下掃描找到同層的 "env:" 區塊，收集已有的 key，
-    # 新 key 插入在最後一個現有 key 之後。
+    # ── 注入点 2：指定 step 的 env: 区块 ──────────────────────────────
+    # 先找到 "id: <step_id>" 那一行，记下其缩排深度（即 step 属性的缩排层）。
+    # 再往下扫描找到同层的 "env:" 区块，收集已有的 key，
+    # 新 key 插入在最后一个现有 key 之后。
     step_line_idx = None
     for i, line in enumerate(lines):
         if re.search(rf'\bid:\s*(?:{re.escape(step_id)}|pi_task|copilot_task)\b', line):
@@ -100,10 +100,10 @@ def inject(workflow_file, env_vars_raw, step_id):
             f.writelines(lines)
         return
 
-    # id: 與 env: 在 YAML step 裡是同層屬性，縮排相同
+    # id: 与 env: 在 YAML step 里是同层属性，缩排相同
     step_indent = len(lines[step_line_idx]) - len(lines[step_line_idx].lstrip())
-    env_block_indent = step_indent       # env: 與 id: 同縮排
-    var_indent = step_indent + 2         # env 區塊內的 KEY: 再縮排 2
+    env_block_indent = step_indent       # env: 与 id: 同缩排
+    var_indent = step_indent + 2         # env 区块内的 KEY: 再缩排 2
 
     step_keys = set()
     step_insert_after = None
@@ -113,14 +113,14 @@ def inject(workflow_file, env_vars_raw, step_id):
         if not line.strip():
             continue
         cur_indent = len(line) - len(line.lstrip())
-        # 遇到下一個 step 的 "-" 起始行，代表已離開此 step
+        # 遇到下一个 step 的 "-" 起始行，代表已离开此 step
         if cur_indent <= step_indent and line.lstrip().startswith('-'):
             break
         if re.match(r'\s+env:\s*$', line) and cur_indent == env_block_indent:
             in_step_env = True
             continue
         if in_step_env:
-            # 縮排回退代表 env 區塊結束
+            # 缩排回退代表 env 区块结束
             if cur_indent < var_indent:
                 break
             m = re.match(r'\s+([A-Za-z_][A-Za-z0-9_]*):', line)
@@ -130,7 +130,7 @@ def inject(workflow_file, env_vars_raw, step_id):
 
     step_to_add = [v for v in env_vars if v not in step_keys]
     if step_to_add and step_insert_after is not None:
-        # 格式：        VAR: ${{ env.VAR }}（從頂層 env 繼承，不用 secrets）
+        # 格式：        VAR: ${{ env.VAR }}（从顶层 env 继承，不用 secrets）
         prefix = ' ' * var_indent
         new_lines = [f'{prefix}{v}: ${{{{ env.{v} }}}}\n' for v in step_to_add]
         lines[step_insert_after + 1:step_insert_after + 1] = new_lines

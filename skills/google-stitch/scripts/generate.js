@@ -11,20 +11,20 @@ function printUsage() {
   console.error(
     [
       "用法：",
-      '  node .agents/skills/google-stitch/scripts/generate.js --prompt "<設計描述>" [options]',
+      '  node .agents/skills/google-stitch/scripts/generate.js --prompt "<设计描述>" [options]',
       "",
-      "選項：",
-      "  --prompt <text>          必填，設計提示詞",
+      "选项：",
+      "  --prompt <text>          必填，设计提示词",
       "  --aspect-ratio <value>   例如 16:9、9:16、1:1",
       "  --image-size <value>     例如 512、1K、2K、4K",
       "  --model <value>          gemini-3.1-flash-image-preview | gemini-3-pro-image-preview",
-      "  --output-dir <path>      输出目錄，預設 ./google-stitch-output",
-      "  --html-out <path>        自訂 HTML 输出檔案",
-      "  --image-out <path>       自訂圖片输出檔案",
+      "  --output-dir <path>      输出目录，预设 ./google-stitch-output",
+      "  --html-out <path>        自订 HTML 输出档案",
+      "  --image-out <path>       自订图片输出档案",
       "",
-      "環境变數：",
+      "环境变数：",
       "  GEMINI_API_KEY / GOOGLE_API_KEY",
-      "  GOOGLE_STITCH_DRY_RUN=1  只输出執行計畫，不呼叫 API",
+      "  GOOGLE_STITCH_DRY_RUN=1  只输出执行计划，不呼叫 API",
     ].join("\n"),
   );
 }
@@ -156,6 +156,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`錯誤：${error.message || error}`);
+  console.error(`错误：${error.message || error}`);
   process.exit(1);
 });

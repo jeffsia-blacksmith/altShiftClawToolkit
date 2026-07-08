@@ -2,14 +2,14 @@
 "use strict";
 
 /**
- * Gemini Lyria-3 音樂生成 CLI（零依賴）
+ * Gemini Lyria-3 音乐生成 CLI（零依赖）
  *
- * 環境变數：
- *   GEMINI_API_KEY  — Google Gemini API 金鑰（必填）
- *   PROMPT_FILE     — 含歌詞或提示詞的文字檔路徑（必填）
- *   ISSUE_DIR       — 音訊输出目錄（必填）
- *   NAME_PREFIX     — 输出檔案名稱前綴（選填，預設：track）
- *   LYRIA_MODEL / MODEL — 使用的模型（選填，預設：lyria-3-pro-preview）
+ * 环境变数：
+ *   GEMINI_API_KEY  — Google Gemini API 金钥（必填）
+ *   PROMPT_FILE     — 含歌词或提示词的文字档路径（必填）
+ *   ISSUE_DIR       — 音讯输出目录（必填）
+ *   NAME_PREFIX     — 输出档案名称前缀（选填，预设：track）
+ *   LYRIA_MODEL / MODEL — 使用的模型（选填，预设：lyria-3-pro-preview）
  */
 
 const { mkdir, readFile, writeFile } = require("node:fs/promises");
@@ -37,17 +37,17 @@ async function main() {
   if (!apiKey) throw new Error("缺少 GEMINI_API_KEY");
 
   const promptFile = process.env.PROMPT_FILE;
-  if (!promptFile) throw new Error("缺少 PROMPT_FILE 環境变數");
+  if (!promptFile) throw new Error("缺少 PROMPT_FILE 环境变数");
 
   const issueDir = process.env.ISSUE_DIR;
-  if (!issueDir) throw new Error("缺少 ISSUE_DIR 環境变數");
+  if (!issueDir) throw new Error("缺少 ISSUE_DIR 环境变数");
 
   const namePrefix = process.env.NAME_PREFIX || "track";
   const model =
     process.env.LYRIA_MODEL || process.env.MODEL || "lyria-3-pro-preview";
 
   const lyrics = (await readFile(promptFile, "utf8")).trim();
-  if (!lyrics) throw new Error(`${promptFile} 內容為空，無法生成音樂`);
+  if (!lyrics) throw new Error(`${promptFile} 内容为空，无法生成音乐`);
 
   const resolvedIssueDir = path.resolve(issueDir);
   await mkdir(resolvedIssueDir, { recursive: true });
@@ -56,7 +56,7 @@ async function main() {
     throw new Error("Global fetch is unavailable. Use Node.js 18+.");
   }
 
-  console.error(`使用模型 ${model} 生成音軌，提示詞長度 ${lyrics.length} 字元`);
+  console.error(`使用模型 ${model} 生成音轨，提示词长度 ${lyrics.length} 字元`);
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
@@ -110,10 +110,10 @@ async function main() {
   }
 
   if (savedFiles.length === 0) {
-    throw new Error("API 未回傳任何音訊資料。原始回應：" + JSON.stringify(json ?? body));
+    throw new Error("API 未回传任何音讯资料。原始回应：" + JSON.stringify(json ?? body));
   }
 
-  console.error(`共生成 ${savedFiles.length} 个音軌檔案`);
+  console.error(`共生成 ${savedFiles.length} 个音轨档案`);
 }
 
 main().catch((error) => {
