@@ -1,7 +1,7 @@
 {
   "name": "Default",
-  "tagline": "龙虾堡预设范本（Pi Coding Agent）— 预设 OpenRouter / DeepSeek V4 Flash",
-  "description": "龙虾堡预设范本改用 Pi Coding Agent。每只小龙虾可独立选择 provider 与 model，API key 按 provider 分开管理。预设使用 OpenRouter 与 DeepSeek V4 Flash，并保留 Cloudflare、Anthropic、OpenAI、Gemini、Groq、Pioneer、OpenRouter、Ollama Cloud 多 provider 选择。",
+  "tagline": "Lobster Burger default template (Pi Coding Agent) — defaults to OpenRouter / DeepSeek V4 Flash",
+  "description": "Lobster Burger default template, now powered by Pi Coding Agent. Each Lobster (GitHub Issue) can pick its own provider and model, with API keys managed per provider. Defaults to OpenRouter and DeepSeek V4 Flash, while preserving the multi-provider lineup: Cloudflare, Anthropic, OpenAI, Gemini, Groq, Pioneer, OpenRouter, and Ollama Cloud.",
   "category": "ai",
   "tags": ["default", "pi", "byok", "cloudflare", "anthropic", "openai", "gemini", "groq", "pioneer", "openrouter", "ollama"],
   "version": "1.0.0",
@@ -18,7 +18,7 @@
     {
       "id": "cloudflare-workers-ai",
       "label": "Cloudflare Workers AI",
-      "description": "使用 Cloudflare Workers AI 推论 API，免费额度内可用。",
+      "description": "Use the Cloudflare Workers AI inference API (free tier available).",
       "secretName": "CLOUDFLARE_API_TOKEN",
       "defaultModel": "@cf/moonshotai/kimi-k2.6",
       "models": [
@@ -35,7 +35,7 @@
     {
       "id": "anthropic",
       "label": "Anthropic",
-      "description": "使用 Anthropic Claude 系列模型。",
+      "description": "Use the Anthropic Claude family of models.",
       "secretName": "ANTHROPIC_API_KEY",
       "defaultModel": "claude-sonnet-4-6",
       "models": [
@@ -48,7 +48,7 @@
     {
       "id": "openai",
       "label": "OpenAI",
-      "description": "使用 OpenAI GPT 系列模型。",
+      "description": "Use the OpenAI GPT family of models.",
       "secretName": "OPENAI_API_KEY",
       "defaultModel": "gpt-5-mini",
       "models": [
@@ -63,7 +63,7 @@
     {
       "id": "groq",
       "label": "Groq",
-      "description": "使用 Groq 高速推论 API。",
+      "description": "Use the Groq high-speed inference API.",
       "secretName": "GROQ_API_KEY",
       "defaultModel": "openai/gpt-oss-120b",
       "models": [
@@ -85,7 +85,7 @@
     {
       "id": "google",
       "label": "Google Gemini",
-      "description": "使用 Google Gemini 系列模型。",
+      "description": "Use Google Gemini family models.",
       "secretName": "GEMINI_API_KEY",
       "defaultModel": "gemini-3.5-flash",
       "models": [
@@ -100,7 +100,7 @@
     {
       "id": "pioneer",
       "label": "Pioneer",
-      "description": "透过 Pioneer OpenAI-compatible endpoint 使用多种模型，需设定 PIONEER_API_KEY。",
+      "description": "Use multiple models through the Pioneer OpenAI-compatible endpoint. Requires PIONEER_API_KEY.",
       "secretName": "PIONEER_API_KEY",
       "defaultModel": "gpt-5.5",
       "models": [
@@ -114,7 +114,7 @@
     {
       "id": "openrouter",
       "label": "OpenRouter",
-      "description": "透过 OpenRouter API 使用多种模型，需设定 OPENROUTER_API_KEY。",
+      "description": "Use multiple models through the OpenRouter API. Requires OPENROUTER_API_KEY.",
       "isDefault": true,
       "secretName": "OPENROUTER_API_KEY",
       "defaultModel": "deepseek/deepseek-v4-flash",
@@ -129,7 +129,7 @@
     {
       "id": "ollama-cloud",
       "label": "Ollama Cloud",
-      "description": "透过 Ollama Cloud（ollama.com 托管）使用多种开源模型，适合长时间自主执行的 coding agent 任务。Pi 会自动安装 pi-ollama-cloud 扩展模组，需设定 OLLAMA_API_KEY。",
+      "description": "Use a range of open-source models through Ollama Cloud (hosted at ollama.com) — well suited to long-running, autonomous coding-agent tasks. Pi auto-installs the pi-ollama-cloud extension. Requires OLLAMA_API_KEY.",
       "secretName": "OLLAMA_API_KEY",
       "defaultModel": "kimi-k2.6",
       "models": [
@@ -138,7 +138,7 @@
         { "value": "deepseek-v4-pro", "label": "DeepSeek-V4-Pro" },
         { "value": "glm-5.1", "label": "GLM-5.1" },
         { "value": "qwen3.5:397b", "label": "Qwen3.5 397B" },
-        { "value": "minimax-m2.7", "label": "MiniMax-M2.7" },
+        { "value": "minimax-m2.7", "label": "minimax-m2.7" },
         { "value": "deepseek-v3.2", "label": "DeepSeek-V3.2" },
         { "value": "nemotron-3-super", "label": "Nemotron-3-Super" },
         { "value": "gemma4:31b", "label": "Gemma4 31B" },
