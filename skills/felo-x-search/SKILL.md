@@ -19,7 +19,7 @@ Trigger keywords (examples):
 
 - English: twitter, tweet, X user, X search, tweets from, replies to, trending on X
 - 简体中文: 推特, 推文, X用户, X搜索, 推文回复
-- 日本語: ツイッター, ツイート, Xユーザー, X検索
+- 日本语: ツイッター, ツイート, Xユーザー, X検索
 
 Explicit commands: `/felo-x-search`, "search X", "search twitter"
 
@@ -172,12 +172,12 @@ Engagement: 5.0K likes ｜ 1.0K retweets ｜ 200 replies
 
 ## Link Validation
 
-每次輸出推文連結前，**必須**執行以下檢核，確保連結正確：
+每次输出推文连结前，**必须**执行以下检核，确保连结正确：
 
-1. **連結格式**：推文連結必須為 `https://x.com/{username}/status/{tweet_id}`，username 與 tweet_id 均來自 API 回傳的資料，**禁止自行推測或填入預設值**。
-2. **資料對應**：連結中的 `username` 必須與該推文的 `author.username` 欄位一致，`tweet_id` 必須與 `id` 欄位一致。
-3. **禁止捏造**：若 API 未回傳 tweet_id 或 username，則該則推文不得附上連結，改為標注「連結不可用」。
-4. **用戶連結**：用戶頁面連結格式為 `https://x.com/{username}`，同樣只能使用 API 回傳的 username。
+1. **连结格式**：推文连结必须为 `https://x.com/{username}/status/{tweet_id}`，username 与 tweet_id 均来自 API 回传的资料，**禁止自行推测或填入预设值**。
+2. **资料对应**：连结中的 `username` 必须与该推文的 `author.username` 栏位一致，`tweet_id` 必须与 `id` 栏位一致。
+3. **禁止捏造**：若 API 未回传 tweet_id 或 username，则该则推文不得附上连结，改为标注「连结不可用」。
+4. **用户连结**：用户页面连结格式为 `https://x.com/{username}`，同样只能使用 API 回传的 username。
 
 ## Error Handling
 
@@ -203,7 +203,7 @@ If `FELO_API_KEY` is not set, display setup instructions and stop.
 
 ## Important Notes
 
-- ⚠️ **路徑安全**：skill 腳本位於 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先執行 `git rev-parse --show-toplevel` 取得路徑再 `cd`。禁止用 `$(...)` 語法。
+- ⚠️ **路径安全**：skill 脚本位于 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先执行 `git rev-parse --show-toplevel` 取得路径再 `cd`。禁止用 `$(...)` 语法。
 - Always check `FELO_API_KEY` before calling; if missing, return setup instructions.
 - Format output as readable Markdown by default; use `--json` for raw API response.
 - Use pagination cursors (`next_cursor`) for fetching more results.

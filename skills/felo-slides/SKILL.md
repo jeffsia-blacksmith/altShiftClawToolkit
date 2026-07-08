@@ -159,12 +159,12 @@ Timeout handling:
 
 ## Important Notes
 
-- ⚠️ **路徑安全**：skill 腳本位於 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先執行 `git rev-parse --show-toplevel` 取得路徑再 `cd`。禁止用 `$(...)` 語法。
-- ⚠️ **指令安全**：Copilot CLI 的安全過濾器會封鎖含有特定 shell 語法的指令，執行時**禁止**加入以下任何寫法，否則指令會被直接擋下：
+- ⚠️ **路径安全**：skill 脚本位于 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先执行 `git rev-parse --show-toplevel` 取得路径再 `cd`。禁止用 `$(...)` 语法。
+- ⚠️ **指令安全**：Copilot CLI 的安全过滤器会封锁含有特定 shell 语法的指令，执行时**禁止**加入以下任何写法，否则指令会被直接挡下：
   - `set -e`、`set -u`、`set -o`、`set -euo pipefail` 等 set 指令
-  - `${var@P}`、`${!var}` 等參數展開語法
-  - 巢狀的 `$(...)` 指令替換
-  - 正確寫法：直接執行 `cd` 與 `node` 指令，不要包在 shell 腳本控制流程內
+  - `${var@P}`、`${!var}` 等参数展开语法
+  - 巢状的 `$(...)` 指令替换
+  - 正确写法：直接执行 `cd` 与 `node` 指令，不要包在 shell 脚本控制流程内
 - Always execute this skill when user intent is slide generation.
 - Always return `task_id` so follow-up queries can continue from the same task.
 - Do not claim completion without a terminal status.

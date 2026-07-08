@@ -20,8 +20,8 @@ Trigger this skill for questions requiring current or real-time information:
 
 **Trigger words:**
 - 简体中文: 最近、什么、哪里、怎么样、如何、查、搜、找、推荐、比较、新闻、天气
-- 繁體中文: 最近、什麼、哪裡、怎麼樣、如何、查、搜、找、推薦、比較、新聞、天氣
-- 日本語: 最近、何、どこ、どう、検索、探す、おすすめ、比較、ニュース、天気
+- 繁体中文: 最近、什么、哪里、怎么样、如何、查、搜、找、推荐、比较、新闻、天气
+- 日本语: 最近、何、どこ、どう、検索、探す、おすすめ、比较、ニュース、天気
 - English: latest, recent, what, where, how, best, search, find, compare, news, weather
 
 **Explicit commands:** `/felo-search`, "search with felo", "felo search"
@@ -70,7 +70,7 @@ When this skill is triggered, execute the search script using the Bash tool:
 bash .agents/skills/felo-search/scripts/search.sh "USER_QUERY_HERE"
 ```
 
-> ⚠️ **路徑安全**：skill 腳本位於 **repo 根目錄**的 `.agents/skills/` 下。若 cwd 不在 repo root，請先執行 `git rev-parse --show-toplevel` 取得絕對路徑，再 `cd` 到該路徑後執行。**禁止**在指令中使用 `$(...)` 語法（會被 Copilot CLI 安全過濾器擋下）。
+> ⚠️ **路径安全**：skill 脚本位于 **repo 根目录**的 `.agents/skills/` 下。若 cwd 不在 repo root，请先执行 `git rev-parse --show-toplevel` 取得绝对路径，再 `cd` 到该路径后执行。**禁止**在指令中使用 `$(...)` 语法（会被 Copilot CLI 安全过滤器挡下）。
 
 **Notes:**
 - Replace `USER_QUERY_HERE` with the actual user query
@@ -111,7 +111,7 @@ Light winds from the east at 10 km/h. UV index: 6 (high).
 Good day for outdoor activities!
 
 ## Query Analysis
-Optimized search terms: Tokyo weather today, 東京 天気 今日
+Optimized search terms: Tokyo weather today, 东京 天気 今日
 ```
 
 **Bash command:**
@@ -212,10 +212,10 @@ To use this skill, you need to set up your Felo API Key:
 
 ## Important Notes
 
-- ⚠️ **路徑安全**：skill 腳本位於 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先執行 `git rev-parse --show-toplevel` 取得路徑再 `cd`。禁止用 `$(...)` 語法。
+- ⚠️ **路径安全**：skill 脚本位于 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先执行 `git rev-parse --show-toplevel` 取得路径再 `cd`。禁止用 `$(...)` 语法。
 - This skill should be used for any question requiring current information
 - Execute immediately using the Bash tool - don't just describe what you would do
-- **預設輸出語言為繁體中文（zh-TW）**。除非使用者明確指定其他語言，否則所有摘要、整理、說明等 AI 產出的文字，一律使用繁體中文輸出。
+- **预设输出语言为繁体中文（zh-TW）**。除非使用者明确指定其他语言，否则所有摘要、整理、说明等 AI 产出的文字，一律使用繁体中文输出。
 - Multi-language support: Fully supports Simplified Chinese, Traditional Chinese (Taiwan), Japanese, and English
 - Handle special characters properly: Use the search script which handles JSON escaping via sed
 - Parse JSON response: Extract answer and query_analysis fields

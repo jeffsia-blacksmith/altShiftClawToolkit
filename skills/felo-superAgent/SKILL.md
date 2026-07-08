@@ -1,6 +1,6 @@
 ---
 name: felo-superAgent
-description: "Felo SuperAgent API: AI conversation with real-time SSE streaming on a persistent LiveDoc canvas. Use when users want SuperAgent chat, continuous conversation, logo/branding design, or e-commerce product images. CRITICAL: When user provides ANY image/product description (e.g. '生成一張...產品照片', '我的提示詞為: 生成...', 'generate a product photo'), ALWAYS call the API to generate the actual image — NEVER rewrite the prompt as text output. Do NOT use for tweet/X post writing — use felo-twitter-writer instead. Explicit commands: /felo-superagent."
+description: "Felo SuperAgent API: AI conversation with real-time SSE streaming on a persistent LiveDoc canvas. Use when users want SuperAgent chat, continuous conversation, logo/branding design, or e-commerce product images. CRITICAL: When user provides ANY image/product description (e.g. '生成一张...产品照片', '我的提示词为: 生成...', 'generate a product photo'), ALWAYS call the API to generate the actual image — NEVER rewrite the prompt as text output. Do NOT use for tweet/X post writing — use felo-twitter-writer instead. Explicit commands: /felo-superagent."
 ---
 
 # Felo SuperAgent Skill
@@ -9,7 +9,7 @@ description: "Felo SuperAgent API: AI conversation with real-time SSE streaming 
 
 These rules are mandatory. Violating any of them will produce incorrect behavior.
 
-0. **NEVER treat image/product descriptions as prompt-writing or prompt-optimization tasks.** If the user's message contains a visual description — regardless of phrasing such as "我的提示詞為", "my prompt is", "生成一張", "generate a photo of", "create a product image" — you MUST call the felo-superAgent API immediately to generate the actual image. Do NOT:
+0. **NEVER treat image/product descriptions as prompt-writing or prompt-optimization tasks.** If the user's message contains a visual description — regardless of phrasing such as "我的提示词为", "my prompt is", "生成一张", "generate a photo of", "create a product image" — you MUST call the felo-superAgent API immediately to generate the actual image. Do NOT:
    - Rewrite, refine, or "improve" the description as a text output
    - Suggest keywords or aspect ratios as your final response
    - Write a better prompt to result.md instead of calling the API
@@ -66,7 +66,7 @@ Trigger this skill when users want:
 - **SuperAgent conversation:** AI conversation with Felo SuperAgent, with real-time streaming output
 - **Continuous conversation:** Multi-turn Q&A on a persistent LiveDoc canvas
 - **Logo & branding:** Create logos or brand designs (auto-selects `logo-and-branding` skill)
-- **E-commerce images:** Generate product images for e-commerce use (auto-selects `ecommerce-product-image` skill). **This includes any request where the user provides a visual description and wants an AI-generated product photo** — e.g., "生成一張…產品照片", "generate a photo of a leather wallet", "幫我生成一張商品圖"
+- **E-commerce images:** Generate product images for e-commerce use (auto-selects `ecommerce-product-image` skill). **This includes any request where the user provides a visual description and wants an AI-generated product photo** — e.g., "生成一张…产品照片", "generate a photo of a leather wallet", "帮我生成一张商品图"
 - **Image generation from description:** Any request where the user describes a scene, product, or visual concept and expects an actual AI-generated image as output — NOT a text description or prompt refinement
 - **Tool-augmented answers:** Responses that may include image generation, document creation, PPT generation, or Twitter/X search
 - **Streaming responses:** Real-time answer generation with Server-Sent Events (SSE)
@@ -76,7 +76,7 @@ Trigger this skill when users want:
 **Trigger words:**
 
 - English: superagent, super agent, stream chat, streaming conversation, livedoc conversation, continuous chat, follow-up question, create a logo, brand design, product image, e-commerce image, generate image, generate photo, product photo, product shot
-- 繁體中文：超級助手、串流對話、連續對話、追問、設計 logo、品牌設計、電商圖片、商品圖片、商品照片、產品照片、產品圖片、生成圖片、生成照片、生圖、AI 生圖、AI 作圖、製作圖片、電商產品圖
+- 繁体中文：超级助手、串流对话、连续对话、追问、设计 logo、品牌设计、电商图片、商品图片、商品照片、产品照片、产品图片、生成图片、生成照片、生图、AI 生图、AI 作图、制作图片、电商产品图
 - 简体中文：超级助手、流式对话、连续对话、追问、设计 logo、品牌设计、电商图片、商品图片、商品照片、产品照片、产品图片、生成图片、生成照片、生图、AI 生图
 - Japanese (romaji): suupaa eejento, sutoriimingu kaiwa, keizoku kaiwa, rogo sakusei, shouhin gazou, gazou seisei, shouhin shashin
 
@@ -677,13 +677,13 @@ To use this skill, you need to set up your Felo API Key:
 
 ## Important Notes
 
-- ⚠️ **路徑安全**：skill 腳本位於 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先執行 `git rev-parse --show-toplevel` 取得路徑再 `cd`。禁止用 `$(...)` 語法。
-- ⚠️ **指令安全**：Copilot CLI 的安全過濾器會封鎖含有特定 shell 語法的指令，執行時**禁止**加入以下任何寫法，否則指令會被直接擋下：
+- ⚠️ **路径安全**：skill 脚本位于 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先执行 `git rev-parse --show-toplevel` 取得路径再 `cd`。禁止用 `$(...)` 语法。
+- ⚠️ **指令安全**：Copilot CLI 的安全过滤器会封锁含有特定 shell 语法的指令，执行时**禁止**加入以下任何写法，否则指令会被直接挡下：
   - `set -e`、`set -u`、`set -o`、`set -euo pipefail` 等 set 指令
-  - `${var@P}`、`${!var}` 等參數展開語法
-  - 巢狀的 `$(...)` 指令替換
-  - 正確寫法：直接執行 `cd` 與 `node` 指令，不要包在 shell 腳本控制流程內
-- **預設輸出語言為繁體中文（zh-TW）**。除非使用者明確指定其他語言，否則所有摘要、整理、說明等 AI 產出的文字，一律使用繁體中文輸出。
+  - `${var@P}`、`${!var}` 等参数展开语法
+  - 巢状的 `$(...)` 指令替换
+  - 正确写法：直接执行 `cd` 与 `node` 指令，不要包在 shell 脚本控制流程内
+- **默认输出语言为简体中文（zh-CN）**。除非使用者明确指定其他语言，否则所有摘要、整理、说明等 AI 产出的文字，一律使用简体中文或英文输出。
 - Execute this skill immediately using the Bash tool — do not just describe what you would do
 - **ALWAYS use `--json`** — in Claude Code's Bash tool, stdout is captured, not streamed. JSON mode returns the answer in a structured response that Claude outputs as text
 - **ALWAYS output `data.answer` verbatim AND render `data.image_urls`** — print the answer exactly as-is, then render each image URL as `![title](url)` Markdown. Never discard image URLs.

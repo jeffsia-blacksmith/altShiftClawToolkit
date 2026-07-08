@@ -34,7 +34,7 @@ description: Use this skill when users ask to generate, edit, or compose images 
 
 After successful generation, **always** report results in this format:
 
-1. `✅ 圖片已產出`
+1. `✅ 图片已产出`
 2. Each image as a **markdown embed with absolute GitHub URL**:
    `![description](https://github.com/{GITHUB_REPO}/blob/{BRANCH}/{relative_path}?raw=true)`
 3. File metadata: format (`JPEG`/`PNG`), dimensions, file size
@@ -46,9 +46,9 @@ After successful generation, **always** report results in this format:
 Assuming `GITHUB_REPO=test/baoclaw-5`, `BRANCH=issue-3`, `COMMENT_ID=4153431460`:
 
 ```
-✅ 圖片已產出
+✅ 图片已产出
 
-![一杯抹茶拿鐵](https://github.com/test/baoclaw-5/blob/issue-3/artifacts/4153431460/matcha-latte-01.jpg?raw=true)
+![一杯抹茶拿铁](https://github.com/test/baoclaw-5/blob/issue-3/artifacts/4153431460/matcha-latte-01.jpg?raw=true)
 
 - 格式：JPEG · 1408×768 · 757 KB
 
@@ -58,13 +58,13 @@ Assuming `GITHUB_REPO=test/baoclaw-5`, `BRANCH=issue-3`, `COMMENT_ID=4153431460`
 ### Example (multiple images)
 
 ```
-✅ 圖片已產出
+✅ 图片已产出
 
-![圖 1](https://github.com/test/baoclaw-5/blob/issue-3/artifacts/4153431460/cute-puppy-01.jpg?raw=true)
-![圖 2](https://github.com/test/baoclaw-5/blob/issue-3/artifacts/4153431460/cute-puppy-02.jpg?raw=true)
+![图 1](https://github.com/test/baoclaw-5/blob/issue-3/artifacts/4153431460/cute-puppy-01.jpg?raw=true)
+![图 2](https://github.com/test/baoclaw-5/blob/issue-3/artifacts/4153431460/cute-puppy-02.jpg?raw=true)
 
-- 圖 1：JPEG · 1408×768 · 703 KB
-- 圖 2：JPEG · 1408×768 · 512 KB
+- 图 1：JPEG · 1408×768 · 703 KB
+- 图 2：JPEG · 1408×768 · 512 KB
 
 <!-- githubclaw-artifacts: {"images":[{"branch":"issue-3","path":"artifacts/4153431460/cute-puppy-01.jpg"},{"branch":"issue-3","path":"artifacts/4153431460/cute-puppy-02.jpg"}],"html":[]} -->
 ```

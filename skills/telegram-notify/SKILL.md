@@ -29,28 +29,28 @@ A skill for integrating Telegram Bot notifications into GitHub Actions workflows
 
 AGENTS.md contains a **Telegram 通知收件人** section with:
 
-1. **預設通知對象** — the default recipient name(s) used when the user does not specify who to notify.
-2. **收件人對應表（CSV）** — a CSV list where each line is `chat_id,名稱`.
+1. **预设通知对象** — the default recipient name(s) used when the user does not specify who to notify.
+2. **收件人对应表（CSV）** — a CSV list where each line is `chat_id,名称`.
 
 ### Resolution Rules
 
-1. If the user says a name (e.g. "發通知給 Will"), look up the Chat ID from the CSV 收件人對應表.
-2. If the user does not specify a recipient, use the 預設通知對象 name, then resolve it from the CSV list.
+1. If the user says a name (e.g. "发通知给 Will"), look up the Chat ID from the CSV 收件人对应表.
+2. If the user does not specify a recipient, use the 预设通知对象 name, then resolve it from the CSV list.
 3. If multiple names are specified (comma-separated in the default or explicitly by the user),
    call the send script once per Chat ID.
 4. If a name is not found in the table, report the error — do not guess a Chat ID.
-5. Parse each CSV row strictly as `chat_id,名稱`; names must not contain commas.
+5. Parse each CSV row strictly as `chat_id,名称`; names must not contain commas.
 
 ### Example AGENTS.md Section
 
 ~~~markdown
 ## 10) Telegram 通知收件人
 
-### 10.1 預設通知對象
-未指定收件人時，預設發送通知給：`Will`
+### 10.1 预设通知对象
+未指定收件人时，预设发送通知给：`Will`
 
-### 10.2 收件人對應表（CSV）
-請使用 CSV，每行一筆，格式固定為：`chat_id,名稱`
+### 10.2 收件人对应表（CSV）
+请使用 CSV，每行一笔，格式固定为：`chat_id,名称`
 
 ```text
 123456789,Will

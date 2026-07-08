@@ -1,17 +1,17 @@
-# 技能安裝工作流程：從 jeffsia-blacksmith/altShiftClawToolkit 安裝技能到指定 issue 的工作區。
-# 執行兩次提交：一次在 issue-N 分支（技能檔案），一次在 main 分支（workflow YAML 環境變數）。
-name: '🔧 安裝技能'
-run-name: "技能安裝: ${{ inputs.skill_name }} | req:${{ inputs.request_id }}"
+# 技能安装工作流程：从 jeffsia-blacksmith/altShiftClawToolkit 安装技能到指定 issue 的工作区。
+# 执行两次提交：一次在 issue-N 分支（技能档案），一次在 main 分支（workflow YAML 环境变数）。
+name: '🔧 Install Skill 安装技能'
+run-name: "Install Skill 技能安装: ${{ inputs.skill_name }} | req:${{ inputs.request_id }}"
 
 on:
   workflow_dispatch:
     inputs:
       skill_name:
-        description: '技能名稱'
+        description: 'Skill name 技能名称'
         required: true
         type: string
       issue_number:
-        description: '目標 issue 編號'
+        description: 'Target issue number 目标 issue 编号'
         required: true
         type: string
       request_id:
@@ -24,7 +24,7 @@ permissions:
   issues: write
 
 concurrency:
-  # 已知問題: GitHub 只保證 1 running, 1 pending，當 1 running, 1 pending 時又多新增一個 run 的話，第二個的那個 1 pending 會被取消，最後一個才會變成 1 pending 狀態
+  # 已知问题: GitHub 只保证 1 running, 1 pending，当 1 running, 1 pending 时又多新增一个 run 的话，第二个的那个 1 pending 会被取消，最后一个才会变成 1 pending 状态
   group: "skills-install-${{ github.repository }}-{{ inputs.issue_number }}"
   cancel-in-progress: false
 
@@ -49,34 +49,34 @@ jobs:
         with:
           node-version: 22
 
-      # ── Step 1: 驗證輸入參數 ──────────────────────────────────────
-      - name: 驗證輸入參數
+      # ── Step 1: 验证输入参数 ──────────────────────────────────────
+      - name: Validate Inputs 验证输入参数
         shell: bash
         run: |
           if [[ -z "${SKILL_NAME}" ]]; then
-            echo "::error::[步驟1 - 驗證輸入參數] 缺少技能名稱。請確認安裝請求有正確填寫技能名稱。"
+            echo "::error::[Step 1 - Validate Inputs] Missing skill name. Please confirm the install request specifies a skill name. 缺少技能名称"
             echo "INSTALL_FAILED=true" >> "$GITHUB_ENV"
-            echo "INSTALL_ERROR=[步驟1 - 驗證輸入參數] 缺少技能名稱。請確認安裝請求有正確填寫技能名稱。" >> "$GITHUB_ENV"
+            echo "INSTALL_ERROR=[Step 1 - Validate Inputs] Missing skill name. Please confirm the install request specifies a skill name. 缺少技能名称" >> "$GITHUB_ENV"
             exit 0
           fi
           if [[ -z "${ISSUE_NUMBER}" ]]; then
-            echo "::error::[步驟1 - 驗證輸入參數] 缺少 Issue 編號。請確認安裝請求有正確填寫目標 Issue 編號。"
+            echo "::error::[Step 1 - Validate Inputs] Missing issue number. Please confirm the install request specifies a target issue number. 缺少 Issue 编号"
             echo "INSTALL_FAILED=true" >> "$GITHUB_ENV"
-            echo "INSTALL_ERROR=[步驟1 - 驗證輸入參數] 缺少 Issue 編號。請確認安裝請求有正確填寫目標 Issue 編號。" >> "$GITHUB_ENV"
+            echo "INSTALL_ERROR=[Step 1 - Validate Inputs] Missing issue number. Please confirm the install request specifies a target issue number. 缺少 Issue 编号" >> "$GITHUB_ENV"
             exit 0
           fi
           echo "skill_name=${SKILL_NAME}"
           echo "issue_number=${ISSUE_NUMBER}"
 
-      # ── Step 2: 簽出倉庫 ──────────────────────────────────────────
-      - name: 簽出倉庫
+      # ── Step 2: 签出仓库 ──────────────────────────────────────────
+      - name: Checkout Repository 签出仓库
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ env.PUSH_TOKEN }}
 
-      # ── Step 3: 從技能倉庫稀疏簽出技能 ────────────────────────────
-      - name: 從技能倉庫稀疏簽出技能
+      # ── Step 3: 从技能仓库稀疏签出技能 ────────────────────────────
+      - name: Sparse Checkout Skill from Source Repo 从技能仓库稀疏签出技能
         uses: actions/checkout@v6
         with:
           repository: ${{ env.SKILLS_SOURCE_REPO }}
@@ -85,20 +85,20 @@ jobs:
           sparse-checkout: |
             skills/${{ env.SKILL_NAME }}
 
-      - name: 驗證技能存在
+      - name: Validate Skill Exists 验证技能存在
         shell: bash
         run: |
           set -euo pipefail
           if [[ ! -d ".tmp/skills-source/skills/${SKILL_NAME}" ]]; then
             echo "::error::Skill '${SKILL_NAME}' not found in ${SKILLS_SOURCE_REPO}"
             echo "INSTALL_FAILED=true" >> "$GITHUB_ENV"
-            echo "INSTALL_ERROR=[步驟3 - 尋找技能] 找不到技能「${SKILL_NAME}」。請確認技能名稱是否正確，或聯絡管理員確認此技能是否已上架。" >> "$GITHUB_ENV"
+            echo "INSTALL_ERROR=[Step 3 - Find Skill] Skill '${SKILL_NAME}' not found. Please confirm the skill name is correct, or contact an admin to confirm the skill is published. 找不到技能" >> "$GITHUB_ENV"
             exit 0
           fi
           echo "SKILL_SOURCE_DIR=.tmp/skills-source/skills/${SKILL_NAME}" >> "$GITHUB_ENV"
 
-      # ── Step 4: 讀取技能 githubclaw.json ────────────────────────────
-      - name: 讀取技能 githubclaw.json
+      # ── Step 4: 读取技能 githubclaw.json ────────────────────────────
+      - name: Read Skill githubclaw.json 读取技能 githubclaw.json
         if: env.INSTALL_FAILED != 'true'
         shell: bash
         run: |
@@ -111,7 +111,7 @@ jobs:
             exit 0
           fi
 
-          # 從 githubclaw.json 的 requireEnv 陣列擷取環境變數，轉成逗號分隔字串
+          # 从 githubclaw.json 的 requireEnv 阵列撷取环境变数，转成逗号分隔字串
           ENVS=$(node -e "
             const fs = require('fs');
             const manifest = JSON.parse(fs.readFileSync('${MANIFEST}', 'utf8'));
@@ -129,8 +129,8 @@ jobs:
             echo "REQUIRED_ENVS=${ENVS}" >> "$GITHUB_ENV"
           fi
 
-      # ── Step 5: 切換到 issue 分支並安裝技能檔案 ────────────────────
-      - name: 切換到 issue 分支並安裝技能檔案
+      # ── Step 5: 切换到 issue 分支并安装技能档案 ────────────────────
+      - name: Switch to Issue Branch and Install Skill Files 切换到 issue 分支并安装技能档案
         if: env.INSTALL_FAILED != 'true'
         shell: bash
         run: |
@@ -150,13 +150,13 @@ jobs:
             git checkout -B "${TARGET_BRANCH}" origin/main
           fi
 
-          # 複製技能檔案（排除 .githubclaw/ 目錄）
+          # 复制技能档案（排除 .githubclaw/ 目录）
           mkdir -p "${INSTALL_PATH}"
           rsync -a --exclude='.githubclaw' "${SKILL_SOURCE_DIR}/" "${INSTALL_PATH}/"
           echo "✅ Copied skill files to ${INSTALL_PATH}"
           ls -la "${INSTALL_PATH}/"
 
-          # 提交並推送到 issue 分支
+          # 提交并推送到 issue 分支
           git add -A -- . ':(exclude).tmp/skills-source'
           if git diff --cached --quiet; then
             echo "No changes to commit (skill may already be installed)"
@@ -173,12 +173,12 @@ jobs:
               echo "✅ Force-pushed skill files to ${TARGET_BRANCH}"
             else
               echo "INSTALL_FAILED=true" >> "$GITHUB_ENV"
-              echo "INSTALL_ERROR=[步驟5 - 安裝技能檔案] 無法將技能檔案儲存到工作區（${TARGET_BRANCH}）。可能是系統權限不足，請聯絡管理員確認 CLAW_SYS_GITHUB_TOKEN 是否有倉庫寫入權限。" >> "$GITHUB_ENV"
+              echo "INSTALL_ERROR=[Step 5 - Install Skill Files] Could not save skill files to the workspace (${TARGET_BRANCH}). This may be a permissions issue — please confirm CLAW_SYS_GITHUB_TOKEN has repo write access. 无法储存技能档案" >> "$GITHUB_ENV"
             fi
           fi
 
-      # ── Step 6: 執行自訂後安裝腳本 ────────────────────────────────
-      - name: 執行自訂後安裝腳本
+      # ── Step 6: 执行自订后安装脚本 ────────────────────────────────
+      - name: Run Custom Post-Install Script 执行自订后安装脚本
         if: env.INSTALL_FAILED != 'true'
         shell: bash
         run: |
@@ -198,8 +198,8 @@ jobs:
             echo "No post-install.sh found, skipping"
           fi
 
-      # ── Step 7: 切換到 main 分支，用 YAML parser 注入 workflow env vars ─
-      - name: 切換到 main 分支修改 workflow YAML
+      # ── Step 7: 切换到 main 分支，用 YAML parser 注入 workflow env vars ─
+      - name: Switch to Main and Patch Workflow YAML 切换到 main 分支修改 workflow YAML
         if: env.INSTALL_FAILED != 'true' && env.REQUIRED_ENVS != ''
         shell: bash
         run: |
@@ -218,14 +218,14 @@ jobs:
             "$WORKFLOW_FILE" \
             "$REQUIRED_ENVS"; then
             echo "INSTALL_FAILED=true" >> "$GITHUB_ENV"
-            echo "INSTALL_ERROR=[步驟7 - 設定環境變數] 自動注入環境變數失敗。請確認 workflow 檔案格式正確，或查看上方 log 了解詳情。" >> "$GITHUB_ENV"
+            echo "INSTALL_ERROR=[Step 7 - Configure Env Vars] Automatic env var injection failed. Please confirm the workflow file format is correct, or check the log above for details. 自动注入环境变数失败" >> "$GITHUB_ENV"
             exit 0
           fi
 
           echo "✅ Env vars injected into $WORKFLOW_FILE"
 
-      # ── Step 8: 提交 main 分支的 workflow 變更 ─────────────────────
-      - name: 提交 main 分支的 workflow 變更
+      # ── Step 8: 提交 main 分支的 workflow 变更 ─────────────────────
+      - name: Commit Workflow Changes on Main 提交 main 分支的 workflow 变更
         if: env.INSTALL_FAILED != 'true' && env.REQUIRED_ENVS != ''
         shell: bash
         run: |
@@ -240,8 +240,8 @@ jobs:
             echo "No workflow changes to commit"
           fi
 
-      # ── Step 8.5: 用 actionlint 驗證修改後的 workflow YAML ────────
-      - name: 驗證修改後的 workflow YAML
+      # ── Step 8.5: 用 actionlint 验证修改后的 workflow YAML ────────
+      - name: Validate Patched Workflow YAML 验证修改后的 workflow YAML
         if: env.INSTALL_FAILED != 'true' && env.REQUIRED_ENVS != ''
         shell: bash
         run: |
@@ -260,21 +260,21 @@ jobs:
             echo "::warning::actionlint found issues in $WORKFLOW_FILE — please review"
           fi
 
-      # ── Step 9: 清理暫存資料 ─────────────────────────────────────
-      - name: 清理暫存資料
+      # ── Step 9: 清理暂存资料 ─────────────────────────────────────
+      - name: Clean Up Temp Data 清理暂存资料
         if: always()
         shell: bash
         run: |
           rm -rf .tmp/skills-source
 
-      # ── Step 10: 根據安裝結果決定 job 狀態 ─────────────────────────
-      - name: 檢查安裝結果
+      # ── Step 10: 根据安装结果决定 job 状态 ─────────────────────────
+      - name: Check Install Result 检查安装结果
         if: always() && !cancelled()
         shell: bash
         run: |
           if [[ "${INSTALL_FAILED:-}" == "true" ]]; then
-            echo "::error::❌ 技能安裝失敗"
-            echo "::error::原因：${INSTALL_ERROR:-未知錯誤（請查看上方各步驟的 log）}"
-            echo "::error::如需協助，請將此錯誤訊息截圖給管理員。"
+            echo "::error::❌ Skill install failed 技能安装失败"
+            echo "::error::Reason 原因：${INSTALL_ERROR:-Unknown error, see the log for each step above 未知错误}"
+            echo "::error::If you need help, please screenshot this error message for an admin. 如需协助请截图给管理员"
             exit 1
           fi

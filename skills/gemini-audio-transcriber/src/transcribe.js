@@ -31,7 +31,7 @@ const MIME_TYPES = {
 function printUsage() {
   console.error("用法：node scripts/transcribe.js <audio-path-or-url>");
   console.error("");
-  console.error("範例：");
+  console.error("范例：");
   console.error(
     '  node scripts/transcribe.js "https://example.com/audio/meeting.mp3"'
   );
@@ -57,7 +57,7 @@ function getMimeType(filePath) {
 
 async function resolveAudioInput(rawInput) {
   if (!rawInput) {
-    throw new Error("需要提供音訊 URL 或本機檔案路徑。");
+    throw new Error("需要提供音讯 URL 或本机档案路径。");
   }
 
   if (isDataUri(rawInput)) {
@@ -89,7 +89,7 @@ async function resolveAudioInput(rawInput) {
   } catch (error) {
     if (error?.code !== "ENOENT" && error?.code !== "ENOTDIR") {
       throw new Error(
-        `無法讀取本機音訊檔案 "${resolvedPath}"：${error.message}`
+        `无法读取本机音讯档案 "${resolvedPath}"：${error.message}`
       );
     }
   }
@@ -103,7 +103,7 @@ async function resolveAudioInput(rawInput) {
   }
 
   throw new Error(
-    `輸入既非可讀取的本機檔案，也非有效的音訊 URL：${rawInput}`
+    `输入既非可读取的本机档案，也非有效的音讯 URL：${rawInput}`
   );
 }
 
@@ -127,7 +127,7 @@ function createMediaPart(uri, mimeType) {
 async function main() {
   const rawInput = process.argv[2];
   if (!rawInput) {
-    console.error("錯誤：需要提供音訊 URL 或本機檔案路徑。");
+    console.error("错误：需要提供音讯 URL 或本机档案路径。");
     printUsage();
     process.exit(1);
   }
@@ -156,15 +156,15 @@ async function main() {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.error("錯誤：需要設定 GEMINI_API_KEY 環境變數。");
-    console.error("請先設定：export GEMINI_API_KEY=your_api_key");
+    console.error("错误：需要设定 GEMINI_API_KEY 环境变数。");
+    console.error("请先设定：export GEMINI_API_KEY=your_api_key");
     process.exit(1);
   }
 
   const client = new GoogleGenAI({ apiKey });
 
-  console.error(`正在分析音訊：${rawInput}`);
-  console.error("請稍候，Gemini 正在處理音訊...\n");
+  console.error(`正在分析音讯：${rawInput}`);
+  console.error("请稍候，Gemini 正在处理音讯...\n");
 
   const stream = await client.models.generateContentStream({
     model: process.env.GEMINI_AUDIO_MODEL || "gemini-3.5-flash",
@@ -173,17 +173,43 @@ async function main() {
         role: "user",
         parts: [
           {
-            text: [
-              "請仔細聆聽這段音訊內容，並完成以下任務：",
-              "",
-              "1. 將所有語音內容轉錄為繁體中文逐字稿",
-              "2. 如果音訊中有多位說話者，請用「說話者 A」「說話者 B」等標記區分每位說話者的發言",
-              "3. 保留語意完整，不遺漏重要內容",
-              "4. 如果音訊品質不佳導致某段無法辨識，請用「[無法辨識]」標記",
-              "5. 輸出格式為繁體中文 Markdown",
-              "",
-              "請直接輸出逐字稿內容，不需要額外的前言或說明。",
-            ].join("\n"),
+            text: (() => {
+              const code = process.env.CLAW_LANGUAGE || "en";
+              const map = {
+                "zh-CN": "Simplified Chinese",
+                "en": "English"
+              };
+              const fullName = map[code] || "English";
+              if (code === "zh-CN") {
+                return [
+                  "请仔细聆听这段音讯内容，并完成以下任务：",
+                  "",
+                  "1. 将所有语音内容转录为简体中文逐字稿",
+                  "2. 如果音讯中有多位说话者，请用「说话者 A」「说话者 B」等标记区分每位说话者的发言",
+                  "3. 保留语意完整，不遗漏重要内容",
+                  "4. 如果音讯品质不佳导致某段无法辨识，请用「[无法辨识]」标记",
+                  "5. 输出格式为简体中文 Markdown",
+                  "",
+                  "请直接输出逐字稿内容，不需要额外的前言或说明。",
+                  "",
+                  `You MUST respond entirely in ${fullName}.`,
+                ].join("\n");
+              } else {
+                return [
+                  "Please listen carefully to this audio content and complete the following tasks:",
+                  "",
+                  "1. Transcribe all spoken content into an English transcript",
+                  "2. If there are multiple speakers, distinguish them using labels like 'Speaker A', 'Speaker B', etc.",
+                  "3. Keep the meaning intact, do not omit important details",
+                  "4. If the audio quality is poor and a segment is unrecognizable, mark it with '[unrecognizable]'",
+                  "5. The output format must be English Markdown",
+                  "",
+                  "Output the transcript content directly, without any introduction or additional explanation.",
+                  "",
+                  `You MUST respond entirely in ${fullName}.`,
+                ].join("\n");
+              }
+            })(),
           },
           createMediaPart(audioInput.uri, audioInput.mimeType),
         ],
@@ -207,6 +233,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(`錯誤：${err.message || err}`);
+  console.error(`错误：${err.message || err}`);
   process.exit(1);
 });

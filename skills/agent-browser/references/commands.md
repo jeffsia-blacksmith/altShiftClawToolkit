@@ -101,15 +101,15 @@ agent-browser wait --load networkidle      # Wait for network idle (or -l)
 agent-browser wait --fn "window.ready"     # Wait for JS condition (or -f)
 ```
 
-> ⚠️ **避免在電商或動態網站使用 `--load networkidle`**
+> ⚠️ **避免在电商或动态网站使用 `--load networkidle`**
 >
-> PChome、momo、蝦皮等電商網站頁面會持續發送廣告追蹤、分析、輪詢等背景請求，
-> 瀏覽器永遠不會進入 network idle 狀態，導致指令卡住直到超時。
+> PChome、momo、虾皮等电商网站页面会持续发送广告追踪、分析、轮询等背景请求，
+> 浏览器永远不会进入 network idle 状态，导致指令卡住直到超时。
 >
-> **建議替代方案：**
+> **建议替代方案：**
 > ```bash
-> agent-browser wait --load load    # 等 DOM + 主資源載入即可（大多數情況適用）
-> agent-browser wait 3000           # 固定等待 3 秒（SPA / React / Vue 頁面適用）
+> agent-browser wait --load load    # 等 DOM + 主资源载入即可（大多数情况适用）
+> agent-browser wait 3000           # 固定等待 3 秒（SPA / React / Vue 页面适用）
 > agent-browser wait --load domcontentloaded  # 只等 DOM ready（最快）
 > ```
 
@@ -226,20 +226,20 @@ agent-browser dialog accept [text]  # Accept dialog
 agent-browser dialog dismiss        # Dismiss dialog
 ```
 
-> ⚠️ **`dialog` 只適用於瀏覽器原生對話框（`alert` / `confirm` / `prompt`）**
+> ⚠️ **`dialog` 只适用于浏览器原生对话框（`alert` / `confirm` / `prompt`）**
 >
-> 網頁自製的彈窗（HTML modal、overlay、toast）**不是原生對話框**，
-> 對它們使用 `dialog dismiss` 會導致指令卡住、無回應。
+> 网页自制的弹窗（HTML modal、overlay、toast）**不是原生对话框**，
+> 对它们使用 `dialog dismiss` 会导致指令卡住、无回应。
 >
-> **遇到 HTML 彈窗的處理方式：**
+> **遇到 HTML 弹窗的处理方式：**
 > ```bash
-> # 先用 snapshot -i 找到關閉按鈕的 ref，再用 click 關閉
+> # 先用 snapshot -i 找到关闭按钮的 ref，再用 click 关闭
 > agent-browser snapshot -i
-> agent-browser click @eXXX   # 點擊「確定」、「關閉」、「×」等按鈕
+> agent-browser click @eXXX   # 点击「确定」、「关闭」、「×」等按钮
 > ```
-> 如何判斷是哪種彈窗：
-> - 原生對話框：頁面會整個鎖住，`dialog accept/dismiss` 才有效
-> - HTML 彈窗：頁面其他地方還能操作，要用 `click` 關閉
+> 如何判断是哪种弹窗：
+> - 原生对话框：页面会整个锁住，`dialog accept/dismiss` 才有效
+> - HTML 弹窗：页面其他地方还能操作，要用 `click` 关闭
 
 ## JavaScript
 

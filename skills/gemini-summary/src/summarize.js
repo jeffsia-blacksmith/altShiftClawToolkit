@@ -78,7 +78,7 @@ const AUDIO_MIME_TYPES = {
 function printUsage() {
   console.error("用法：node scripts/summarize.js [--type url|pdf|video|audio] <input>");
   console.error("");
-  console.error("範例：");
+  console.error("范例：");
   console.error('  node scripts/summarize.js "https://example.com/post/123"');
   console.error('  node scripts/summarize.js "./reports/quarterly.pdf"');
   console.error('  node scripts/summarize.js "https://youtu.be/abc123"');
@@ -89,7 +89,7 @@ function ensureApiKey() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "缺少 GEMINI_API_KEY。請先執行 export GEMINI_API_KEY=your_api_key"
+      "缺少 GEMINI_API_KEY。请先执行 export GEMINI_API_KEY=your_api_key"
     );
   }
   return apiKey;
@@ -111,7 +111,7 @@ function trimContent(value, maxLength = MAX_CONTENT_LENGTH) {
     return { text: normalized, truncated: false };
   }
   return {
-    text: `${normalized.slice(0, maxLength)}\n\n[內容因長度限制已截斷]`,
+    text: `${normalized.slice(0, maxLength)}\n\n[内容因长度限制已截断]`,
     truncated: true,
   };
 }
@@ -123,7 +123,7 @@ async function fetchWithTimeout(url, options = {}) {
     return await fetch(url, { ...options, signal: controller.signal });
   } catch (error) {
     if (error?.name === "AbortError") {
-      throw new Error(`抓取逾時（${FETCH_TIMEOUT_MS / 1000} 秒）：${url}`);
+      throw new Error(`抓取逾时（${FETCH_TIMEOUT_MS / 1000} 秒）：${url}`);
     }
     throw error;
   } finally {
@@ -185,7 +185,7 @@ function parseCliArgs() {
     if (args[i] === "--type" && i + 1 < args.length) {
       type = args[++i];
       if (!["url", "pdf", "video", "audio"].includes(type)) {
-        throw new Error(`不支援的類型：${type}（可用：url, pdf, video, audio）`);
+        throw new Error(`不支援的类型：${type}（可用：url, pdf, video, audio）`);
       }
     } else if (!input) {
       input = args[i];
@@ -196,7 +196,7 @@ function parseCliArgs() {
 }
 
 function detectInputType(input) {
-  if (!input) throw new Error("請提供輸入（URL 或檔案路徑）。");
+  if (!input) throw new Error("请提供输入（URL 或档案路径）。");
 
   // data: URI → video
   if (input.startsWith("data:")) return "video";
@@ -237,7 +237,7 @@ function detectInputType(input) {
   if (AUDIO_EXTENSIONS.has(ext)) return "audio";
 
   throw new Error(
-    `無法辨識輸入類型：${input}。支援的格式：網頁 URL、.pdf 檔案、影片檔案（${[...VIDEO_EXTENSIONS].join(", ")}）、音訊檔案（${[...AUDIO_EXTENSIONS].join(", ")}）`
+    `无法辨识输入类型：${input}。支援的格式：网页 URL、.pdf 档案、影片档案（${[...VIDEO_EXTENSIONS].join(", ")}）、音讯档案（${[...AUDIO_EXTENSIONS].join(", ")}）`
   );
 }
 
@@ -257,7 +257,7 @@ async function fetchHtml(url) {
 
   if (!response.ok) {
     throw new Error(
-      `抓取網址失敗：${url}（HTTP ${response.status} ${response.statusText}）`
+      `抓取网址失败：${url}（HTTP ${response.status} ${response.statusText}）`
     );
   }
 
@@ -270,7 +270,7 @@ async function fetchHtml(url) {
     !contentType.includes("application/xhtml+xml")
   ) {
     throw new Error(
-      `網址不是可解析的 HTML 頁面：${url}（Content-Type: ${contentType || "unknown"}）。若為 PDF，請改用 --type pdf`
+      `网址不是可解析的 HTML 页面：${url}（Content-Type: ${contentType || "unknown"}）。若为 PDF，请改用 --type pdf`
     );
   }
   return response.text();
@@ -280,7 +280,7 @@ function extractFromBody(document) {
   const root = document.querySelector("main, article, body");
   const title =
     normalizeText(document.querySelector("title")?.textContent || "") ||
-    "未命名頁面";
+    "未命名页面";
   const siteName =
     normalizeText(
       document
@@ -306,7 +306,7 @@ function extractArticle(html, url) {
   if (!article?.textContent) return extractFromBody(document);
 
   return {
-    title: normalizeText(article.title) || "未命名頁面",
+    title: normalizeText(article.title) || "未命名页面",
     siteName: normalizeText(article.siteName || "") || null,
     byline: normalizeText(article.byline || "") || null,
     excerpt: normalizeText(article.excerpt || "") || null,
@@ -324,60 +324,126 @@ function buildUrlPrompt({
   content,
   truncated,
 }) {
-  return `你是一個專門整理網頁內容的繁體中文編輯。請根據以下資料，輸出固定格式的 Markdown 摘要。
+  const code = process.env.CLAW_LANGUAGE || "en";
+  const map = {
+    "zh-CN": "Simplified Chinese",
+    "en": "English"
+  };
+  const fullName = map[code] || "English";
 
-任務目標：
-1. 深入理解文章內容，提供有深度與細節的摘要，避免過於簡略空泛。
-2. 絕對不要虛構（Hallucination）原文沒有提及的資訊。若資訊不足以形成某個段落，請直接省略該部分或註明資訊不足。
-3. 全文必須使用繁體中文（zh-TW），並盡可能保留原文的專有名詞（可於括號內附上原文）。
+  if (code === "zh-CN") {
+    return `你是一个专门整理网页内容的简体中文编辑。请根据以下资料，输出固定格式的 Markdown 摘要。
 
-格式規範（重要）：
-- 標題請用粗體加 emoji，例如「**📝 內容摘要**」，不要使用 # 標題語法。
-- 不要使用 Markdown 表格（| 語法），改用條列格式。
-- 條列項目一律使用扁平結構（只用 - 開頭），不要使用編號子列表（1. 2. 3.）或巢狀縮排。
-- 條列項目中若需標示重點名稱，直接寫在 - 後面即可，不要在條列內再使用粗體。
-- 這些規則是為了確保輸出在 GitHub Issue 和 Telegram 都能正確顯示。
+任务目标：
+1. 深入理解文章内容，提供有深度与细节的摘要，避免过于简略空泛。
+2. 绝对不要虚构（Hallucination）原文没有提及的信息。若信息不足以形成某个段落，请直接省略该部分或注明信息不足。
+3. 全文必须使用简体中文，并尽可能保留原文的专有名词（可于括号内附上原文）。
 
-請依照以下結構輸出：
+格式规范（重要）：
+- 标题请用粗体加 emoji，例如「**📝 内容摘要**」，不要使用 # 标题语法。
+- 不要使用 Markdown 表格（| 语法），改用条列格式。
+- 条列项目一律使用扁平结构（只用 - 开头），不要使用编号子列表（1. 2. 3.）或巢状缩进。
+- 条列项目中若需标示重点名称，直接写在 - 后面即可，不要在条列内再使用粗体。
+- 这些规则是为了确保输出在 GitHub Issue 和 Telegram 都能正确显示。
 
-**📝 內容摘要**
+请依照以下结构输出：
 
-**📌 來源**
-- 類型：網頁
-- 標題：
-- 網站：
+**📝 内容摘要**
+
+**📌 来源**
+- 类型：网页
+- 标题：
+- 网站：
 - 作者：
-- 網址：
+- 网址：
 
 **💡 核心概述**
-（請以流暢的段落整理文章的脈絡。包含：文章的主題背景、關鍵論點/方法、以及最終結論。請視原文的豐富度來決定篇幅，確保能完整傳達作者的原意與重要細節。）
+（请以流畅的段落整理文章的脉络。包含：文章的主题背景、关键论点/方法、以及最终结论。请视原文的丰富度来决定篇幅，确保能完整传达作者的原意与重要细节。）
 
-**🔍 重點條列**
-（請萃取原文中最具價值的重點。數量請依據原文內容決定，寧缺勿濫。每個重點請盡量包含具體的細節、範例或解釋，不要僅用一句話帶過。）
-- 重點 1：具體說明...
-- 重點 2：具體說明...
+**🔍 重点条列**
+（请萃取原文中最具价值的重点。数量请依据原文内容决定，宁缺勿滥。每个重点请尽量包含具体的细节、范例或解释，不要仅用一句话带过。）
+- 重点 1：具体说明...
+- 重点 2：具体说明...
 
-**📊 關鍵數據與事實**
-（如原文有關鍵數字、金額、日期、百分比等，請用條列呈現；若無相關資訊則省略此段）
-- 項目：數值/日期/事實
-- 項目：數值/日期/事實
+**📊 关键数据与事实**
+（如原文有关键数字、金额、日期、百分比等，请用条列呈现；若无相关信息则省略此段）
+- 项目：数值/日期/事实
+- 项目：数值/日期/事实
 
-**🎯 行動建議**
-（若文章內容有提供建議或可執行的步驟，請在此條列；若無明確建議，請寫「目前無明確行動建議」）
+**🎯 行动建议**
+（若文章内容有提供建议或可执行的步骤，请在此条列；若无明确建议，请写「目前无明确行动建议」）
 
 ---
-以下是原始資料：
-- 標題：${title}
-- 網站：${siteName || "未提供"}
+以下是原始资料：
+- 标题：${title}
+- 网站：${siteName || "未提供"}
 - 作者：${byline || "未提供"}
 - 摘要：${excerpt || "未提供"}
-- 網址：${url}
-- 內容是否截斷：${truncated ? "是" : "否"}
+- 网址：${url}
+- 内容是否截断：${truncated ? "是" : "否"}
 
-原文內容：
+原文内容：
 """
 ${content}
-"""`;
+"""
+You MUST respond entirely in ${fullName}.`;
+  } else {
+    return `You are a professional webpage content editor. Based on the following information, please produce a structured Markdown summary.
+
+Task Goals:
+1. Understand the article in depth and provide detailed summaries instead of shallow lists.
+2. Never hallucinate facts not present in the source. If information is insufficient for a section, omit or specify it.
+3. The entire response must be in English. Keep proper nouns and key terms.
+
+Formatting Rules (Important):
+- Headers must use bold and emojis, e.g., "**📝 Summary**", do NOT use "#" markdown headers.
+- Do not use markdown tables (| syntax), use bullet points instead.
+- Bullet points must be flat (only starting with "-"), do not use sub-numbering (1. 2. 3.) or nested indentation.
+- For key points, put key names right after the "-", do not use bolding within bullet items.
+- These rules ensure the output displays correctly on GitHub Issues and Telegram.
+
+Please output using the following structure:
+
+**📝 Summary**
+
+**📌 Source**
+- Type: Webpage
+- Title:
+- Website:
+- Author:
+- URL:
+
+**💡 Core Overview**
+(Please write a coherent paragraph outlining the context, key arguments/methods, and final conclusion. Adjust the length based on content depth to capture key details.)
+
+**🔍 Key Highlights**
+(Extract the most valuable takeaways. Keep them rich and informative instead of single-sentence bullet points.)
+- Point 1: Detailed explanation...
+- Point 2: Detailed explanation...
+
+**📊 Key Metrics & Facts**
+(If there are metrics, amounts, dates, or percentages, list them here; otherwise omit this section.)
+- Item: Value/Date/Fact
+- Item: Value/Date/Fact
+
+**🎯 Actionable Recommendations**
+(If the article outlines recommendations or actionable steps, list them here; otherwise write "No clear actionable recommendations at this time.")
+
+---
+Below is the metadata:
+- Title: ${title}
+- Website: ${siteName || "Not provided"}
+- Author: ${byline || "Not provided"}
+- Excerpt: ${excerpt || "Not provided"}
+- URL: ${url}
+- Truncated: ${truncated ? "Yes" : "No"}
+
+Source Content:
+"""
+${content}
+"""
+You MUST respond entirely in ${fullName}.`;
+  }
 }
 
 async function handleUrl(input, client) {
@@ -385,11 +451,11 @@ async function handleUrl(input, client) {
     try {
       return new URL(input).toString();
     } catch {
-      throw new Error(`網址格式錯誤：${input}`);
+      throw new Error(`网址格式错误：${input}`);
     }
   })();
 
-  console.error(`正在抓取網址：${url}`);
+  console.error(`正在抓取网址：${url}`);
   const html = await fetchHtml(url);
 
   // Auto-fallback: if the URL serves a PDF, delegate to PDF handler
@@ -403,7 +469,7 @@ async function handleUrl(input, client) {
 
   if (prepared.text.length < MIN_CONTENT_LENGTH) {
     throw new Error(
-      `無法從頁面抽出足夠正文：${url}。這可能是登入頁、動態頁，或頁面內容過少。`
+      `无法从页面抽出足够正文：${url}。这可能是登入页、动态页，或页面内容过少。`
     );
   }
 
@@ -447,62 +513,118 @@ async function handleUrl(input, client) {
 // ---------------------------------------------------------------------------
 
 function buildPdfPrompt() {
-  return `你是專業的文件分析助手。請仔細閱讀這份 PDF 文件的內容，並產出結構化、重點清晰的繁體中文摘要。
+  const code = process.env.CLAW_LANGUAGE || "en";
+  const map = {
+    "zh-CN": "Simplified Chinese",
+    "en": "English"
+  };
+  const fullName = map[code] || "English";
 
-任務目標：
-1. 確保涵蓋文件中各個章節的重要內容，不要只摘要前幾頁。
-2. 絕對不要虛構文件中沒有提到的資訊。
-3. 全文使用繁體中文（zh-TW），保留專有名詞的原文（括號附上）。
-4. 數字和日期必須準確引用，不可估算。
+  if (code === "zh-CN") {
+    return `你是专业的文件 analysis 助手。请仔细阅读这份 PDF 文件的内容，并产出结构化、重点清晰的简体中文摘要。
 
-格式規範（重要）：
-- 標題請用粗體加 emoji，例如「**📝 內容摘要**」，不要使用 # 標題語法。
-- 不要使用 Markdown 表格（| 語法），改用條列格式。
-- 條列項目一律使用扁平結構（只用 - 開頭），不要使用編號子列表（1. 2. 3.）或巢狀縮排。
-- 條列項目中若需標示重點名稱，直接寫在 - 後面即可，不要在條列內再使用粗體。
-- 這些規則是為了確保輸出在 GitHub Issue 和 Telegram 都能正確顯示。
+任务目标：
+1. 确保涵盖文件中各个章节的重要内容，不要只摘要前几页。
+2. 绝对不要虚构文件中没有提到的信息。
+3. 全文使用简体中文，保留专有名词的原文（括号附上）。
+4. 数字和日期必须准确引用，不可估算。
 
-請依照以下結構輸出：
+格式规范（重要）：
+- 标题请用粗体加 emoji，例如「**📝 内容摘要**」，不要使用 # 标题语法。
+- 不要使用 Markdown 表格（| 语法），改用条列格式。
+- 条列项目一律使用改变的扁平结构（只用 - 开头），不要使用编号子列表（1. 2. 3.）或巢状缩进。
+- 条列项目中若需标示重点名称，直接写在 - 后面即可，不要在条列内再使用粗体。
+- 这些规则是为了确保输出在 GitHub Issue 和 Telegram 都能正确显示。
 
-**📝 內容摘要**
+请依照以下结构输出：
 
-**📌 來源**
-- 類型：PDF 文件
-- 檔名：（請從文件內容或脈絡推斷標題）
+**📝 内容摘要**
+
+**📌 来源**
+- 类型：PDF 文件
+- 文件名：（请从文件内容或脉络推断标题）
 
 **💡 核心概述**
-（請以流暢的段落整理文件的核心脈絡，包含：文件主旨與背景、主要探討的方法論或內容、以及結論與影響。請依據文件厚度與資訊量調整篇幅，確保重要細節不遺漏。）
+（请以流畅的段落整理文件的核心脉络，包含：文件主旨与背景、主要探讨的方法论或内容、以及结论与影响。请依据文件厚度与信息量调整篇幅，确保重要细节不遗漏。）
 
-**🔍 重點條列**
-（請萃取文件中的重要論點、發現或規範。數量請視文件內容而定。每點需包含具體細節、數據或範例說明。）
-- 重點說明...
+**🔍 重点条列**
+（请萃取文件中的重要论点、发现或规范。数量请视文件内容而定。每点需包含具体细节、数据或范例说明。）
+- 重点说明...
 
-**📊 關鍵數據與事實**
-（如有關鍵數字、金額、日期、百分比等，請用條列呈現；若無則省略此段）
-- 項目：數值/日期
-- 項目：數值/日期
+**📊 关键数据与事实**
+（如有关键数字、金额、日期、百分比等，请用条列呈现；若无则省略此段）
+- 项目：数值/日期
+- 项目：数值/日期
 
-**📖 專有名詞表**
-（若文件中有頻繁出現或具關鍵性的專業術語，請用條列並簡要解釋；若無則省略此段）
-- **術語**：說明
-- **術語**：說明
+**📖 专有名词表**
+（若文件中有频繁出现或具关键性的专业术语，请用条列并简要解释；若无则省略此段）
+- **术语**：说明
+- **术语**：说明
 
-**🎯 行動建議**
-（若文件包含後續計畫、建議採取的步驟或管理決策，請在此整理出來；若無則寫「目前無明確行動建議」）`;
+**🎯 行动建议**
+（若文件包含后续计划、建议采取的步骤或管理决策，请在此整理出来；若无则写「目前无明确行动建议」）
+---
+You MUST respond entirely in ${fullName}.`;
+  } else {
+    return `You are a professional document analysis assistant. Please read this PDF document carefully and produce a structured, clear English summary.
+
+Task Goals:
+1. Ensure all sections of the document are covered, not just the first few pages.
+2. Never hallucinate facts not present in the document.
+3. The entire response must be in English. Keep proper nouns.
+4. Numbers and dates must be quoted accurately.
+
+Formatting Rules (Important):
+- Headers must use bold and emojis, e.g., "**📝 Summary**", do NOT use "#" markdown headers.
+- Do not use markdown tables (| syntax), use bullet points instead.
+- Bullet points must be flat (only starting with "-"), do not use sub-numbering (1. 2. 3.) or nested indentation.
+- For key points, put key names right after the "-", do not use bolding within bullet items.
+- These rules ensure the output displays correctly on GitHub Issues and Telegram.
+
+Please output using the following structure:
+
+**📝 Summary**
+
+**📌 Source**
+- Type: PDF Document
+- Filename: (Infer the title from content/context)
+
+**💡 Core Overview**
+(Please write a coherent paragraph outlining the context, key arguments/methods, and final conclusion. Adjust the length based on content depth to capture key details.)
+
+**🔍 Key Highlights**
+(Extract the most valuable takeaways. Keep them rich and informative instead of single-sentence bullet points.)
+- Point 1: Detailed explanation...
+
+**📊 Key Metrics & Facts**
+(If there are metrics, amounts, dates, or percentages, list them here; otherwise omit this section.)
+- Item: Value/Date
+- Item: Value/Date
+
+**📖 Glossary**
+(If there are frequent or key technical terms, list and explain them briefly; otherwise omit this section.)
+- **Term**: Explanation
+- **Term**: Explanation
+
+**🎯 Actionable Recommendations**
+(If the document outlines recommendations or actionable steps, list them here; otherwise write "No clear actionable recommendations at this time.")
+---
+You MUST respond entirely in ${fullName}.`;
+  }
 }
 
 async function resolvePdfBuffer(rawInput) {
-  if (!rawInput) throw new Error("請提供 PDF 檔案路徑或 URL。");
+  if (!rawInput) throw new Error("请提供 PDF 档案路径或 URL。");
 
   const lower = rawInput.toLowerCase();
   if (!lower.endsWith(".pdf")) {
     try {
       const url = new URL(rawInput);
       if (!url.pathname.toLowerCase().endsWith(".pdf")) {
-        console.error(`警告：輸入不像 PDF 檔案，仍嘗試處理：${rawInput}`);
+        console.error(`警告：输入不像 PDF 档案，仍尝试处理：${rawInput}`);
       }
     } catch {
-      console.error(`警告：輸入不像 PDF 檔案，仍嘗試處理：${rawInput}`);
+      console.error(`警告：输入不像 PDF 档案，仍尝试处理：${rawInput}`);
     }
   }
 
@@ -522,16 +644,16 @@ async function resolvePdfBuffer(rawInput) {
     };
   } catch (error) {
     if (error?.code !== "ENOENT" && error?.code !== "ENOTDIR") {
-      throw new Error(`無法讀取檔案 "${resolvedPath}"：${error.message}`);
+      throw new Error(`无法读取档案 "${resolvedPath}"：${error.message}`);
     }
   }
 
   // Try remote URL
   if (isRemoteUrl(rawInput)) {
-    console.error(`正在下載 PDF：${rawInput}`);
+    console.error(`正在下载 PDF：${rawInput}`);
     const response = await fetchWithTimeout(rawInput);
     if (!response.ok)
-      throw new Error(`下載失敗（HTTP ${response.status}）：${rawInput}`);
+      throw new Error(`下载失败（HTTP ${response.status}）：${rawInput}`);
     const buffer = Buffer.from(await response.arrayBuffer());
     const urlPath = new URL(rawInput).pathname;
     return {
@@ -543,11 +665,11 @@ async function resolvePdfBuffer(rawInput) {
     };
   }
 
-  throw new Error(`輸入既非可讀取的本地檔案，也非有效的 URL：${rawInput}`);
+  throw new Error(`输入既非可读取的本地档案，也非有效的 URL：${rawInput}`);
 }
 
 async function uploadPdfAndGetUri(client, pdfInput) {
-  console.error("正在上傳 PDF 至 Gemini Files API...");
+  console.error("正在上传 PDF 至 Gemini Files API...");
   const blob = new Blob([pdfInput.buffer], { type: pdfInput.mimeType });
   let uploadedFile = await client.files.upload({
     file: blob,
@@ -563,7 +685,7 @@ async function uploadPdfAndGetUri(client, pdfInput) {
   }
 
   if (uploadedFile.state === "FAILED") {
-    throw new Error(`Gemini Files API 處理失敗：${uploadedFile.name}`);
+    throw new Error(`Gemini Files API 处理失败：${uploadedFile.name}`);
   }
 
   return { uri: uploadedFile.uri, name: uploadedFile.name };
@@ -587,7 +709,7 @@ async function handlePdf(input, client) {
     client,
     pdfInput
   );
-  console.error(`已上傳：${uploadedFileName}`);
+  console.error(`已上传：${uploadedFileName}`);
 
   return {
     dryRunInfo,
@@ -616,45 +738,94 @@ function getVideoMimeType(filePath) {
 }
 
 function buildVideoPrompt() {
-  return `你是一個專業的影片內容分析師。請仔細觀看這段影片的完整內容，並產出結構化、重點清晰的繁體中文摘要。
+  const code = process.env.CLAW_LANGUAGE || "en";
+  const map = {
+    "zh-CN": "Simplified Chinese",
+    "en": "English"
+  };
+  const fullName = map[code] || "English";
 
-任務目標：
-1. 確保涵蓋影片從頭到尾的重要段落，不要只摘要開頭。
-2. 絕對不要虛構影片中沒有出現的資訊。
-3. 全文使用繁體中文（zh-TW），保留專有名詞的原文（括號附上）。
+  if (code === "zh-CN") {
+    return `你是一个专业的影片内容分析师。请仔细观看这段影片的完整内容，并产出结构化、重点清晰的简体中文摘要。
 
-格式規範（重要）：
-- 標題請用粗體加 emoji，例如「**📝 內容摘要**」，不要使用 # 標題語法。
-- 不要使用 Markdown 表格（| 語法），改用條列格式。
-- 條列項目一律使用扁平結構（只用 - 開頭），不要使用編號子列表（1. 2. 3.）或巢狀縮排。
-- 條列項目中若需標示重點名稱，直接寫在 - 後面即可，不要在條列內再使用粗體。
-- 這些規則是為了確保輸出在 GitHub Issue 和 Telegram 都能正確顯示。
+任务目标：
+1. 确保涵盖影片从头到尾的重要段落，不要只摘要开头。
+2. 绝对不要虚构影片中没有出现的信息。
+3. 全文使用简体中文，保留专有名词的原文（括号附上）。
 
-請依照以下結構輸出：
+格式规范（重要）：
+- 标题请用粗体加 emoji，例如「**📝 内容摘要**」，不要使用 # 标题语法。
+- 不要使用 Markdown 表格（| 语法），改用条列格式。
+- 条列项目一律使用扁平结构（只用 - 开头），不要使用编号子列表（1. 2. 3.）或巢状缩进。
+- 条列项目中若需标示重点名称，直接写在 - 后面即可，不要在条列内再使用粗体。
+- 这些规则是为了确保输出在 GitHub Issue 和 Telegram 都能正确显示。
 
-**📝 內容摘要**
+请依照以下结构输出：
 
-**📌 來源**
-- 類型：影片
+**📝 内容摘要**
+
+**📌 来源**
+- 类型：影片
 
 **💡 核心概述**
-（請以流暢的段落整理影片的脈絡，包含：影片主題與背景、核心內容或關鍵步驟、以及最終結論與啟示。請依據影片長度與資訊豐富度調整篇幅。）
+（请以流畅的段落整理影片的脉络，包含：影片主题与背景、核心内容或关键步骤、以及最终结论与启示。请依据影片长度与信息丰富度调整篇幅。）
 
-**🔍 重點條列**
-（請萃取影片中的精華重點。數量視內容而定，寧缺勿濫。若影片中有特定的步驟、操作畫面或關鍵論述，請盡量補上具體細節。）
-- 重點說明...
+**🔍 重点条列**
+（请萃取影片中的精华重点。数量视内容而定，宁缺勿滥。若影片中有特定的步骤、操作画面或关键论述，请尽量补上具体细节。）
+- 重点说明...
 
-**📊 關鍵數據與事實**
-（如影片中提及關鍵數字、金額、日期、百分比等，請用條列呈現；若無則省略此段）
-- 項目：數值/日期
-- 項目：數值/日期
+**📊 关键数据与事实**
+（如影片中提及关键数字、金额、日期、百分比等，请用条列呈现；若无则省略此段）
+- 项目：数值/日期
+- 项目：数值/日期
 
-**🎯 行動建議**
-（觀看後若有建議行動或下一步，請整理於此；若無則寫「目前無明確行動建議」）`;
+**🎯 行动建议**
+（观看后若有建议行动或下一步，请整理于此；若无则写「目前无明确行动建议」）
+---
+You MUST respond entirely in ${fullName}.`;
+  } else {
+    return `You are a professional video analyst. Please watch the entire content of the video carefully and produce a structured English summary.
+
+Task Goals:
+1. Ensure the summary covers segments from beginning to end, not just the introduction.
+2. Never hallucinate information not shown in the video.
+3. The entire response must be in English. Keep proper nouns.
+
+Formatting Rules (Important):
+- Headers must use bold and emojis, e.g., "**📝 Summary**", do NOT use "#" markdown headers.
+- Do not use markdown tables (| syntax), use bullet points instead.
+- Bullet points must be flat (only starting with "-"), do not use sub-numbering (1. 2. 3.) or nested indentation.
+- For key points, put key names right after the "-", do not use bolding within bullet items.
+- These rules ensure the output displays correctly on GitHub Issues and Telegram.
+
+Please output using the following structure:
+
+**📝 Summary**
+
+**📌 Source**
+- Type: Video
+
+**💡 Core Overview**
+(Please write a coherent paragraph outlining the context, key arguments/methods, and final conclusion. Adjust the length based on content depth to capture key details.)
+
+**🔍 Key Highlights**
+(Extract the most valuable takeaways. Keep them rich and informative instead of single-sentence bullet points.)
+- Point 1: Detailed explanation...
+
+**📊 Key Metrics & Facts**
+(If there are metrics, amounts, dates, or percentages, list them here; otherwise omit this section.)
+- Item: Value/Date
+- Item: Value/Date
+
+**🎯 Actionable Recommendations**
+(If the video outlines recommendations or actionable steps, list them here; otherwise write "No clear actionable recommendations at this time.")
+---
+You MUST respond entirely in ${fullName}.`;
+  }
 }
 
 async function resolveVideoInput(rawInput) {
-  if (!rawInput) throw new Error("請提供影片 URL 或本地檔案路徑。");
+  if (!rawInput) throw new Error("请提供影片 URL 或本地档案路径。");
 
   if (rawInput.startsWith("data:")) {
     return {
@@ -681,7 +852,7 @@ async function resolveVideoInput(rawInput) {
     };
   } catch (error) {
     if (error?.code !== "ENOENT" && error?.code !== "ENOTDIR") {
-      throw new Error(`無法讀取影片檔案 "${resolvedPath}"：${error.message}`);
+      throw new Error(`无法读取影片档案 "${resolvedPath}"：${error.message}`);
     }
   }
 
@@ -695,7 +866,7 @@ async function resolveVideoInput(rawInput) {
   }
 
   throw new Error(
-    `輸入既非可讀取的本地檔案，也非有效的影片 URL：${rawInput}`
+    `输入既非可读取的本地档案，也非有效的影片 URL：${rawInput}`
   );
 }
 
@@ -737,45 +908,94 @@ function getAudioMimeType(filePath) {
 }
 
 function buildAudioPrompt() {
-  return `你是一個專業的音訊內容分析師。請仔細聆聽這段音訊的完整內容，並產出結構化、重點清晰的繁體中文摘要。
+  const code = process.env.CLAW_LANGUAGE || "en";
+  const map = {
+    "zh-CN": "Simplified Chinese",
+    "en": "English"
+  };
+  const fullName = map[code] || "English";
 
-任務目標：
-1. 確保涵蓋音訊從頭到尾的對話或獨白重點。
-2. 絕對不要虛構音訊中沒有出現的資訊。
-3. 全文使用繁體中文（zh-TW），保留專有名詞的原文（括號附上）。
+  if (code === "zh-CN") {
+    return `你是一个专业的音讯内容分析师。请仔细聆听这段音讯的完整内容，并产出结构化、重点清晰的简体中文摘要。
 
-格式規範（重要）：
-- 標題請用粗體加 emoji，例如「**📝 內容摘要**」，不要使用 # 標題語法。
-- 不要使用 Markdown 表格（| 語法），改用條列格式。
-- 條列項目一律使用扁平結構（只用 - 開頭），不要使用編號子列表（1. 2. 3.）或巢狀縮排。
-- 條列項目中若需標示重點名稱，直接寫在 - 後面即可，不要在條列內再使用粗體。
-- 這些規則是為了確保輸出在 GitHub Issue 和 Telegram 都能正確顯示。
+任务目标：
+1. 确保涵盖音讯从头到尾的对话或独白重点。
+2. 绝对不要虚构音讯中没有出现的信息。
+3. 全文使用简体中文，保留专有名词的原文（括号附上）。
 
-請依照以下結構輸出：
+格式规范（重要）：
+- 标题请用粗体加 emoji，例如「**📝 内容摘要**」，不要使用 # 标题语法。
+- 不要使用 Markdown 表格（| 语法），改用条列格式。
+- 条列项目一律使用扁平结构（只用 - 开头），不要使用编号子列表（1. 2. 3.）或巢状缩进。
+- 条列项目中若需标示重点名称，直接写在 - 后面即可，不要在条列内再使用粗体。
+- 这些规则是为了确保输出在 GitHub Issue 和 Telegram 都能正确显示。
 
-**📝 內容摘要**
+请依照以下结构输出：
 
-**📌 來源**
-- 類型：音訊
+**📝 内容摘要**
+
+**📌 来源**
+- 类型：音讯
 
 **💡 核心概述**
-（請以流暢的段落整理音訊的脈絡，包含：討論主題與背景、核心對話內容或關鍵論點、以及結論。請依據音訊長度與資訊豐富度調整篇幅。）
+（请以流畅的段落整理音讯的脉络，包含：讨论主题与背景、核心对话内容或关键论点、以及结论。请依据音讯长度与信息丰富度调整篇幅。）
 
-**🔍 重點條列**
-（請萃取音訊中的精華論點或對話重點。數量視內容而定，寧缺勿濫。盡可能保留講者的具體舉例或重要細節。）
-- 重點說明...
+**🔍 重点条列**
+（请萃取音讯中的精华论点或对话重点。数量视内容而定，宁缺勿滥。尽可能保留讲者的具体举例或重要细节。）
+- 重点说明...
 
-**📊 關鍵數據與事實**
-（如音訊中提及關鍵數字、金額、日期等，請用條列呈現；若無則省略此段）
-- 項目：數值/日期
-- 項目：數值/日期
+**📊 关键数据与事实**
+（如音讯中提及关键数字、金额、日期等，请用条列呈现；若无则省略此段）
+- 项目：数值/日期
+- 项目：数值/日期
 
-**🎯 行動建議**
-（聆聽後若有明確的建議行動或後續規劃，請整理於此；若無則寫「目前無明確行動建議」）`;
+**🎯 行动建议**
+（聆听后若有明确的建议行动或后续规划，请整理于此；若无则写「目前无明确行动建议」）
+---
+You MUST respond entirely in ${fullName}.`;
+  } else {
+    return `You are a professional audio analyst. Please listen carefully to the entire audio content and produce a structured English summary.
+
+Task Goals:
+1. Ensure the summary covers dialogues or monologues from beginning to end.
+2. Never hallucinate information not present in the audio.
+3. The entire response must be in English. Keep proper nouns.
+
+Formatting Rules (Important):
+- Headers must use bold and emojis, e.g., "**📝 Summary**", do NOT use "#" markdown headers.
+- Do not use markdown tables (| syntax), use bullet points instead.
+- Bullet points must be flat (only starting with "-"), do not use sub-numbering (1. 2. 3.) or nested indentation.
+- For key points, put key names right after the "-", do not use bolding within bullet items.
+- These rules ensure the output displays correctly on GitHub Issues and Telegram.
+
+Please output using the following structure:
+
+**📝 Summary**
+
+**📌 Source**
+- Type: Audio
+
+**💡 Core Overview**
+(Please write a coherent paragraph outlining the context, key arguments/methods, and final conclusion. Adjust the length based on content depth to capture key details.)
+
+**🔍 Key Highlights**
+(Extract the most valuable takeaways. Keep them rich and informative instead of single-sentence bullet points.)
+- Point 1: Detailed explanation...
+
+**📊 Key Metrics & Facts**
+(If there are metrics, amounts, dates, or percentages, list them here; otherwise omit this section.)
+- Item: Value/Date
+- Item: Value/Date
+
+**🎯 Actionable Recommendations**
+(If the audio outlines recommendations or actionable steps, list them here; otherwise write "No clear actionable recommendations at this time.")
+---
+You MUST respond entirely in ${fullName}.`;
+  }
 }
 
 async function resolveAudioInput(rawInput) {
-  if (!rawInput) throw new Error("請提供音訊檔案路徑或 URL。");
+  if (!rawInput) throw new Error("请提供音讯档案路径或 URL。");
 
   // Try local file first
   let localPath = rawInput;
@@ -794,16 +1014,16 @@ async function resolveAudioInput(rawInput) {
     };
   } catch (error) {
     if (error?.code !== "ENOENT" && error?.code !== "ENOTDIR") {
-      throw new Error(`無法讀取音訊檔案 "${resolvedPath}"：${error.message}`);
+      throw new Error(`无法读取音讯档案 "${resolvedPath}"：${error.message}`);
     }
   }
 
   // Remote URL
   if (isRemoteUrl(rawInput)) {
-    console.error(`正在下載音訊：${rawInput}`);
+    console.error(`正在下载音讯：${rawInput}`);
     const response = await fetchWithTimeout(rawInput);
     if (!response.ok)
-      throw new Error(`下載失敗（HTTP ${response.status}）：${rawInput}`);
+      throw new Error(`下载失败（HTTP ${response.status}）：${rawInput}`);
     const buffer = Buffer.from(await response.arrayBuffer());
     const urlPath = new URL(rawInput).pathname;
     const ext = path.extname(urlPath).toLowerCase();
@@ -817,7 +1037,7 @@ async function resolveAudioInput(rawInput) {
   }
 
   throw new Error(
-    `輸入既非可讀取的本地檔案，也非有效的音訊 URL：${rawInput}`
+    `输入既非可读取的本地档案，也非有效的音讯 URL：${rawInput}`
   );
 }
 
@@ -834,7 +1054,7 @@ async function handleAudio(input, client) {
     displayName: audioInput.displayName,
   };
 
-  console.error(`正在分析音訊：${input}`);
+  console.error(`正在分析音讯：${input}`);
   const blob = new Blob([audioInput.buffer], { type: audioInput.mimeType });
   let uploadedFile = await client.files.upload({
     file: blob,
@@ -850,11 +1070,11 @@ async function handleAudio(input, client) {
   }
 
   if (uploadedFile.state === "FAILED") {
-    throw new Error(`Gemini Files API 處理失敗：${uploadedFile.name}`);
+    throw new Error(`Gemini Files API 处理失败：${uploadedFile.name}`);
   }
 
   const uploadedFileName = uploadedFile.name;
-  console.error(`已上傳：${uploadedFileName}`);
+  console.error(`已上传：${uploadedFileName}`);
 
   return {
     dryRunInfo,
@@ -887,7 +1107,7 @@ async function main() {
   }
 
   const detectedType = forcedType || detectInputType(input);
-  console.error(`偵測到輸入類型：${detectedType}`);
+  console.error(`侦测到输入类型：${detectedType}`);
 
   const isDryRun = process.env.SUMMARY_DRY_RUN === "1";
 
@@ -905,7 +1125,7 @@ async function main() {
       result = await handleUrl(input, client);
       // Auto-fallback: URL returned PDF content-type
       if (result && result.__pdfFallback) {
-        console.error("偵測到 PDF Content-Type，自動切換至 PDF 處理器...");
+        console.error("侦测到 PDF Content-Type，自动切换至 PDF 处理器...");
         if (!client) {
           const pdfInput = await resolvePdfBuffer(result.url);
           process.stdout.write(
@@ -977,7 +1197,7 @@ async function main() {
       result = await handleAudio(input, client);
       break;
     default:
-      throw new Error(`不支援的類型：${detectedType}`);
+      throw new Error(`不支援的类型：${detectedType}`);
   }
 
   // Dry-run: output metadata only
@@ -987,7 +1207,7 @@ async function main() {
   }
 
   // Stream the summary
-  console.error("正在請 Gemini 產生摘要...");
+  console.error("正在请 Gemini 产生摘要...");
   try {
     const stream = await client.models.generateContentStream({
       model: result.model,
@@ -1001,6 +1221,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`錯誤：${error.message || error}`);
+  console.error(`错误：${error.message || error}`);
   process.exit(1);
 });

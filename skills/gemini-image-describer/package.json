@@ -1,7 +1,7 @@
 {
   "name": "gemini-image-describer-skill",
   "version": "1.0.0",
-  "description": "圖片內容描述工具 — 使用 Gemini API 分析圖片並產生繁中描述",
+  "description": "图片内容描述工具 — 使用 Gemini API 分析图片并产生繁中描述",
   "type": "module",
   "scripts": {
     "build": "npx -y bun build src/describe.js --outfile scripts/describe.js --target node --minify",

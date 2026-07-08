@@ -181,8 +181,8 @@ Fetched content is in `data.content`; structure depends on `output_format`.
 
 ## Language
 
-- **預設輸出語言為繁體中文（zh-TW）**。除非使用者明確指定其他語言，否則所有摘要、整理、說明等 AI 產出的文字，一律使用繁體中文輸出。
-- 網頁原始內容（如簡體中文頁面）維持原文擷取，但 AI 的整理、摘要與說明部分仍須使用繁體中文。
+- **预设输出语言为繁体中文（zh-TW）**。除非使用者明确指定其他语言，否则所有摘要、整理、说明等 AI 产出的文字，一律使用繁体中文输出。
+- 网页原始内容（如简体中文页面）维持原文撷取，但 AI 的整理、摘要与说明部分仍须使用繁体中文。
 
 Error response format:
 
@@ -194,12 +194,12 @@ Error response format:
 
 ## Important Notes
 
-- ⚠️ **路徑安全**：skill 腳本位於 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先執行 `git rev-parse --show-toplevel` 取得路徑再 `cd`。禁止用 `$(...)` 語法。
-- ⚠️ **指令安全**：Copilot CLI 的安全過濾器會封鎖含有特定 shell 語法的指令，執行時**禁止**加入以下任何寫法，否則指令會被直接擋下：
+- ⚠️ **路径安全**：skill 脚本位于 repo root 的 `.agents/skills/` 下。若 cwd 不在 repo root，先执行 `git rev-parse --show-toplevel` 取得路径再 `cd`。禁止用 `$(...)` 语法。
+- ⚠️ **指令安全**：Copilot CLI 的安全过滤器会封锁含有特定 shell 语法的指令，执行时**禁止**加入以下任何写法，否则指令会被直接挡下：
   - `set -e`、`set -u`、`set -o`、`set -euo pipefail` 等 set 指令
-  - `${var@P}`、`${!var}` 等參數展開語法
-  - 巢狀的 `$(...)` 指令替換
-  - 正確寫法：直接執行 `cd` 與 `node` 指令，不要包在 shell 腳本控制流程內
+  - `${var@P}`、`${!var}` 等参数展开语法
+  - 巢状的 `$(...)` 指令替换
+  - 正确写法：直接执行 `cd` 与 `node` 指令，不要包在 shell 脚本控制流程内
 - Always require URL before running.
 - Validate enum values:
   - `output_format`: `html`, `markdown`, `text`

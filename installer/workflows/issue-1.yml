@@ -1,20 +1,20 @@
-# 這個 workflow 會接手指定 issue，執行 Pi Coding Agent，並把結果回寫到 issue comment 與 issue branch。
-# 注意：整個流程直接跑在 GitHub Actions runner 上，這份 YAML 本身沒有使用 Docker container。
-name: '🦞 執行小龍蝦任務 #1'
+# 这个 workflow 会接手指定 issue，执行 Pi Coding Agent，并把结果回写到 issue comment 与 issue branch。
+# 注意：整个流程直接跑在 GitHub Actions runner 上，这份 YAML 本身没有使用 Docker container。
+name: '🦞 执行小龙虾任务 #1'
 
-# 支援兩種觸發方式：
-# 1. workflow_dispatch：從 GitHub Actions UI 手動填參數後執行
-# 2. repository_dispatch：由外部系統帶 payload 呼叫
+# 支援两种触发方式：
+# 1. workflow_dispatch：从 GitHub Actions UI 手动填参数后执行
+# 2. repository_dispatch：由外部系统带 payload 呼叫
 on:
-  # 讓人可以手動啟動這個 workflow，適合排錯或由上游系統代送參數。
+  # 让人可以手动启动这个 workflow，适合排错或由上游系统代送参数。
   workflow_dispatch:
     inputs:
-      # 要處理的 GitHub issue 編號。
+      # 要处理的 GitHub issue 编号。
       issue_number:
         description: 'GitHub issue number to process'
         required: true
         type: string
-      # 可選：若上游已建立進度留言，這裡可以直接指定 comment id 來沿用。
+      # 可选：若上游已建立进度留言，这里可以直接指定 comment id 来沿用。
       comment_id:
         description: 'Existing issue comment ID to reuse for progress updates'
         required: false
@@ -23,7 +23,7 @@ on:
         description: 'User issue comment ID used to locate artifacts/{user_comment_id}/user.md'
         required: false
         type: string
-      # 可選：觸發來源，方便 workflow 內部根據不同來源調整行為或紀錄分析用。
+      # 可选：触发来源，方便 workflow 内部根据不同来源调整行为或纪录分析用。
       event_source:
         description: 'Who is triggering this workflow: cron or issue'
         required: false
@@ -38,62 +38,63 @@ on:
         required: false
         type: string
         default: ''
-  # 讓外部 dispatcher 用 API 觸發這個 workflow。
+  # 让外部 dispatcher 用 API 触发这个 workflow。
   repository_dispatch:
     types: [coding-agent]
 
-# Actions UI 上顯示的執行名稱，會把 issue 編號直接帶進來，方便辨識。
-run-name: "🦞 執行小龍蝦 #${{ github.event_name == 'repository_dispatch' && github.event.client_payload.issue_number || inputs.issue_number }}"
+# Actions UI 上显示的执行名称，会把 issue 编号直接带进来，方便辨识。
+run-name: "🦞 执行小龙虾 #${{ github.event_name == 'repository_dispatch' && github.event.client_payload.issue_number || inputs.issue_number }}"
 
-# 避免同一個 repo + issue 同時有多個 agent 執行互相覆蓋。
+# 避免同一个 repo + issue 同时有多个 agent 执行互相覆盖。
 concurrency:
   group: "coding-agent-${{ github.repository }}-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.issue_number || inputs.issue_number }}"
   cancel-in-progress: false
 
-# 這個 workflow 需要能推送內容，也需要能建立/更新 issue comment。
+# 这个 workflow 需要能推送内容，也需要能建立/更新 issue comment。
 permissions:
   contents: write
   issues: write
 
-# 把不同 trigger 的 payload 統一整理成共用環境變數，後續 step 只要讀 env 即可。
+# 把不同 trigger 的 payload 统一整理成共用环境变数，后续 step 只要读 env 即可。
 env:
-  # 統一後的 issue 編號。
+  # 统一后的 issue 编号。
   ISSUE_NUMBER: "${{ github.event_name == 'repository_dispatch' && github.event.client_payload.issue_number || inputs.issue_number }}"
-  # 若有提供現成的 comment id，就直接更新那則留言。
+  # 若有提供现成的 comment id，就直接更新那则留言。
   COMMENT_ID: "${{ github.event_name == 'repository_dispatch' && github.event.client_payload.comment_id || inputs.comment_id }}"
-  # 這次觸發來源的使用者留言 id，用來讀取對應的 user.md。
+  # 这次触发来源的使用者留言 id，用来读取对应的 user.md。
   USER_COMMENT_ID: "${{ github.event_name == 'repository_dispatch' && github.event.client_payload.user_comment_id || inputs.user_comment_id }}"
+  CLAW_LANGUAGE: "${{ vars.CLAW_LANGUAGE || 'en' }}"
 
 jobs:
-  # 單一主 job：在 GitHub-hosted runner 上完成驗證、執行 agent、寫回結果。
+  # 单一主 job：在 GitHub-hosted runner 上完成验证、执行 agent、写回结果。
   run-agent:
-    # 直接跑在 Ubuntu runner，不是以 Docker container 執行。
+    # 直接跑在 Ubuntu runner，不是以 Docker container 执行。
     runs-on: ubuntu-latest
-    # 最多允許執行 90 分鐘，避免 workflow 無限卡住。
+    # 最多允许执行 90 分钟，避免 workflow 无限卡住。
     timeout-minutes: 90
 
     steps:
-      # 把目標 repo 檢出到 runner，後面才能切 branch、寫檔與 push。
+      # 把目标 repo 检出到 runner，后面才能切 branch、写档与 push。
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: "issue-${{ github.event_name == 'repository_dispatch' && github.event.client_payload.issue_number || inputs.issue_number }}"
           fetch-depth: 1
 
-      # 先把 Node.js 環境準備好，Pi Coding Agent 需要 Node.js 執行。
+      # 先把 Node.js 环境准备好，Pi Coding Agent 需要 Node.js 执行。
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 22
 
-      - name: 狀態更新處理
+      - name: 状态更新处理
         if: ${{ (github.event_name == 'repository_dispatch' && github.event.client_payload.event_data == 'StatusUpdate') || inputs.event_data == 'StatusUpdate' }}
         shell: bash
         run: |
           echo "StatusUpdate event detected, performing status update..."
 
-      # 從 .pi/settings.json 讀取使用者選擇的 provider，並設定對應的 API key 環境變數
-      - name: 讀取 BYOK 設定
+      # 从 .pi/settings.json 读取使用者选择的 provider，并设定对应的 API key 环境变数
+      - name: 读取 BYOK 设定
         if: ${{ (github.event_name == 'repository_dispatch' && github.event.client_payload.event_data != 'StatusUpdate') || inputs.event_data != 'StatusUpdate' }}
         shell: bash
         env:
@@ -105,14 +106,15 @@ jobs:
           SECRET_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SECRET_PIONEER_API_KEY: ${{ secrets.PIONEER_API_KEY }}
           SECRET_OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          SECRET_OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
         run: |
-          # 讀取 provider（Pi 原生 provider id）
+          # 读取 provider（Pi 原生 provider id）
           PROVIDER="openrouter"
           if [ -f .pi/settings.json ]; then
             PROVIDER=$(jq -r '.defaultProvider // "openrouter"' .pi/settings.json)
           fi
 
-          # 依 provider 設定對應的 Pi 環境變數
+          # 依 provider 设定对应的 Pi 环境变数
           case "$PROVIDER" in
             cloudflare-workers-ai)
               echo "CLOUDFLARE_API_KEY=${SECRET_CLOUDFLARE_API_TOKEN}" >> "$GITHUB_ENV"
@@ -136,6 +138,9 @@ jobs:
             openrouter)
               echo "OPENROUTER_API_KEY=${SECRET_OPENROUTER_API_KEY}" >> "$GITHUB_ENV"
               ;;
+            ollama-cloud)
+              echo "OLLAMA_API_KEY=${SECRET_OLLAMA_API_KEY}" >> "$GITHUB_ENV"
+              ;;
             *)
               echo "Unknown provider: $PROVIDER"
               exit 1
@@ -144,7 +149,7 @@ jobs:
 
           echo "PI_PROVIDER=$PROVIDER" >> "$GITHUB_ENV"
 
-      - name: 執行任務
+      - name: 执行任务
         if: ${{ (github.event_name == 'repository_dispatch' && github.event.client_payload.event_data != 'StatusUpdate') || inputs.event_data != 'StatusUpdate' }}
         id: pi_task
         shell: bash
@@ -192,23 +197,29 @@ jobs:
 
           USER_PROMPT_CONTENT="$(cat "$USER_PROMPT_FILE")"
 
-          # 固定 Pi Coding Agent 版本，避免 @latest 造成不可重現結果或遭上游 breaking change 影響。
-          # 可透過 repo variable PI_CODING_AGENT_VERSION 覆寫。
+          # 固定 Pi Coding Agent 版本，避免 @latest 造成不可重现结果或遭上游 breaking change 影响。
+          # 可透过 repo variable PI_CODING_AGENT_VERSION 覆写。
           PI_CODING_AGENT_VERSION='${{ vars.PI_CODING_AGENT_VERSION }}'
           : "${PI_CODING_AGENT_VERSION:=0.70.6}"
 
-          # 若選取 pioneer，則需要先安裝 pi-pioneer-provider 延伸模組
+          # 若选取 pioneer，则需要先安装 pi-pioneer-provider 延伸模组
           if [[ "${PI_PROVIDER}" == "pioneer" ]]; then
             echo "Installing pi-pioneer-provider extension..."
             npx -y "@mariozechner/pi-coding-agent@${PI_CODING_AGENT_VERSION}" install npm:pi-pioneer-provider
           fi
 
-          # Pi 會透過 PI_CODING_AGENT_DIR=.pi 讀取 template 內的 settings.json 與 models.json
-          # 以 error loglevel 執行，避免 npm warning 汙染 error.log
+          # 若选取 ollama-cloud，则需要先安装 pi-ollama-cloud 延伸模组
+          if [[ "${PI_PROVIDER}" == "ollama-cloud" ]]; then
+            echo "Installing pi-ollama-cloud extension..."
+            npx -y "@mariozechner/pi-coding-agent@${PI_CODING_AGENT_VERSION}" install npm:pi-ollama-cloud
+          fi
+
+          # Pi 会透过 PI_CODING_AGENT_DIR=.pi 读取 template 内的 settings.json 与 models.json
+          # 以 error loglevel 执行，避免 npm warning 污染 error.log
           set +e
           set -o pipefail
           npm_config_loglevel=error npx -y "@mariozechner/pi-coding-agent@${PI_CODING_AGENT_VERSION}" \
-            -p "請將最終結果寫入 artifacts/${COMMENT_ID}/result.md 。我的提示詞為: ${USER_PROMPT_CONTENT}" \
+            -p "请将最终结果写入 artifacts/${COMMENT_ID}/result.md 。我的提示词为: ${USER_PROMPT_CONTENT}" \
             --mode json \
             2> "artifacts/${COMMENT_ID}/error.log" \
             | jq -c 'select(.type | test("^(session|agent_|turn_|message_start|message_end|tool_|error|result|compaction_|auto_retry_)"))' \
@@ -217,8 +228,8 @@ jobs:
           set +o pipefail
           set -e
 
-          # Pi 即使遇到 provider 錯誤也會以 exit 0 結束，需要從 output.jsonl 偵測 errorMessage
-          # 偵測到時補寫進 error.log 並讓本步驟失敗，後續的失敗處理才會觸發
+          # Pi 即使遇到 provider 错误也会以 exit 0 结束，需要从 output.jsonl 侦测 errorMessage
+          # 侦测到时补写进 error.log 并让本步骤失败，后续的失败处理才会触发
           HAS_ERROR=0
           if jq -e '.. | objects | select((.errorMessage // "") != "")' \
               "artifacts/${COMMENT_ID}/output.jsonl" > /dev/null; then
@@ -230,7 +241,7 @@ jobs:
             HAS_ERROR=1
           fi
 
-          # 如果沒有產生 result.md，自動從 output.jsonl 或 error.log 擷取 AI 的回覆內容或報錯原因做為補救
+          # 如果没有产生 result.md，自动从 output.jsonl 或 error.log 撷取 AI 的回覆内容或报错原因做为补救
           if [[ ! -s "artifacts/${COMMENT_ID}/result.md" ]]; then
             echo "Notice: result.md is missing or empty. Attempting intelligent fallback from output.jsonl/error.log..."
             if [[ -f "artifacts/${COMMENT_ID}/output.jsonl" ]]; then
@@ -238,10 +249,10 @@ jobs:
                 "artifacts/${COMMENT_ID}/output.jsonl" 2>/dev/null | tail -n 1 > "artifacts/${COMMENT_ID}/result.md" || true
             fi
             if [[ ! -s "artifacts/${COMMENT_ID}/result.md" && -s "artifacts/${COMMENT_ID}/error.log" ]]; then
-              echo -e "### ⚠️ 執行提示\n\n產生結果失敗，以下為系統排錯日誌：\n" > "artifacts/${COMMENT_ID}/result.md"
+              echo -e "### ⚠️ 执行提示\n\n产生结果失败，以下为系统排错日志：\n" > "artifacts/${COMMENT_ID}/result.md"
               cat "artifacts/${COMMENT_ID}/error.log" >> "artifacts/${COMMENT_ID}/result.md" || true
             elif [[ ! -s "artifacts/${COMMENT_ID}/result.md" ]]; then
-              echo "⚠️ AI 未能返回有意義的文字結果或檔案，請檢查指令或 API 授權金鑰是否已正確設定。" > "artifacts/${COMMENT_ID}/result.md"
+              echo "⚠️ AI 未能返回有意义的文字结果或档案，请检查指令或 API 授权金钥是否已正确设定。" > "artifacts/${COMMENT_ID}/result.md"
             fi
           fi
 
@@ -255,7 +266,7 @@ jobs:
             fi
           fi
 
-      - name: 推送結果
+      - name: 推送结果
         if: always()
         shell: bash
         run: |
@@ -269,14 +280,14 @@ jobs:
           fi
           git push origin "issue-${{ env.ISSUE_NUMBER }}" --force
 
-      - name: 任務失敗處理
+      - name: 任务失败处理
         if: failure() && steps.pi_task.conclusion == 'failure'
         uses: jeffsia-blacksmith/altShiftClawToolkit/actions/error-handler-action@v1
         with:
           output_file: artifacts/${{ env.COMMENT_ID }}/error.log
           result_file: artifacts/${{ env.COMMENT_ID }}/result.md
 
-      - name: 執行結果回報
+      - name: 执行结果回报
         if: always()
         uses: jeffsia-blacksmith/altShiftClawToolkit/actions/update-comment-action@v1
         with:

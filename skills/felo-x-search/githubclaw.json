@@ -1,7 +1,7 @@
 {
   "name": "Felo X Search",
-  "tagline": "搜尋 X（Twitter）使用者、推文與回覆，掌握社群動態",
-  "description": "Felo X Search 透過 Felo X Search API 搜尋 X（Twitter）平台資料，支援使用者查詢、推文搜尋、使用者時間軸與推文回覆。結果以 Markdown 格式呈現並附帶互動數據，適合社群媒體監控與資料分析。",
+  "tagline": "搜寻 X（Twitter）使用者、推文与回覆，掌握社群动态",
+  "description": "Felo X Search 透过 Felo X Search API 搜寻 X（Twitter）平台资料，支援使用者查询、推文搜寻、使用者时间轴与推文回覆。结果以 Markdown 格式呈现并附带互动数据，适合社群媒体监控与资料分析。",
   "category": "data",
   "tags": ["felo", "twitter", "x-search", "social-media", "search"],
   "version": "1.0.0",
