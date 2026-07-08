@@ -1,11 +1,11 @@
-name: '📚 Sync Templates 同步范本'
-run-name: "Sync Template 范本同步: ${{ inputs.template_name }} | req:${{ inputs.request_id }}"
+name: '📚 同步範本'
+run-name: "📚 範本同步: ${{ inputs.template_name }} | req:${{ inputs.request_id }}"
 
 on:
   workflow_dispatch:
     inputs:
       template_name:
-        description: 'Template name 范本名称'
+        description: '範本名稱'
         required: true
         type: string
       request_id:
@@ -38,7 +38,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Validate Inputs 验证输入参数
+      - name: 验证输入參數
         shell: bash
         run: |
           set -euo pipefail
@@ -47,13 +47,13 @@ jobs:
             exit 1
           fi
 
-      - name: Checkout Repository 签出仓库
+      - name: 簽出倉庫
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ env.PUSH_TOKEN }}
 
-      - name: Checkout Template from Source Repo 从范本仓库签出范本
+      - name: 从範本倉庫簽出範本
         uses: actions/checkout@v6
         with:
           repository: ${{ env.TEMPLATES_SOURCE_REPO }}
@@ -62,13 +62,13 @@ jobs:
           sparse-checkout: |
             templates/${{ env.TEMPLATE_NAME }}
 
-      - name: Validate Template Exists 验证范本存在
+      - name: 验证範本存在
         shell: bash
         run: |
           set -euo pipefail
           test -d "templates-source/templates/${TEMPLATE_NAME}"
 
-      - name: Sync Template to Main Branch 同步范本到 main 分支
+      - name: 同步範本到 main 分支
         shell: bash
         run: |
           set -euo pipefail
@@ -84,7 +84,7 @@ jobs:
           mkdir -p "${INSTALL_PATH}"
           rsync -a --delete "templates-source/templates/${TEMPLATE_NAME}/" "${INSTALL_PATH}/"
 
-          # 同步范本额外的 workflow 档案到 .github/workflows/
+          # 同步範本額外的 workflow 檔案到 .github/workflows/
           TEMPLATE_WF_DIR="templates-source/templates/${TEMPLATE_NAME}/.github/workflows"
           if [[ -d "${TEMPLATE_WF_DIR}" ]]; then
             mkdir -p ".github/workflows"
@@ -92,7 +92,7 @@ jobs:
             for wf_file in "${TEMPLATE_WF_DIR}"/*.yml "${TEMPLATE_WF_DIR}"/*.yaml; do
               wf_name="$(basename "${wf_file}")"
               [[ "${wf_name}" == "issue-N.yml" ]] && continue
-              echo "Copying workflow 复制 workflow: ${wf_name}"
+              echo "复制 workflow: ${wf_name}"
               cp "${wf_file}" ".github/workflows/${wf_name}"
             done
             shopt -u nullglob
@@ -112,9 +112,9 @@ jobs:
         shell: bash
         run: |
           {
-            echo "### 📚 Template Sync Result 范本同步结果"
+            echo "### 📚 範本同步結果"
             echo
-            echo "| Item 项目 | Value 值 |"
+            echo "| 項目 | 值 |"
             echo "| --- | --- |"
             echo "| Template | \`${TEMPLATE_NAME}\` |"
             echo "| Target | \`templates/${TEMPLATE_NAME}\` |"

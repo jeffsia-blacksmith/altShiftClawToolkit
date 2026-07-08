@@ -2,7 +2,7 @@
 # Note: the whole flow runs directly on a GitHub Actions runner; this YAML does not use a Docker container.
 name: '🦞 Lobster Task #1'
 
-# Two trigger modes are supported: 
+# Two trigger modes are supported:
 # 1. workflow_dispatch: from the GitHub Actions UI after entering parameters manually
 # 2. repository_dispatch: called by an external system with a payload
 on:
@@ -23,7 +23,7 @@ on:
         description: 'User issue comment ID used to locate artifacts/{user_comment_id}/user.md'
         required: false
         type: string
-      # Optional: source of the trigger, so the workflow can branch on the source or record analytics. 
+      # Optional: source of the trigger, so the workflow can branch on the source or record analytics.
       event_source:
         description: 'Who is triggering this workflow: cron or issue'
         required: false
@@ -63,7 +63,6 @@ env:
   COMMENT_ID: "${{ github.event_name == 'repository_dispatch' && github.event.client_payload.comment_id || inputs.comment_id }}"
   # User comment id from this trigger; used to read the corresponding user.md.
   USER_COMMENT_ID: "${{ github.event_name == 'repository_dispatch' && github.event.client_payload.user_comment_id || inputs.user_comment_id }}"
-  CLAW_LANGUAGE: "${{ vars.CLAW_LANGUAGE || 'en' }}"
 
 jobs:
   # Single main job: validate, run the agent, and write back results on a GitHub-hosted runner.

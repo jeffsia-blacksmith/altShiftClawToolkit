@@ -1,10 +1,10 @@
-name: 🛡️ Env Var Permission Check 龙虾堡环境变数检测
+name: 🛡️ 龍蝦堡環境变數檢測
 
 on:
   workflow_call:
   workflow_dispatch:
 
-run-name: "🔍 Env Var Permission Check 龙虾堡环境变数检测"
+run-name: "🔍 龍蝦堡環境变數檢測"
 
 concurrency:
   group: check-env-permissions-${{ github.repository }}
@@ -14,7 +14,7 @@ permissions: {}
 
 jobs:
   check-env-permissions:
-    name: 🛡️ Env Var Permission Check 龙虾堡环境变数检测
+    name: 🛡️ 龍蝦堡環境变數檢測
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -26,7 +26,7 @@ jobs:
       GH_WEBHOOK_SECRET: ${{ secrets.GH_WEBHOOK_SECRET }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_WEBHOOK_SECRET: ${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
-      # ── 选填 Secrets ─────────────────────────────────────────────────────
+      # ── 選填 Secrets ─────────────────────────────────────────────────────
       COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       CLAWBRAIN_API_KEY: ${{ secrets.CLAWBRAIN_API_KEY }}
@@ -44,37 +44,37 @@ jobs:
       # CLOUDFLARE_API_TOKEN
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-CF01] CLOUDFLARE_API_TOKEN — Exists / 是否存在"
+      - name: "[TC-CF01] CLOUDFLARE_API_TOKEN — 是否存在"
         id: tc_cf01
         continue-on-error: true
         run: |
           if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
-            echo "::error::CLOUDFLARE_API_TOKEN 未设定（Settings → Secrets → Actions）"
+            echo "::error::CLOUDFLARE_API_TOKEN 未設定（Settings → Secrets → Actions）"
             exit 1
           fi
-          echo "✅ CLOUDFLARE_API_TOKEN 已设定"
+          echo "✅ CLOUDFLARE_API_TOKEN 已設定"
 
-      - name: "[TC-CF02] CLOUDFLARE_API_TOKEN — Format Check (length ≥ 30 chars) / 格式验证（长度 ≥ 30 字元）"
+      - name: "[TC-CF02] CLOUDFLARE_API_TOKEN — 格式验证（長度 ≥ 30 字元）"
         id: tc_cf02
         continue-on-error: true
         run: |
           if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
-            echo "::warning::CLOUDFLARE_API_TOKEN 未设定，跳过格式验证"
+            echo "::warning::CLOUDFLARE_API_TOKEN 未設定，跳過格式验证"
             exit 0
           fi
           len=${#CLOUDFLARE_API_TOKEN}
           if [[ $len -lt 30 ]]; then
-            echo "::error::CLOUDFLARE_API_TOKEN 长度异常（${len} 字元，预期至少 30 字元）"
+            echo "::error::CLOUDFLARE_API_TOKEN 長度異常（${len} 字元，預期至少 30 字元）"
             exit 1
           fi
-          echo "✅ CLOUDFLARE_API_TOKEN 长度正常（${len} 字元）"
+          echo "✅ CLOUDFLARE_API_TOKEN 長度正常（${len} 字元）"
 
-      - name: "[TC-CF03] CLOUDFLARE_API_TOKEN — Cloudflare API Token Check / Cloudflare API Token 验证"
+      - name: "[TC-CF03] CLOUDFLARE_API_TOKEN — Cloudflare API Token 验证"
         id: tc_cf03
         continue-on-error: true
         run: |
           if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
-            echo "::warning::CLOUDFLARE_API_TOKEN 未设定，跳过 API 验证"
+            echo "::warning::CLOUDFLARE_API_TOKEN 未設定，跳過 API 验证"
             exit 0
           fi
           RESPONSE=$(curl -sS \
@@ -82,7 +82,7 @@ jobs:
             "https://api.cloudflare.com/client/v4/user/tokens/verify")
           SUCCESS=$(echo "$RESPONSE" | jq -r '.success // false')
           if [[ "$SUCCESS" != "true" ]]; then
-            echo "::error::CLOUDFLARE_API_TOKEN 验证失败: $(echo "$RESPONSE" | jq -c '.errors // []')"
+            echo "::error::CLOUDFLARE_API_TOKEN 验证失敗: $(echo "$RESPONSE" | jq -c '.errors // []')"
             exit 1
           fi
           STATUS=$(echo "$RESPONSE" | jq -r '.result.status // "unknown"')
@@ -92,36 +92,36 @@ jobs:
       # CLOUDFLARE_ACCOUNT_ID
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-CF04] CLOUDFLARE_ACCOUNT_ID — Exists / 是否存在"
+      - name: "[TC-CF04] CLOUDFLARE_ACCOUNT_ID — 是否存在"
         id: tc_cf04
         continue-on-error: true
         run: |
           if [[ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
-            echo "::error::CLOUDFLARE_ACCOUNT_ID 未设定（Settings → Secrets → Actions）"
+            echo "::error::CLOUDFLARE_ACCOUNT_ID 未設定（Settings → Secrets → Actions）"
             exit 1
           fi
-          echo "✅ CLOUDFLARE_ACCOUNT_ID 已设定"
+          echo "✅ CLOUDFLARE_ACCOUNT_ID 已設定"
 
-      - name: "[TC-CF05] CLOUDFLARE_ACCOUNT_ID — Format Check (32-char hex) / 格式验证（32 位 hex 字元）"
+      - name: "[TC-CF05] CLOUDFLARE_ACCOUNT_ID — 格式验证（32 位 hex 字元）"
         id: tc_cf05
         continue-on-error: true
         run: |
           if [[ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
-            echo "::warning::CLOUDFLARE_ACCOUNT_ID 未设定，跳过格式验证"
+            echo "::warning::CLOUDFLARE_ACCOUNT_ID 未設定，跳過格式验证"
             exit 0
           fi
           if ! [[ "${CLOUDFLARE_ACCOUNT_ID}" =~ ^[0-9a-f]{32}$ ]]; then
-            echo "::error::CLOUDFLARE_ACCOUNT_ID 格式不符（预期 32 位小写 hex，实际长度: ${#CLOUDFLARE_ACCOUNT_ID}）"
+            echo "::error::CLOUDFLARE_ACCOUNT_ID 格式不符（預期 32 位小寫 hex，實際長度: ${#CLOUDFLARE_ACCOUNT_ID}）"
             exit 1
           fi
-          echo "✅ CLOUDFLARE_ACCOUNT_ID 格式正确（32 位 hex）"
+          echo "✅ CLOUDFLARE_ACCOUNT_ID 格式正確（32 位 hex）"
 
-      - name: "[TC-CF06] CLOUDFLARE_ACCOUNT_ID — Can Access Account Workers / 可存取帐号下的 Workers"
+      - name: "[TC-CF06] CLOUDFLARE_ACCOUNT_ID — 可存取帳號下的 Workers"
         id: tc_cf06
         continue-on-error: true
         run: |
           if [[ -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
-            echo "::warning::CLOUDFLARE_API_TOKEN 或 CLOUDFLARE_ACCOUNT_ID 未设定，跳过帐号存取验证"
+            echo "::warning::CLOUDFLARE_API_TOKEN 或 CLOUDFLARE_ACCOUNT_ID 未設定，跳過帳號存取验证"
             exit 0
           fi
           RESPONSE=$(curl -sS \
@@ -129,32 +129,32 @@ jobs:
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts")
           SUCCESS=$(echo "$RESPONSE" | jq -r '.success // false')
           if [[ "$SUCCESS" != "true" ]]; then
-            echo "::error::无法用 CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID 存取帐号 Workers: $(echo "$RESPONSE" | jq -c '.errors // []')"
+            echo "::error::無法用 CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID 存取帳號 Workers: $(echo "$RESPONSE" | jq -c '.errors // []')"
             exit 1
           fi
           WORKER_COUNT=$(echo "$RESPONSE" | jq '.result | length')
-          echo "✅ 可存取 Cloudflare 帐号下的 Workers（Worker 数量: ${WORKER_COUNT}）"
+          echo "✅ 可存取 Cloudflare 帳號下的 Workers（Worker 數量: ${WORKER_COUNT}）"
 
       # ══════════════════════════════════════════════════════════════════════
       # CLAW_SYS_GITHUB_TOKEN
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-GH01] CLAW_SYS_GITHUB_TOKEN — Exists / 是否存在"
+      - name: "[TC-GH01] CLAW_SYS_GITHUB_TOKEN — 是否存在"
         id: tc_gh01
         continue-on-error: true
         run: |
           if [[ -z "${CLAW_SYS_GITHUB_TOKEN:-}" ]]; then
-            echo "::error::CLAW_SYS_GITHUB_TOKEN 未设定（Settings → Secrets → Actions）"
+            echo "::error::CLAW_SYS_GITHUB_TOKEN 未設定（Settings → Secrets → Actions）"
             exit 1
           fi
-          echo "✅ CLAW_SYS_GITHUB_TOKEN 已设定"
+          echo "✅ CLAW_SYS_GITHUB_TOKEN 已設定"
 
-      - name: "[TC-GH02] CLAW_SYS_GITHUB_TOKEN — Format Check (known GitHub PAT format) / 格式验证（已知 GitHub PAT 格式）"
+      - name: "[TC-GH02] CLAW_SYS_GITHUB_TOKEN — 格式验证（已知 GitHub PAT 格式）"
         id: tc_gh02
         continue-on-error: true
         run: |
           if [[ -z "${CLAW_SYS_GITHUB_TOKEN:-}" ]]; then
-            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未设定，跳过格式验证"
+            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未設定，跳過格式验证"
             exit 0
           fi
           len=${#CLAW_SYS_GITHUB_TOKEN}
@@ -165,18 +165,18 @@ jobs:
           elif [[ "${CLAW_SYS_GITHUB_TOKEN}" =~ ^[0-9a-f]{40}$ ]]; then
             echo "✅ CLAW_SYS_GITHUB_TOKEN 符合旧版 Classic PAT 格式（40 位 hex）"
           elif [[ $len -ge 20 ]]; then
-            echo "⚠️ CLAW_SYS_GITHUB_TOKEN 格式未能识别已知格式，但长度足够（${len} 字元），可能是自订格式"
+            echo "⚠️ CLAW_SYS_GITHUB_TOKEN 格式未能識別已知格式，但長度足够（${len} 字元），可能是自訂格式"
           else
-            echo "::error::CLAW_SYS_GITHUB_TOKEN 长度异常（${len} 字元），可能不是有效的 GitHub Token"
+            echo "::error::CLAW_SYS_GITHUB_TOKEN 長度異常（${len} 字元），可能不是有效的 GitHub Token"
             exit 1
           fi
 
-      - name: "[TC-GH03] CLAW_SYS_GITHUB_TOKEN — GitHub API Check (GET /user) / GitHub API 验证（GET /user）"
+      - name: "[TC-GH03] CLAW_SYS_GITHUB_TOKEN — GitHub API 验证（GET /user）"
         id: tc_gh03
         continue-on-error: true
         run: |
           if [[ -z "${CLAW_SYS_GITHUB_TOKEN:-}" ]]; then
-            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未设定，跳过 API 验证"
+            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未設定，跳過 API 验证"
             exit 0
           fi
           RESPONSE=$(curl -sS \
@@ -186,17 +186,17 @@ jobs:
             "https://api.github.com/user")
           LOGIN=$(echo "$RESPONSE" | jq -r '.login // empty')
           if [[ -z "$LOGIN" ]]; then
-            echo "::error::CLAW_SYS_GITHUB_TOKEN 无法呼叫 GitHub API（Token 无效或已过期）: $(echo "$RESPONSE" | jq -c '{message}')"
+            echo "::error::CLAW_SYS_GITHUB_TOKEN 無法呼叫 GitHub API（Token 無效或已過期）: $(echo "$RESPONSE" | jq -c '{message}')"
             exit 1
           fi
           echo "✅ CLAW_SYS_GITHUB_TOKEN 有效（GitHub 使用者: ${LOGIN}）"
 
-      - name: "[TC-GH04] CLAW_SYS_GITHUB_TOKEN — Repository Access Check (GET /repos/{owner}/{repo}) / Repository 存取验证（GET /repos/{owner}/{repo}）"
+      - name: "[TC-GH04] CLAW_SYS_GITHUB_TOKEN — Repository 存取验证（GET /repos/{owner}/{repo}）"
         id: tc_gh04
         continue-on-error: true
         run: |
           if [[ -z "${CLAW_SYS_GITHUB_TOKEN:-}" ]]; then
-            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未设定，跳过 Repository 存取验证"
+            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未設定，跳過 Repository 存取验证"
             exit 0
           fi
           HTTP_STATUS=$(curl -sS \
@@ -215,33 +215,33 @@ jobs:
               echo "✅ CLAW_SYS_GITHUB_TOKEN 可存取 Repository：${REPO_NAME:-${GITHUB_REPOSITORY}}"
               ;;
             401)
-              echo "::error::CLAW_SYS_GITHUB_TOKEN 无效、已过期，或已被撤销（GET /repos 回传 HTTP 401）: ${MSG}"
+              echo "::error::CLAW_SYS_GITHUB_TOKEN 無效、已過期，或已被撤銷（GET /repos 回傳 HTTP 401）: ${MSG}"
               exit 1
               ;;
             403)
-              echo "::error::CLAW_SYS_GITHUB_TOKEN 无法存取 Repository（HTTP 403）: ${MSG}"
+              echo "::error::CLAW_SYS_GITHUB_TOKEN 無法存取 Repository（HTTP 403）: ${MSG}"
               if [[ -n "${ACCEPTED_PERMS:-}" ]]; then
-                echo "::error::GitHub API 建议权限: ${ACCEPTED_PERMS}"
+                echo "::error::GitHub API 建議權限: ${ACCEPTED_PERMS}"
               fi
               exit 1
               ;;
             404)
-              echo "::error::CLAW_SYS_GITHUB_TOKEN 找不到或无法存取 Repository '${GITHUB_REPOSITORY}'（HTTP 404）。这通常代表 token 没有 repo 存取权、repo 授权已被移除，或 token 仅授权到其他 repository。"
+              echo "::error::CLAW_SYS_GITHUB_TOKEN 找不到或無法存取 Repository '${GITHUB_REPOSITORY}'（HTTP 404）。這通常代表 token 沒有 repo 存取權、repo 授權已被移除，或 token 僅授權到其他 repository。"
               exit 1
               ;;
             *)
-              echo "::error::CLAW_SYS_GITHUB_TOKEN Repository 存取验证回传非预期状态码（HTTP ${HTTP_STATUS}）: ${MSG}"
+              echo "::error::CLAW_SYS_GITHUB_TOKEN Repository 存取验证回傳非預期狀態碼（HTTP ${HTTP_STATUS}）: ${MSG}"
               cat /tmp/gh-repo-response.json 2>/dev/null | head -n 5 || true
               exit 1
               ;;
           esac
 
-      - name: "[TC-GH05] CLAW_SYS_GITHUB_TOKEN — Issues Read Permission (GET /repos/{owner}/{repo}/issues) / Issues 读取权限（GET /repos/{owner}/{repo}/issues）"
+      - name: "[TC-GH05] CLAW_SYS_GITHUB_TOKEN — Issues 讀取權限（GET /repos/{owner}/{repo}/issues）"
         id: tc_gh05
         continue-on-error: true
         run: |
           if [[ -z "${CLAW_SYS_GITHUB_TOKEN:-}" ]]; then
-            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未设定，跳过 Issues 读取权限验证"
+            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未設定，跳過 Issues 讀取權限验证"
             exit 0
           fi
           HTTP_STATUS=$(curl -sS \
@@ -255,26 +255,26 @@ jobs:
           if [[ -z "$HTTP_STATUS" || "$HTTP_STATUS" -lt 200 || "$HTTP_STATUS" -ge 300 ]]; then
             MSG=$(cat /tmp/gh-issues-response.json | jq -r 'if type=="object" and has("message") then .message else empty end' 2>/dev/null || true)
             ACCEPTED_PERMS=$(tr -d '\r' < /tmp/gh-issues-headers.txt | awk -F': ' 'tolower($1)=="x-accepted-github-permissions"{print $2}' | tail -n 1)
-            echo "::error::CLAW_SYS_GITHUB_TOKEN 读取 Issues 失败（HTTP ${HTTP_STATUS}）: ${MSG}"
+            echo "::error::CLAW_SYS_GITHUB_TOKEN 讀取 Issues 失敗（HTTP ${HTTP_STATUS}）: ${MSG}"
             if [[ -n "${ACCEPTED_PERMS:-}" ]]; then
-              echo "::error::GitHub API 建议权限: ${ACCEPTED_PERMS}"
+              echo "::error::GitHub API 建議權限: ${ACCEPTED_PERMS}"
             fi
             cat /tmp/gh-issues-response.json 2>/dev/null | head -n 5 || true
             exit 1
           fi
           MSG=$(cat /tmp/gh-issues-response.json | jq -r 'if type=="object" and has("message") then .message else empty end' 2>/dev/null || true)
           if [[ -n "$MSG" ]]; then
-            echo "::error::CLAW_SYS_GITHUB_TOKEN 读取 Issues 回传异常讯息: ${MSG}"
+            echo "::error::CLAW_SYS_GITHUB_TOKEN 讀取 Issues 回傳異常訊息: ${MSG}"
             exit 1
           fi
-          echo "✅ CLAW_SYS_GITHUB_TOKEN 具有 Issues 读取权限"
+          echo "✅ CLAW_SYS_GITHUB_TOKEN 具有 Issues 讀取權限"
 
-      - name: "[TC-GH06] CLAW_SYS_GITHUB_TOKEN — Actions Read Permission (GET /repos/{owner}/{repo}/actions/workflows) / Actions 读取权限（GET /repos/{owner}/{repo}/actions/workflows）"
+      - name: "[TC-GH06] CLAW_SYS_GITHUB_TOKEN — Actions 讀取權限（GET /repos/{owner}/{repo}/actions/workflows）"
         id: tc_gh06
         continue-on-error: true
         run: |
           if [[ -z "${CLAW_SYS_GITHUB_TOKEN:-}" ]]; then
-            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未设定，跳过 Actions 读取权限验证"
+            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未設定，跳過 Actions 讀取權限验证"
             exit 0
           fi
           HTTP_STATUS=$(curl -sS \
@@ -288,35 +288,35 @@ jobs:
           MSG=$(jq -r '.message // empty' /tmp/gh-actions-read-response.json 2>/dev/null || true)
           ACCEPTED_PERMS=$(tr -d '\r' < /tmp/gh-actions-read-headers.txt | awk -F': ' 'tolower($1)=="x-accepted-github-permissions"{print $2}' | tail -n 1)
           if [[ -z "$HTTP_STATUS" || "$HTTP_STATUS" -lt 200 || "$HTTP_STATUS" -ge 300 ]]; then
-            echo "::error::CLAW_SYS_GITHUB_TOKEN 没有 Actions 读取权限（HTTP ${HTTP_STATUS}）: ${MSG}"
+            echo "::error::CLAW_SYS_GITHUB_TOKEN 沒有 Actions 讀取權限（HTTP ${HTTP_STATUS}）: ${MSG}"
             if [[ -n "${ACCEPTED_PERMS:-}" ]]; then
-              echo "::error::GitHub API 建议权限: ${ACCEPTED_PERMS}"
+              echo "::error::GitHub API 建議權限: ${ACCEPTED_PERMS}"
             fi
             exit 1
           fi
           if echo "$MSG" | grep -qiE "Not Found|Resource not accessible|Bad credentials"; then
-            echo "::error::CLAW_SYS_GITHUB_TOKEN 没有 Actions 读取权限: ${MSG}"
+            echo "::error::CLAW_SYS_GITHUB_TOKEN 沒有 Actions 讀取權限: ${MSG}"
             if [[ -n "${ACCEPTED_PERMS:-}" ]]; then
-              echo "::error::GitHub API 建议权限: ${ACCEPTED_PERMS}"
+              echo "::error::GitHub API 建議權限: ${ACCEPTED_PERMS}"
             fi
             exit 1
           fi
           COUNT=$(jq '.total_count // 0' /tmp/gh-actions-read-response.json 2>/dev/null || echo "0")
-          echo "✅ CLAW_SYS_GITHUB_TOKEN 具有 Actions 读取权限（Workflow 数量: ${COUNT}）"
+          echo "✅ CLAW_SYS_GITHUB_TOKEN 具有 Actions 讀取權限（Workflow 數量: ${COUNT}）"
 
-      - name: "[TC-GH07] CLAW_SYS_GITHUB_TOKEN — Actions Write Permission (Workflow Dispatch Access Check) / Actions 写入权限（Workflow Dispatch 存取验证）"
+      - name: "[TC-GH07] CLAW_SYS_GITHUB_TOKEN — Actions 寫入權限（Workflow Dispatch 存取验证）"
         id: tc_gh07
         continue-on-error: true
         run: |
           if [[ -z "${CLAW_SYS_GITHUB_TOKEN:-}" ]]; then
-            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未设定，跳过 Actions 写入权限验证"
+            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未設定，跳過 Actions 寫入權限验证"
             exit 0
           fi
-          # 使用当前执行中的 workflow（check-env-permissions.yml）做 dispatch 尝试；
-          # 因为此 workflow 本身就有 workflow_dispatch trigger，且一定存在。
-          # HTTP 422 → 有权限（ref 不存在但可以呼叫）
-          # HTTP 403/401 → 无 Actions:write 权限
-          # HTTP 404 → workflow 不存在或无法存取（不应发生）
+          # 使用當前執行中的 workflow（check-env-permissions.yml）做 dispatch 嘗試；
+          # 因為此 workflow 本身就有 workflow_dispatch trigger，且一定存在。
+          # HTTP 422 → 有權限（ref 不存在但可以呼叫）
+          # HTTP 403/401 → 無 Actions:write 權限
+          # HTTP 404 → workflow 不存在或無法存取（不應发生）
           HTTP_STATUS=$(curl -sS -D /tmp/gh-actions-write-headers.txt -o /tmp/dispatch-response.json -w "%{http_code}" \
             -X POST \
             -H "Authorization: Bearer ${CLAW_SYS_GITHUB_TOKEN}" \
@@ -329,30 +329,30 @@ jobs:
           MSG=$(jq -r '.message // empty' /tmp/dispatch-response.json 2>/dev/null || true)
           case "$HTTP_STATUS" in
             422)
-              echo "✅ CLAW_SYS_GITHUB_TOKEN 具有 Actions 写入（workflow dispatch）权限（HTTP 422：ref 不存在但有存取权）"
+              echo "✅ CLAW_SYS_GITHUB_TOKEN 具有 Actions 寫入（workflow dispatch）權限（HTTP 422：ref 不存在但有存取權）"
               ;;
             401|403)
-              echo "::error::CLAW_SYS_GITHUB_TOKEN 没有 Actions 写入（workflow dispatch）权限（HTTP ${HTTP_STATUS}）: ${MSG}"
+              echo "::error::CLAW_SYS_GITHUB_TOKEN 沒有 Actions 寫入（workflow dispatch）權限（HTTP ${HTTP_STATUS}）: ${MSG}"
               if [[ -n "${ACCEPTED_PERMS:-}" ]]; then
-                echo "::error::GitHub API 建议权限: ${ACCEPTED_PERMS}"
+                echo "::error::GitHub API 建議權限: ${ACCEPTED_PERMS}"
               fi
               exit 1
               ;;
             404)
-              echo "::warning::check-env-permissions.yml 不存在或无法存取，无法确认 Actions 写入权限（HTTP 404）"
+              echo "::warning::check-env-permissions.yml 不存在或無法存取，無法確認 Actions 寫入權限（HTTP 404）"
               ;;
             *)
-              echo "::warning::Actions 写入权限验证回传非预期状态码（HTTP ${HTTP_STATUS}）: ${MSG}"
+              echo "::warning::Actions 寫入權限验证回傳非預期狀態碼（HTTP ${HTTP_STATUS}）: ${MSG}"
               cat /tmp/dispatch-response.json | jq . 2>/dev/null || true
               ;;
           esac
 
-      - name: "[TC-GH08] GitHub App — Repository Installation Check (best effort) / Repository Installation 检查（best effort）"
+      - name: "[TC-GH08] GitHub App — Repository Installation 檢查（best effort）"
         id: tc_gh08
         continue-on-error: true
         run: |
           if [[ -z "${CLAW_SYS_GITHUB_TOKEN:-}" ]]; then
-            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未设定，跳过 GitHub App installation 检查"
+            echo "::warning::CLAW_SYS_GITHUB_TOKEN 未設定，跳過 GitHub App installation 檢查"
             exit 0
           fi
           HTTP_STATUS=$(curl -sS \
@@ -370,22 +370,22 @@ jobs:
           ACCEPTED_PERMS=$(tr -d '\r' < /tmp/gh-app-install-headers.txt | awk -F': ' 'tolower($1)=="x-accepted-github-permissions"{print $2}' | tail -n 1)
           case "$HTTP_STATUS" in
             200)
-              echo "✅ GitHub App 已安装到此 Repository（installation_id: ${INSTALLATION_ID:-unknown}, app_id: ${APP_ID:-unknown}, app_slug: ${APP_SLUG:-unknown}）"
+              echo "✅ GitHub App 已安裝到此 Repository（installation_id: ${INSTALLATION_ID:-unknown}, app_id: ${APP_ID:-unknown}, app_slug: ${APP_SLUG:-unknown}）"
               ;;
             404)
-              echo "::error::找不到 '${GITHUB_REPOSITORY}' 的 GitHub App installation（HTTP 404）。通常代表 GitHub App 尚未安装到此 repo，或目前的 CLAW_SYS_GITHUB_TOKEN 无法查询 installation 状态。"
+              echo "::error::找不到 '${GITHUB_REPOSITORY}' 的 GitHub App installation（HTTP 404）。通常代表 GitHub App 尚未安裝到此 repo，或目前的 CLAW_SYS_GITHUB_TOKEN 無法查詢 installation 狀態。"
               exit 1
               ;;
             401|403)
-              echo "::error::无法查询 GitHub App installation（HTTP ${HTTP_STATUS}）: ${MSG}"
+              echo "::error::無法查詢 GitHub App installation（HTTP ${HTTP_STATUS}）: ${MSG}"
               if [[ -n "${ACCEPTED_PERMS:-}" ]]; then
-                echo "::error::GitHub API 建议权限: ${ACCEPTED_PERMS}"
+                echo "::error::GitHub API 建議權限: ${ACCEPTED_PERMS}"
               fi
-              echo "::error::若你已安装 GitHub App，请确认 CLAW_SYS_GITHUB_TOKEN 仍保有此 repo 的存取权，或改用 GitHub App 凭证做 installation 验证。"
+              echo "::error::若你已安裝 GitHub App，請確認 CLAW_SYS_GITHUB_TOKEN 仍保有此 repo 的存取權，或改用 GitHub App 憑证做 installation 验证。"
               exit 1
               ;;
             *)
-              echo "::error::GitHub App installation 检查回传非预期状态码（HTTP ${HTTP_STATUS}）: ${MSG}"
+              echo "::error::GitHub App installation 檢查回傳非預期狀態碼（HTTP ${HTTP_STATUS}）: ${MSG}"
               cat /tmp/gh-app-install-response.json 2>/dev/null | head -n 5 || true
               exit 1
               ;;
@@ -395,37 +395,37 @@ jobs:
       # GH_WEBHOOK_SECRET
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-WS01] GH_WEBHOOK_SECRET — Exists / 是否存在"
+      - name: "[TC-WS01] GH_WEBHOOK_SECRET — 是否存在"
         id: tc_ws01
         continue-on-error: true
         run: |
           if [[ -z "${GH_WEBHOOK_SECRET:-}" ]]; then
-            echo "::error::GH_WEBHOOK_SECRET 未设定（Settings → Secrets → Actions）"
+            echo "::error::GH_WEBHOOK_SECRET 未設定（Settings → Secrets → Actions）"
             exit 1
           fi
-          echo "✅ GH_WEBHOOK_SECRET 已设定"
+          echo "✅ GH_WEBHOOK_SECRET 已設定"
 
-      - name: "[TC-WS02] GH_WEBHOOK_SECRET — Length At Least 8 Chars / 长度至少 8 字元"
+      - name: "[TC-WS02] GH_WEBHOOK_SECRET — 長度至少 8 字元"
         id: tc_ws02
         continue-on-error: true
         run: |
           if [[ -z "${GH_WEBHOOK_SECRET:-}" ]]; then
-            echo "::warning::GH_WEBHOOK_SECRET 未设定，跳过长度验证"
+            echo "::warning::GH_WEBHOOK_SECRET 未設定，跳過長度验证"
             exit 0
           fi
           len=${#GH_WEBHOOK_SECRET}
           if [[ $len -lt 8 ]]; then
-            echo "::error::GH_WEBHOOK_SECRET 长度太短（${len} 字元），建议至少 8 字元以确保安全性"
+            echo "::error::GH_WEBHOOK_SECRET 長度太短（${len} 字元），建議至少 8 字元以確保安全性"
             exit 1
           fi
-          echo "✅ GH_WEBHOOK_SECRET 长度足够（${len} 字元）"
+          echo "✅ GH_WEBHOOK_SECRET 長度足够（${len} 字元）"
 
-      - name: "[TC-WS03] GH_WEBHOOK_SECRET — No Obvious Weak Password / 不含明显弱密码"
+      - name: "[TC-WS03] GH_WEBHOOK_SECRET — 不含明顯弱密碼"
         id: tc_ws03
         continue-on-error: true
         run: |
           if [[ -z "${GH_WEBHOOK_SECRET:-}" ]]; then
-            echo "::warning::GH_WEBHOOK_SECRET 未设定，跳过弱密码验证"
+            echo "::warning::GH_WEBHOOK_SECRET 未設定，跳過弱密碼验证"
             exit 0
           fi
           WEAK_PATTERNS=("password" "secret" "12345678" "webhook" "test" "example" "changeme" "default" "qwerty" "abcdefgh")
@@ -433,84 +433,84 @@ jobs:
           FAILED=false
           for pattern in "${WEAK_PATTERNS[@]}"; do
             if [[ "$LOWER" == *"${pattern}"* ]]; then
-              echo "::error::GH_WEBHOOK_SECRET 包含弱密码片段 '${pattern}'，请使用随机生成的强密码"
+              echo "::error::GH_WEBHOOK_SECRET 包含弱密碼片段 '${pattern}'，請使用隨機生成的強密碼"
               FAILED=true
             fi
           done
-          # 检查是否全为同一字元重复（如 "aaaaaaaa"）
+          # 檢查是否全為同一字元重复（如 "aaaaaaaa"）
           UNIQUE=$(echo "${GH_WEBHOOK_SECRET}" | grep -o . | sort -u | wc -l | tr -d ' ')
           if [[ "$UNIQUE" -le 1 ]]; then
-            echo "::error::GH_WEBHOOK_SECRET 为单一字元重复，强度极低"
+            echo "::error::GH_WEBHOOK_SECRET 為單一字元重复，強度極低"
             FAILED=true
           fi
-          # 检查是否全为数字（如 "123456789"）
+          # 檢查是否全為數字（如 "123456789"）
           if [[ "${GH_WEBHOOK_SECRET}" =~ ^[0-9]+$ ]]; then
-            echo "::error::GH_WEBHOOK_SECRET 全为数字，建议包含英文字母与特殊字元"
+            echo "::error::GH_WEBHOOK_SECRET 全為數字，建議包含英文字母與特殊字元"
             FAILED=true
           fi
           if [[ "$FAILED" == "true" ]]; then
             exit 1
           fi
-          echo "✅ GH_WEBHOOK_SECRET 未侦测到明显弱密码"
+          echo "✅ GH_WEBHOOK_SECRET 未偵測到明顯弱密碼"
 
       # ══════════════════════════════════════════════════════════════════════
       # TELEGRAM_BOT_TOKEN
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-TG01] TELEGRAM_BOT_TOKEN — Exists / 是否存在"
+      - name: "[TC-TG01] TELEGRAM_BOT_TOKEN — 是否存在"
         id: tc_tg01
         continue-on-error: true
         run: |
           if [[ -z "${TELEGRAM_BOT_TOKEN:-}" ]]; then
-            echo "::error::TELEGRAM_BOT_TOKEN 未设定（Settings → Secrets → Actions）"
+            echo "::error::TELEGRAM_BOT_TOKEN 未設定（Settings → Secrets → Actions）"
             exit 1
           fi
-          echo "✅ TELEGRAM_BOT_TOKEN 已设定"
+          echo "✅ TELEGRAM_BOT_TOKEN 已設定"
 
-      - name: "[TC-TG02] TELEGRAM_BOT_TOKEN — Format Check ({bot_id}:{token_string}) / 格式验证（{bot_id}:{token_string}）"
+      - name: "[TC-TG02] TELEGRAM_BOT_TOKEN — 格式验证（{bot_id}:{token_string}）"
         id: tc_tg02
         continue-on-error: true
         run: |
           if [[ -z "${TELEGRAM_BOT_TOKEN:-}" ]]; then
-            echo "::warning::TELEGRAM_BOT_TOKEN 未设定，跳过格式验证"
+            echo "::warning::TELEGRAM_BOT_TOKEN 未設定，跳過格式验证"
             exit 0
           fi
           if ! [[ "${TELEGRAM_BOT_TOKEN}" =~ ^[0-9]+:[A-Za-z0-9_-]{35,}$ ]]; then
-            echo "::error::TELEGRAM_BOT_TOKEN 格式不符（预期: {数字}:{35+ 字元英数字}）"
+            echo "::error::TELEGRAM_BOT_TOKEN 格式不符（預期: {數字}:{35+ 字元英數字}）"
             exit 1
           fi
           BOT_ID=$(echo "${TELEGRAM_BOT_TOKEN}" | cut -d: -f1)
-          echo "✅ TELEGRAM_BOT_TOKEN 格式正确（Bot ID: ${BOT_ID}）"
+          echo "✅ TELEGRAM_BOT_TOKEN 格式正確（Bot ID: ${BOT_ID}）"
 
-      - name: "[TC-TG03] TELEGRAM_BOT_TOKEN — Telegram API Check (getMe) / Telegram API 验证（getMe）"
+      - name: "[TC-TG03] TELEGRAM_BOT_TOKEN — Telegram API 验证（getMe）"
         id: tc_tg03
         continue-on-error: true
         run: |
           if [[ -z "${TELEGRAM_BOT_TOKEN:-}" ]]; then
-            echo "::warning::TELEGRAM_BOT_TOKEN 未设定，跳过 Telegram API 验证"
+            echo "::warning::TELEGRAM_BOT_TOKEN 未設定，跳過 Telegram API 验证"
             exit 0
           fi
           RESPONSE=$(curl -sS "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getMe")
           OK=$(echo "$RESPONSE" | jq -r '.ok // false')
           if [[ "$OK" != "true" ]]; then
-            echo "::error::TELEGRAM_BOT_TOKEN 无效（Telegram API getMe 失败）: $(echo "$RESPONSE" | jq -c '{description}')"
+            echo "::error::TELEGRAM_BOT_TOKEN 無效（Telegram API getMe 失敗）: $(echo "$RESPONSE" | jq -c '{description}')"
             exit 1
           fi
           BOT_USERNAME=$(echo "$RESPONSE" | jq -r '.result.username // "unknown"')
           echo "✅ TELEGRAM_BOT_TOKEN 有效（Bot: @${BOT_USERNAME}）"
 
-      - name: "[TC-TG04] TELEGRAM_BOT_TOKEN — Telegram Webhook Config Check (getWebhookInfo) / Telegram Webhook 设定检查（getWebhookInfo）"
+      - name: "[TC-TG04] TELEGRAM_BOT_TOKEN — Telegram Webhook 設定檢查（getWebhookInfo）"
         id: tc_tg04
         continue-on-error: true
         run: |
           if [[ -z "${TELEGRAM_BOT_TOKEN:-}" ]]; then
-            echo "::warning::TELEGRAM_BOT_TOKEN 未设定，跳过 Telegram webhook 检查"
+            echo "::warning::TELEGRAM_BOT_TOKEN 未設定，跳過 Telegram webhook 檢查"
             exit 0
           fi
           RESPONSE=$(curl -sS "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo")
           OK=$(echo "$RESPONSE" | jq -r '.ok // false')
           if [[ "$OK" != "true" ]]; then
-            echo "::error::无法读取 Telegram webhook 设定（getWebhookInfo 失败）: $(echo "$RESPONSE" | jq -c '{description}')"
+            echo "::error::無法讀取 Telegram webhook 設定（getWebhookInfo 失敗）: $(echo "$RESPONSE" | jq -c '{description}')"
             exit 1
           fi
           WEBHOOK_URL=$(echo "$RESPONSE" | jq -r '.result.url // ""')
@@ -522,11 +522,11 @@ jobs:
             EXPECTED_WEBHOOK_URL="${WORKER_URL%/}/telegram/webhook"
           fi
           if [[ -z "${WEBHOOK_URL}" ]]; then
-            echo "::error::Telegram Bot 尚未设定 webhook URL，代表 Bot webhook 尚未完成设定或已被清空"
+            echo "::error::Telegram Bot 尚未設定 webhook URL，代表 Bot webhook 尚未完成設定或已被清空"
             exit 1
           fi
           if [[ -n "${EXPECTED_WEBHOOK_URL}" && "${WEBHOOK_URL}" != "${EXPECTED_WEBHOOK_URL}" ]]; then
-            echo "::error::Telegram webhook URL 设定错误：目前为 '${WEBHOOK_URL}'，预期为 '${EXPECTED_WEBHOOK_URL}'"
+            echo "::error::Telegram webhook URL 設定錯誤：目前為 '${WEBHOOK_URL}'，預期為 '${EXPECTED_WEBHOOK_URL}'"
             exit 1
           fi
           if [[ -n "${LAST_ERROR_MESSAGE:-}" ]]; then
@@ -535,74 +535,74 @@ jobs:
             else
               LAST_ERROR_DATE_FMT="unknown"
             fi
-            echo "::error::Telegram webhook 最近回报错误（${LAST_ERROR_DATE_FMT}）: ${LAST_ERROR_MESSAGE}"
+            echo "::error::Telegram webhook 最近回報錯誤（${LAST_ERROR_DATE_FMT}）: ${LAST_ERROR_MESSAGE}"
             exit 1
           fi
-          echo "✅ Telegram webhook 设定正常（url: ${WEBHOOK_URL}，pending_update_count: ${PENDING_COUNT}）"
+          echo "✅ Telegram webhook 設定正常（url: ${WEBHOOK_URL}，pending_update_count: ${PENDING_COUNT}）"
 
       # ══════════════════════════════════════════════════════════════════════
       # TELEGRAM_WEBHOOK_SECRET
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-TW01] TELEGRAM_WEBHOOK_SECRET — Exists / 是否存在"
+      - name: "[TC-TW01] TELEGRAM_WEBHOOK_SECRET — 是否存在"
         id: tc_tw01
         continue-on-error: true
         run: |
           if [[ -z "${TELEGRAM_WEBHOOK_SECRET:-}" ]]; then
-            echo "::error::TELEGRAM_WEBHOOK_SECRET 未设定（Settings → Secrets → Actions）"
+            echo "::error::TELEGRAM_WEBHOOK_SECRET 未設定（Settings → Secrets → Actions）"
             exit 1
           fi
-          echo "✅ TELEGRAM_WEBHOOK_SECRET 已设定"
+          echo "✅ TELEGRAM_WEBHOOK_SECRET 已設定"
 
-      - name: "[TC-TW02] TELEGRAM_WEBHOOK_SECRET — Length At Least 8 Chars / 长度至少 8 字元"
+      - name: "[TC-TW02] TELEGRAM_WEBHOOK_SECRET — 長度至少 8 字元"
         id: tc_tw02
         continue-on-error: true
         run: |
           if [[ -z "${TELEGRAM_WEBHOOK_SECRET:-}" ]]; then
-            echo "::warning::TELEGRAM_WEBHOOK_SECRET 未设定，跳过长度验证"
+            echo "::warning::TELEGRAM_WEBHOOK_SECRET 未設定，跳過長度验证"
             exit 0
           fi
           len=${#TELEGRAM_WEBHOOK_SECRET}
           if [[ $len -lt 8 ]]; then
-            echo "::error::TELEGRAM_WEBHOOK_SECRET 长度太短（${len} 字元），建议至少 8 字元"
+            echo "::error::TELEGRAM_WEBHOOK_SECRET 長度太短（${len} 字元），建議至少 8 字元"
             exit 1
           fi
-          echo "✅ TELEGRAM_WEBHOOK_SECRET 长度足够（${len} 字元）"
+          echo "✅ TELEGRAM_WEBHOOK_SECRET 長度足够（${len} 字元）"
 
-      - name: "[TC-TW03] TELEGRAM_WEBHOOK_SECRET — Character Restriction Check (Telegram allows only A-Z a-z 0-9 _ -) / 字元限制验证（Telegram 仅允许 A-Z a-z 0-9 _ -）"
+      - name: "[TC-TW03] TELEGRAM_WEBHOOK_SECRET — 字元限制验证（Telegram 僅允許 A-Z a-z 0-9 _ -）"
         id: tc_tw03
         continue-on-error: true
         run: |
           if [[ -z "${TELEGRAM_WEBHOOK_SECRET:-}" ]]; then
-            echo "::warning::TELEGRAM_WEBHOOK_SECRET 未设定，跳过字元验证"
+            echo "::warning::TELEGRAM_WEBHOOK_SECRET 未設定，跳過字元验证"
             exit 0
           fi
           if ! [[ "${TELEGRAM_WEBHOOK_SECRET}" =~ ^[A-Za-z0-9_-]+$ ]]; then
-            echo "::error::TELEGRAM_WEBHOOK_SECRET 包含 Telegram 不允许的字元（仅允许 A-Z a-z 0-9 _ -），Webhook 验证可能失败"
+            echo "::error::TELEGRAM_WEBHOOK_SECRET 包含 Telegram 不允許的字元（僅允許 A-Z a-z 0-9 _ -），Webhook 验证可能失敗"
             exit 1
           fi
           echo "✅ TELEGRAM_WEBHOOK_SECRET 字元符合 Telegram Webhook Secret 限制"
 
       # ══════════════════════════════════════════════════════════════════════
-      # COPILOT_GITHUB_TOKEN（选填）
+      # COPILOT_GITHUB_TOKEN（選填）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-CS01] COPILOT_GITHUB_TOKEN — Exists (optional) / 是否存在（选填）"
+      - name: "[TC-CS01] COPILOT_GITHUB_TOKEN — 是否存在（選填）"
         id: tc_cs01
         continue-on-error: true
         run: |
           if [[ -z "${COPILOT_GITHUB_TOKEN:-}" ]]; then
-            echo "::warning::COPILOT_GITHUB_TOKEN 未设定（选填；未设定时 coding-agent workflow 会 fallback 到 CLAW_SYS_GITHUB_TOKEN）"
+            echo "::warning::COPILOT_GITHUB_TOKEN 未設定（選填；未設定時 coding-agent workflow 會 fallback 到 CLAW_SYS_GITHUB_TOKEN）"
             exit 0
           fi
-          echo "✅ COPILOT_GITHUB_TOKEN 已设定"
+          echo "✅ COPILOT_GITHUB_TOKEN 已設定"
 
-      - name: "[TC-CS02] COPILOT_GITHUB_TOKEN — Format Check (if present) / 格式验证（若存在）"
+      - name: "[TC-CS02] COPILOT_GITHUB_TOKEN — 格式验证（若存在）"
         id: tc_cs02
         continue-on-error: true
         run: |
           if [[ -z "${COPILOT_GITHUB_TOKEN:-}" ]]; then
-            echo "ℹ️ COPILOT_GITHUB_TOKEN 未设定，跳过格式验证"
+            echo "ℹ️ COPILOT_GITHUB_TOKEN 未設定，跳過格式验证"
             exit 0
           fi
           len=${#COPILOT_GITHUB_TOKEN}
@@ -613,18 +613,18 @@ jobs:
           elif [[ "${COPILOT_GITHUB_TOKEN}" =~ ^[0-9a-f]{40}$ ]]; then
             echo "✅ COPILOT_GITHUB_TOKEN 符合旧版 Classic PAT 格式（40 位 hex）"
           elif [[ $len -ge 20 ]]; then
-            echo "⚠️ COPILOT_GITHUB_TOKEN 格式未能识别已知格式，但长度足够（${len} 字元），可能是自订格式"
+            echo "⚠️ COPILOT_GITHUB_TOKEN 格式未能識別已知格式，但長度足够（${len} 字元），可能是自訂格式"
           else
-            echo "::error::COPILOT_GITHUB_TOKEN 长度异常（${len} 字元），可能不是有效的 GitHub Token"
+            echo "::error::COPILOT_GITHUB_TOKEN 長度異常（${len} 字元），可能不是有效的 GitHub Token"
             exit 1
           fi
 
-      - name: "[TC-CS03] COPILOT_GITHUB_TOKEN — GitHub API Check (GET /user) / GitHub API 验证（GET /user）"
+      - name: "[TC-CS03] COPILOT_GITHUB_TOKEN — GitHub API 验证（GET /user）"
         id: tc_cs03
         continue-on-error: true
         run: |
           if [[ -z "${COPILOT_GITHUB_TOKEN:-}" ]]; then
-            echo "ℹ️ COPILOT_GITHUB_TOKEN 未设定，跳过 API 验证"
+            echo "ℹ️ COPILOT_GITHUB_TOKEN 未設定，跳過 API 验证"
             exit 0
           fi
           RESPONSE=$(curl -sS \
@@ -633,101 +633,101 @@ jobs:
             "https://api.github.com/user")
           LOGIN=$(echo "$RESPONSE" | jq -r '.login // empty')
           if [[ -z "$LOGIN" ]]; then
-            echo "::error::COPILOT_GITHUB_TOKEN 无效或已过期: $(echo "$RESPONSE" | jq -c '{message}')"
+            echo "::error::COPILOT_GITHUB_TOKEN 無效或已過期: $(echo "$RESPONSE" | jq -c '{message}')"
             exit 1
           fi
           echo "✅ COPILOT_GITHUB_TOKEN 有效（GitHub 使用者: ${LOGIN}）"
 
       # ══════════════════════════════════════════════════════════════════════
-      # GEMINI_API_KEY（选填）
+      # GEMINI_API_KEY（選填）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-GM01] GEMINI_API_KEY — Exists (optional) / 是否存在（选填）"
+      - name: "[TC-GM01] GEMINI_API_KEY — 是否存在（選填）"
         id: tc_gm01
         continue-on-error: true
         run: |
           if [[ -z "${GEMINI_API_KEY:-}" ]]; then
-            echo "::warning::GEMINI_API_KEY 未设定（选填；未设定时 summary 等 Gemini skill 无法使用）"
+            echo "::warning::GEMINI_API_KEY 未設定（選填；未設定時 summary 等 Gemini skill 無法使用）"
             exit 0
           fi
-          echo "✅ GEMINI_API_KEY 已设定"
+          echo "✅ GEMINI_API_KEY 已設定"
 
-      - name: "[TC-GM02] GEMINI_API_KEY — Format Check (if present) / 格式验证（若存在）"
+      - name: "[TC-GM02] GEMINI_API_KEY — 格式验证（若存在）"
         id: tc_gm02
         continue-on-error: true
         run: |
           if [[ -z "${GEMINI_API_KEY:-}" ]]; then
-            echo "ℹ️ GEMINI_API_KEY 未设定，跳过格式验证"
+            echo "ℹ️ GEMINI_API_KEY 未設定，跳過格式验证"
             exit 0
           fi
           len=${#GEMINI_API_KEY}
           if [[ "${GEMINI_API_KEY}" =~ ^AIza[A-Za-z0-9_-]{35,}$ ]]; then
-            echo "✅ GEMINI_API_KEY 格式符合 Google AI API Key 格式（AIza 开头，长度: ${len}）"
+            echo "✅ GEMINI_API_KEY 格式符合 Google AI API Key 格式（AIza 開頭，長度: ${len}）"
           elif [[ $len -ge 20 ]]; then
-            echo "⚠️ GEMINI_API_KEY 格式未能识别标准 Google AI API Key 格式（长度: ${len}）；若使用 Vertex AI 或企业端点，格式可能不同"
+            echo "⚠️ GEMINI_API_KEY 格式未能識別標準 Google AI API Key 格式（長度: ${len}）；若使用 Vertex AI 或企業端點，格式可能不同"
           else
-            echo "::error::GEMINI_API_KEY 长度异常（${len} 字元），可能不是有效的 API Key"
+            echo "::error::GEMINI_API_KEY 長度異常（${len} 字元），可能不是有效的 API Key"
             exit 1
           fi
 
-      - name: "[TC-GM03] GEMINI_API_KEY — Google Generative AI API Check (listModels) / Google Generative AI API 验证（listModels）"
+      - name: "[TC-GM03] GEMINI_API_KEY — Google Generative AI API 验证（listModels）"
         id: tc_gm03
         continue-on-error: true
         run: |
           if [[ -z "${GEMINI_API_KEY:-}" ]]; then
-            echo "ℹ️ GEMINI_API_KEY 未设定，跳过 API 验证"
+            echo "ℹ️ GEMINI_API_KEY 未設定，跳過 API 验证"
             exit 0
           fi
           RESPONSE=$(curl -sS \
             "https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}&pageSize=1")
           if echo "$RESPONSE" | jq -e '.models' > /dev/null 2>&1; then
             MODEL_COUNT=$(echo "$RESPONSE" | jq '.models | length')
-            echo "✅ GEMINI_API_KEY 有效（可存取 Generative AI API，models 数量: ${MODEL_COUNT}）"
+            echo "✅ GEMINI_API_KEY 有效（可存取 Generative AI API，models 數量: ${MODEL_COUNT}）"
           elif echo "$RESPONSE" | jq -e '.error' > /dev/null 2>&1; then
             CODE=$(echo "$RESPONSE" | jq -r '.error.code // "unknown"')
             MSG=$(echo "$RESPONSE" | jq -r '.error.message // "unknown"')
-            echo "::error::GEMINI_API_KEY 验证失败（code: ${CODE}）: ${MSG}"
+            echo "::error::GEMINI_API_KEY 验证失敗（code: ${CODE}）: ${MSG}"
             exit 1
           else
-            echo "::error::GEMINI_API_KEY 验证回传非预期格式: $(echo "$RESPONSE" | head -c 200)"
+            echo "::error::GEMINI_API_KEY 验证回傳非預期格式: $(echo "$RESPONSE" | head -c 200)"
             exit 1
           fi
 
       # ══════════════════════════════════════════════════════════════════════
-      # CLAWBRAIN_API_KEY（选填）
+      # CLAWBRAIN_API_KEY（選填）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-CB01] CLAWBRAIN_API_KEY — Exists (optional) / 是否存在（选填）"
+      - name: "[TC-CB01] CLAWBRAIN_API_KEY — 是否存在（選填）"
         id: tc_cb01
         continue-on-error: true
         run: |
           if [[ -z "${CLAWBRAIN_API_KEY:-}" ]]; then
-            echo "ℹ️ CLAWBRAIN_API_KEY 未设定（选填；ClawBrain 功能可能受限）"
+            echo "ℹ️ CLAWBRAIN_API_KEY 未設定（選填；ClawBrain 功能可能受限）"
             exit 0
           fi
-          echo "✅ CLAWBRAIN_API_KEY 已设定"
+          echo "✅ CLAWBRAIN_API_KEY 已設定"
 
-      - name: "[TC-CB02] CLAWBRAIN_API_KEY — Non-blank Check (if present) / 非空白值验证（若存在）"
+      - name: "[TC-CB02] CLAWBRAIN_API_KEY — 非空白值验证（若存在）"
         id: tc_cb02
         continue-on-error: true
         run: |
           if [[ -z "${CLAWBRAIN_API_KEY:-}" ]]; then
-            echo "ℹ️ CLAWBRAIN_API_KEY 未设定，跳过验证"
+            echo "ℹ️ CLAWBRAIN_API_KEY 未設定，跳過验证"
             exit 0
           fi
           TRIMMED=$(echo "${CLAWBRAIN_API_KEY}" | tr -d '[:space:]')
           if [[ -z "$TRIMMED" ]]; then
-            echo "::error::CLAWBRAIN_API_KEY 设定了但值为空白"
+            echo "::error::CLAWBRAIN_API_KEY 設定了但值為空白"
             exit 1
           fi
-          echo "✅ CLAWBRAIN_API_KEY 非空白（长度: ${#CLAWBRAIN_API_KEY} 字元）"
+          echo "✅ CLAWBRAIN_API_KEY 非空白（長度: ${#CLAWBRAIN_API_KEY} 字元）"
 
-      - name: "[TC-CB03] CLAWBRAIN_API_KEY — Call Matching AI Provider API per CLAWBRAIN_PROVIDER / 依 CLAWBRAIN_PROVIDER 呼叫对应 AI Provider API 验证"
+      - name: "[TC-CB03] CLAWBRAIN_API_KEY — 依 CLAWBRAIN_PROVIDER 呼叫對應 AI Provider API 验证"
         id: tc_cb03
         continue-on-error: true
         run: |
           if [[ -z "${CLAWBRAIN_API_KEY:-}" ]]; then
-            echo "ℹ️ CLAWBRAIN_API_KEY 未设定，跳过 API 验证"
+            echo "ℹ️ CLAWBRAIN_API_KEY 未設定，跳過 API 验证"
             exit 0
           fi
           PROVIDER="${CLAWBRAIN_PROVIDER:-}"
@@ -739,7 +739,7 @@ jobs:
                 echo "✅ CLAWBRAIN_API_KEY 有效（provider: gemini，可存取 Generative AI API）"
               else
                 MSG=$(echo "$RESPONSE" | jq -r '.error.message // empty' 2>/dev/null)
-                echo "::error::CLAWBRAIN_API_KEY 验证失败（provider: gemini）: ${MSG}"
+                echo "::error::CLAWBRAIN_API_KEY 验证失敗（provider: gemini）: ${MSG}"
                 exit 1
               fi
               ;;
@@ -751,7 +751,7 @@ jobs:
                 echo "✅ CLAWBRAIN_API_KEY 有效（provider: openai，HTTP ${HTTP_STATUS}）"
               else
                 MSG=$(cat /tmp/cb-api-response.json | jq -r '.error.message // empty' 2>/dev/null)
-                echo "::error::CLAWBRAIN_API_KEY 验证失败（provider: openai，HTTP ${HTTP_STATUS}）: ${MSG}"
+                echo "::error::CLAWBRAIN_API_KEY 验证失敗（provider: openai，HTTP ${HTTP_STATUS}）: ${MSG}"
                 exit 1
               fi
               ;;
@@ -764,7 +764,7 @@ jobs:
                 echo "✅ CLAWBRAIN_API_KEY 有效（provider: anthropic，HTTP ${HTTP_STATUS}）"
               else
                 MSG=$(cat /tmp/cb-api-response.json | jq -r '.error.message // empty' 2>/dev/null)
-                echo "::error::CLAWBRAIN_API_KEY 验证失败（provider: anthropic，HTTP ${HTTP_STATUS}）: ${MSG}"
+                echo "::error::CLAWBRAIN_API_KEY 验证失敗（provider: anthropic，HTTP ${HTTP_STATUS}）: ${MSG}"
                 exit 1
               fi
               ;;
@@ -776,7 +776,7 @@ jobs:
                 echo "✅ CLAWBRAIN_API_KEY 有效（provider: groq，HTTP ${HTTP_STATUS}）"
               else
                 MSG=$(cat /tmp/cb-api-response.json | jq -r '.error.message // empty' 2>/dev/null)
-                echo "::error::CLAWBRAIN_API_KEY 验证失败（provider: groq，HTTP ${HTTP_STATUS}）: ${MSG}"
+                echo "::error::CLAWBRAIN_API_KEY 验证失敗（provider: groq，HTTP ${HTTP_STATUS}）: ${MSG}"
                 exit 1
               fi
               ;;
@@ -788,54 +788,54 @@ jobs:
                 echo "✅ CLAWBRAIN_API_KEY 有效（provider: mistral，HTTP ${HTTP_STATUS}）"
               else
                 MSG=$(cat /tmp/cb-api-response.json | jq -r '.error.message // empty' 2>/dev/null)
-                echo "::error::CLAWBRAIN_API_KEY 验证失败（provider: mistral，HTTP ${HTTP_STATUS}）: ${MSG}"
+                echo "::error::CLAWBRAIN_API_KEY 验证失敗（provider: mistral，HTTP ${HTTP_STATUS}）: ${MSG}"
                 exit 1
               fi
               ;;
             *)
               if [[ -z "$PROVIDER" ]]; then
-                echo "⚠️ CLAWBRAIN_PROVIDER 未设定，无法确认对应 API；仅确认 CLAWBRAIN_API_KEY 非空白"
+                echo "⚠️ CLAWBRAIN_PROVIDER 未設定，無法確認對應 API；僅確認 CLAWBRAIN_API_KEY 非空白"
               else
-                echo "⚠️ CLAWBRAIN_PROVIDER '${PROVIDER}' 未支援 API 验证，跳过（仅确认 CLAWBRAIN_API_KEY 非空白）"
+                echo "⚠️ CLAWBRAIN_PROVIDER '${PROVIDER}' 未支援 API 验证，跳過（僅確認 CLAWBRAIN_API_KEY 非空白）"
               fi
               ;;
           esac
 
       # ══════════════════════════════════════════════════════════════════════
-      # FELO_API_KEY（选填）
+      # FELO_API_KEY（選填）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-FL01] FELO_API_KEY — Exists (optional) / 是否存在（选填）"
+      - name: "[TC-FL01] FELO_API_KEY — 是否存在（選填）"
         id: tc_fl01
         continue-on-error: true
         run: |
           if [[ -z "${FELO_API_KEY:-}" ]]; then
-            echo "ℹ️ FELO_API_KEY 未设定（选填；Felo 相关 tool 将无法使用）"
+            echo "ℹ️ FELO_API_KEY 未設定（選填；Felo 相關 tool 將無法使用）"
             exit 0
           fi
-          echo "✅ FELO_API_KEY 已设定"
+          echo "✅ FELO_API_KEY 已設定"
 
-      - name: "[TC-FL02] FELO_API_KEY — Non-blank Check (if present) / 非空白值验证（若存在）"
+      - name: "[TC-FL02] FELO_API_KEY — 非空白值验证（若存在）"
         id: tc_fl02
         continue-on-error: true
         run: |
           if [[ -z "${FELO_API_KEY:-}" ]]; then
-            echo "ℹ️ FELO_API_KEY 未设定，跳过验证"
+            echo "ℹ️ FELO_API_KEY 未設定，跳過验证"
             exit 0
           fi
           TRIMMED=$(echo "${FELO_API_KEY}" | tr -d '[:space:]')
           if [[ -z "$TRIMMED" ]]; then
-            echo "::error::FELO_API_KEY 设定了但值为空白"
+            echo "::error::FELO_API_KEY 設定了但值為空白"
             exit 1
           fi
-          echo "✅ FELO_API_KEY 非空白（长度: ${#FELO_API_KEY} 字元）"
+          echo "✅ FELO_API_KEY 非空白（長度: ${#FELO_API_KEY} 字元）"
 
-      - name: "[TC-FL03] FELO_API_KEY — Felo API Check (POST /v2/chat) / Felo API 验证（POST /v2/chat）"
+      - name: "[TC-FL03] FELO_API_KEY — Felo API 验证（POST /v2/chat）"
         id: tc_fl03
         continue-on-error: true
         run: |
           if [[ -z "${FELO_API_KEY:-}" ]]; then
-            echo "ℹ️ FELO_API_KEY 未设定，跳过 API 验证"
+            echo "ℹ️ FELO_API_KEY 未設定，跳過 API 验证"
             exit 0
           fi
           HTTP_STATUS=$(curl -sS -o /tmp/felo-response.json -w "%{http_code}" \
@@ -848,50 +848,50 @@ jobs:
           STATUS_FIELD=$(cat /tmp/felo-response.json | jq -r '.status // empty' 2>/dev/null)
           if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]] && \
              { [[ "$STATUS_FIELD" == "ok" ]] || [[ "$STATUS_FIELD" == "200" ]]; }; then
-            echo "✅ FELO_API_KEY 有效（Felo API 回应正常，HTTP ${HTTP_STATUS}）"
+            echo "✅ FELO_API_KEY 有效（Felo API 回應正常，HTTP ${HTTP_STATUS}）"
           elif [[ "$HTTP_STATUS" == "401" || "$HTTP_STATUS" == "403" ]]; then
             MSG=$(cat /tmp/felo-response.json | jq -r '.message // .error // empty' 2>/dev/null)
-            echo "::error::FELO_API_KEY 无效或已过期（HTTP ${HTTP_STATUS}）: ${MSG}"
+            echo "::error::FELO_API_KEY 無效或已過期（HTTP ${HTTP_STATUS}）: ${MSG}"
             exit 1
           else
             MSG=$(cat /tmp/felo-response.json | jq -r '.message // .error // empty' 2>/dev/null)
-            echo "::warning::FELO_API_KEY API 回应非预期（HTTP ${HTTP_STATUS}）: ${MSG}"
+            echo "::warning::FELO_API_KEY API 回應非預期（HTTP ${HTTP_STATUS}）: ${MSG}"
           fi
 
       # ══════════════════════════════════════════════════════════════════════
       # WORKER_NAME（Repository Variable，必填）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-WN01] WORKER_NAME — Exists / 是否存在"
+      - name: "[TC-WN01] WORKER_NAME — 是否存在"
         id: tc_wn01
         continue-on-error: true
         run: |
           if [[ -z "${WORKER_NAME:-}" ]]; then
-            echo "::error::Repository variable WORKER_NAME 未设定（Settings → Secrets and variables → Actions → Variables）"
+            echo "::error::Repository variable WORKER_NAME 未設定（Settings → Secrets and variables → Actions → Variables）"
             exit 1
           fi
-          echo "✅ WORKER_NAME 已设定: ${WORKER_NAME}"
+          echo "✅ WORKER_NAME 已設定: ${WORKER_NAME}"
 
-      - name: "[TC-WN02] WORKER_NAME — Format Check (Cloudflare Worker script name) / 格式验证（Cloudflare Worker script name）"
+      - name: "[TC-WN02] WORKER_NAME — 格式验证（Cloudflare Worker script name）"
         id: tc_wn02
         continue-on-error: true
         run: |
           if [[ -z "${WORKER_NAME:-}" ]]; then
-            echo "::warning::WORKER_NAME 未设定，跳过格式验证"
+            echo "::warning::WORKER_NAME 未設定，跳過格式验证"
             exit 0
           fi
           if ! [[ "${WORKER_NAME}" =~ ^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$ ]]; then
-            echo "::error::WORKER_NAME 格式不符（需符合 Cloudflare Worker script name 规则，实际: '${WORKER_NAME}'）"
+            echo "::error::WORKER_NAME 格式不符（需符合 Cloudflare Worker script name 規則，實際: '${WORKER_NAME}'）"
             exit 1
           fi
-          echo "✅ WORKER_NAME 格式正确"
+          echo "✅ WORKER_NAME 格式正確"
 
-      - name: "[TC-WN03] WORKER_NAME — Worker Exists in Cloudflare Account / Worker 在 Cloudflare 帐号中存在"
+      - name: "[TC-WN03] WORKER_NAME — Worker 在 Cloudflare 帳號中存在"
         id: tc_wn03
         continue-on-error: true
         run: |
           if [[ -z "${WORKER_NAME:-}" || -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
-            echo "::warning::WORKER_NAME / CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID 未完整设定，跳过 Worker 存在验证"
+            echo "::warning::WORKER_NAME / CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID 未完整設定，跳過 Worker 存在验证"
             exit 0
           fi
           HTTP_STATUS=$(curl -sS \
@@ -900,123 +900,123 @@ jobs:
             -o /tmp/cf-workers-list-response.json \
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts")
           if ! echo "$HTTP_STATUS" | grep -Eq '^[0-9]+$'; then
-            echo "::error::Cloudflare Workers API 回应无法取得 HTTP 状态（原始输出: ${HTTP_STATUS}）"
+            echo "::error::Cloudflare Workers API 回應無法取得 HTTP 狀態（原始输出: ${HTTP_STATUS}）"
             exit 1
           fi
           if [[ "$HTTP_STATUS" -lt 200 || "$HTTP_STATUS" -ge 300 ]]; then
             ERRORS=$(jq -c 'if type=="object" and has("errors") then .errors else [] end' /tmp/cf-workers-list-response.json 2>/dev/null || echo "[]")
-            echo "::error::无法列出 Cloudflare Workers（HTTP ${HTTP_STATUS}）: ${ERRORS}"
+            echo "::error::無法列出 Cloudflare Workers（HTTP ${HTTP_STATUS}）: ${ERRORS}"
             exit 1
           fi
           SUCCESS=$(jq -r 'if type=="object" and has("success") then .success else false end' /tmp/cf-workers-list-response.json 2>/dev/null || echo "false")
           if [[ "$SUCCESS" != "true" ]]; then
             ERRORS=$(jq -c 'if type=="object" and has("errors") then .errors else [] end' /tmp/cf-workers-list-response.json 2>/dev/null || echo "[]")
-            echo "::error::无法列出 Cloudflare Workers（API 回应 success!=true）: ${ERRORS}"
+            echo "::error::無法列出 Cloudflare Workers（API 回應 success!=true）: ${ERRORS}"
             exit 1
           fi
           MATCHED_NAME=$(jq -r --arg workerName "$WORKER_NAME" '.result[]? | select(.id == $workerName) | .id' /tmp/cf-workers-list-response.json 2>/dev/null | head -n 1)
           if [[ -z "$MATCHED_NAME" ]]; then
-            ALL_WORKERS=$(jq -r '[.result[]?.id] | join(", ")' /tmp/cf-workers-list-response.json 2>/dev/null || echo "(无法解析)")
-            echo "::error::找不到 Worker '${WORKER_NAME}'（帐号中现有: ${ALL_WORKERS}）"
+            ALL_WORKERS=$(jq -r '[.result[]?.id] | join(", ")' /tmp/cf-workers-list-response.json 2>/dev/null || echo "(無法解析)")
+            echo "::error::找不到 Worker '${WORKER_NAME}'（帳號中現有: ${ALL_WORKERS}）"
             exit 1
           fi
-          echo "✅ Worker '${MATCHED_NAME}' 在 Cloudflare 帐号中存在"
+          echo "✅ Worker '${MATCHED_NAME}' 在 Cloudflare 帳號中存在"
 
       # ══════════════════════════════════════════════════════════════════════
       # WORKERS_SUBDOMAIN（Repository Variable）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-SUB01] WORKERS_SUBDOMAIN — Exists / 是否存在"
+      - name: "[TC-SUB01] WORKERS_SUBDOMAIN — 是否存在"
         id: tc_sub01
         continue-on-error: true
         run: |
           if [[ -z "${WORKERS_SUBDOMAIN:-}" ]]; then
-            echo "::error::Repository variable WORKERS_SUBDOMAIN 未设定（应由 bootstrap 自动设定）"
+            echo "::error::Repository variable WORKERS_SUBDOMAIN 未設定（應由 bootstrap 自動設定）"
             exit 1
           fi
-          echo "✅ WORKERS_SUBDOMAIN 已设定: ${WORKERS_SUBDOMAIN}"
+          echo "✅ WORKERS_SUBDOMAIN 已設定: ${WORKERS_SUBDOMAIN}"
 
-      - name: "[TC-SUB02] WORKERS_SUBDOMAIN — Format Check (alphanumeric and hyphen only) / 格式验证（仅含 alphanumeric 与 hyphen）"
+      - name: "[TC-SUB02] WORKERS_SUBDOMAIN — 格式验证（僅含 alphanumeric 與 hyphen）"
         id: tc_sub02
         continue-on-error: true
         run: |
           if [[ -z "${WORKERS_SUBDOMAIN:-}" ]]; then
-            echo "::warning::WORKERS_SUBDOMAIN 未设定，跳过格式验证"
+            echo "::warning::WORKERS_SUBDOMAIN 未設定，跳過格式验证"
             exit 0
           fi
           if ! [[ "${WORKERS_SUBDOMAIN}" =~ ^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$ ]]; then
-            echo "::error::WORKERS_SUBDOMAIN 格式不符（仅允许 alphanumeric 与 hyphen，且不得以 hyphen 开头或结尾，实际: '${WORKERS_SUBDOMAIN}'）"
+            echo "::error::WORKERS_SUBDOMAIN 格式不符（僅允許 alphanumeric 與 hyphen，且不得以 hyphen 開頭或結尾，實際: '${WORKERS_SUBDOMAIN}'）"
             exit 1
           fi
-          echo "✅ WORKERS_SUBDOMAIN 格式正确"
+          echo "✅ WORKERS_SUBDOMAIN 格式正確"
 
       # ══════════════════════════════════════════════════════════════════════
       # WORKER_URL（Repository Variable）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-WU01] WORKER_URL — Exists / 是否存在"
+      - name: "[TC-WU01] WORKER_URL — 是否存在"
         id: tc_wu01
         continue-on-error: true
         run: |
           if [[ -z "${WORKER_URL:-}" ]]; then
-            echo "::error::Repository variable WORKER_URL 未设定（应由 bootstrap 自动设定）"
+            echo "::error::Repository variable WORKER_URL 未設定（應由 bootstrap 自動設定）"
             exit 1
           fi
-          echo "✅ WORKER_URL 已设定: ${WORKER_URL}"
+          echo "✅ WORKER_URL 已設定: ${WORKER_URL}"
 
-      - name: "[TC-WU02] WORKER_URL — Format Check (valid HTTPS URL) / 格式验证（valid HTTPS URL）"
+      - name: "[TC-WU02] WORKER_URL — 格式验证（valid HTTPS URL）"
         id: tc_wu02
         continue-on-error: true
         run: |
           if [[ -z "${WORKER_URL:-}" ]]; then
-            echo "::warning::WORKER_URL 未设定，跳过格式验证"
+            echo "::warning::WORKER_URL 未設定，跳過格式验证"
             exit 0
           fi
           if ! [[ "${WORKER_URL}" =~ ^https://[A-Za-z0-9._-]+(:[0-9]+)?(/.*)?$ ]]; then
-            echo "::error::WORKER_URL 格式不符（预期 https:// 开头的有效 URL，实际: '${WORKER_URL}'）"
+            echo "::error::WORKER_URL 格式不符（預期 https:// 開頭的有效 URL，實際: '${WORKER_URL}'）"
             exit 1
           fi
-          echo "✅ WORKER_URL 格式正确（HTTPS URL）"
+          echo "✅ WORKER_URL 格式正確（HTTPS URL）"
 
-      - name: "[TC-WU03] WORKER_URL — Worker /health Endpoint Reachable (HTTP 200) / Worker /health 端点可存取（HTTP 200）"
+      - name: "[TC-WU03] WORKER_URL — Worker /health 端點可存取（HTTP 200）"
         id: tc_wu03
         continue-on-error: true
         run: |
           if [[ -z "${WORKER_URL:-}" ]]; then
-            echo "::warning::WORKER_URL 未设定，跳过健康检查"
+            echo "::warning::WORKER_URL 未設定，跳過健康檢查"
             exit 0
           fi
           HEALTH_URL="${WORKER_URL%/}/health"
           HTTP_STATUS=$(curl -sS -o /tmp/health-response.json -w "%{http_code}" \
             --connect-timeout 10 --max-time 30 "${HEALTH_URL}" || echo "000")
           if [[ "$HTTP_STATUS" != "200" ]]; then
-            echo "::error::Worker 健康检查失败（${HEALTH_URL}，HTTP ${HTTP_STATUS}）"
+            echo "::error::Worker 健康檢查失敗（${HEALTH_URL}，HTTP ${HTTP_STATUS}）"
             cat /tmp/health-response.json 2>/dev/null || true
             exit 1
           fi
-          echo "✅ Worker 健康检查通过（${HEALTH_URL}，HTTP ${HTTP_STATUS}）"
+          echo "✅ Worker 健康檢查通過（${HEALTH_URL}，HTTP ${HTTP_STATUS}）"
           cat /tmp/health-response.json | jq . 2>/dev/null || cat /tmp/health-response.json
 
       # ══════════════════════════════════════════════════════════════════════
-      # CLAWBRAIN_PROVIDER（Repository Variable，选填）
+      # CLAWBRAIN_PROVIDER（Repository Variable，選填）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-CP01] CLAWBRAIN_PROVIDER — Exists (optional) / 是否存在（选填）"
+      - name: "[TC-CP01] CLAWBRAIN_PROVIDER — 是否存在（選填）"
         id: tc_cp01
         continue-on-error: true
         run: |
           if [[ -z "${CLAWBRAIN_PROVIDER:-}" ]]; then
-            echo "ℹ️ CLAWBRAIN_PROVIDER 未设定（选填）"
+            echo "ℹ️ CLAWBRAIN_PROVIDER 未設定（選填）"
             exit 0
           fi
-          echo "✅ CLAWBRAIN_PROVIDER 已设定: ${CLAWBRAIN_PROVIDER}"
+          echo "✅ CLAWBRAIN_PROVIDER 已設定: ${CLAWBRAIN_PROVIDER}"
 
-      - name: "[TC-CP02] CLAWBRAIN_PROVIDER — Is a Known AI Provider (if present) / 是已知 AI 提供者（若存在）"
+      - name: "[TC-CP02] CLAWBRAIN_PROVIDER — 是已知 AI 提供者（若存在）"
         id: tc_cp02
         continue-on-error: true
         run: |
           if [[ -z "${CLAWBRAIN_PROVIDER:-}" ]]; then
-            echo "ℹ️ CLAWBRAIN_PROVIDER 未设定，跳过验证"
+            echo "ℹ️ CLAWBRAIN_PROVIDER 未設定，跳過验证"
             exit 0
           fi
           KNOWN_PROVIDERS=("gemini" "openai" "anthropic" "groq" "ollama" "mistral" "azure")
@@ -1028,45 +1028,45 @@ jobs:
             fi
           done
           if [[ "$FOUND" != "true" ]]; then
-            echo "::warning::CLAWBRAIN_PROVIDER '${CLAWBRAIN_PROVIDER}' 不在已知提供者清单（${KNOWN_PROVIDERS[*]}），可能是自订提供者"
+            echo "::warning::CLAWBRAIN_PROVIDER '${CLAWBRAIN_PROVIDER}' 不在已知提供者清單（${KNOWN_PROVIDERS[*]}），可能是自訂提供者"
           else
             echo "✅ CLAWBRAIN_PROVIDER '${CLAWBRAIN_PROVIDER}' 是已知 AI 提供者"
           fi
 
       # ══════════════════════════════════════════════════════════════════════
-      # CLAWBRAIN_MODEL（Repository Variable，选填）
+      # CLAWBRAIN_MODEL（Repository Variable，選填）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: "[TC-CM01] CLAWBRAIN_MODEL — Exists (optional) / 是否存在（选填）"
+      - name: "[TC-CM01] CLAWBRAIN_MODEL — 是否存在（選填）"
         id: tc_cm01
         continue-on-error: true
         run: |
           if [[ -z "${CLAWBRAIN_MODEL:-}" ]]; then
-            echo "ℹ️ CLAWBRAIN_MODEL 未设定（选填）"
+            echo "ℹ️ CLAWBRAIN_MODEL 未設定（選填）"
             exit 0
           fi
-          echo "✅ CLAWBRAIN_MODEL 已设定: ${CLAWBRAIN_MODEL}"
+          echo "✅ CLAWBRAIN_MODEL 已設定: ${CLAWBRAIN_MODEL}"
 
-      - name: "[TC-CM02] CLAWBRAIN_MODEL — Non-blank Check (if present) / 非空白值验证（若存在）"
+      - name: "[TC-CM02] CLAWBRAIN_MODEL — 非空白值验证（若存在）"
         id: tc_cm02
         continue-on-error: true
         run: |
           if [[ -z "${CLAWBRAIN_MODEL:-}" ]]; then
-            echo "ℹ️ CLAWBRAIN_MODEL 未设定，跳过验证"
+            echo "ℹ️ CLAWBRAIN_MODEL 未設定，跳過验证"
             exit 0
           fi
           TRIMMED=$(echo "${CLAWBRAIN_MODEL}" | tr -d '[:space:]')
           if [[ -z "$TRIMMED" ]]; then
-            echo "::error::CLAWBRAIN_MODEL 设定了但值为空白"
+            echo "::error::CLAWBRAIN_MODEL 設定了但值為空白"
             exit 1
           fi
           echo "✅ CLAWBRAIN_MODEL 非空白: ${CLAWBRAIN_MODEL}"
 
       # ══════════════════════════════════════════════════════════════════════
-      # 最终摘要（永远执行）
+      # 最終摘要（永遠執行）
       # ══════════════════════════════════════════════════════════════════════
 
-      - name: Output Test Summary 输出测试摘要
+      - name: 输出測試摘要
         if: always()
         env:
           # Cloudflare
@@ -1174,84 +1174,84 @@ jobs:
           done
 
           {
-            echo "### 🔍 Env Var Permission Check Results 环境变数检测结果"
+            echo "### 🔍 龍蝦堡環境变數檢測結果"
             echo ""
-            echo "> Repository: \`${GITHUB_REPOSITORY}\`　|　Run at 执行时间: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "> Repository: \`${GITHUB_REPOSITORY}\`　|　執行時間: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             echo ""
-            echo "| Metric 统计 | Count 数量 |"
+            echo "| 統計 | 數量 |"
             echo "|------|------|"
-            echo "| ✅ Passed 通过 | **${PASS}** |"
-            echo "| ❌ Failed 失败 | **${FAIL}** |"
-            echo "| ⏭️ Skipped 跳过 | **${SKIP}** |"
-            echo "| Total 合计 | **$((PASS+FAIL+SKIP))** |"
+            echo "| ✅ 通過 | **${PASS}** |"
+            echo "| ❌ 失敗 | **${FAIL}** |"
+            echo "| ⏭️ 跳過 | **${SKIP}** |"
+            echo "| 合計 | **$((PASS+FAIL+SKIP))** |"
             echo ""
 
-            echo "#### Required Secrets 必填 Secrets"
+            echo "#### 必填 Secrets"
             echo ""
-            echo "| Test Case 测试案例 | Variable 变数 | Description 说明 | Result 结果 |"
+            echo "| 測試案例 | 变數 | 说明 | 結果 |"
             echo "|---------|------|------|:----:|"
-            echo "| TC-CF01 | \`CLOUDFLARE_API_TOKEN\`    | Exists 是否存在                       | $(icon "$OUTCOME_CF01") |"
-            echo "| TC-CF02 | \`CLOUDFLARE_API_TOKEN\`    | Format Check (length ≥ 30) 格式验证          | $(icon "$OUTCOME_CF02") |"
-            echo "| TC-CF03 | \`CLOUDFLARE_API_TOKEN\`    | Cloudflare API Token Check 验证     | $(icon "$OUTCOME_CF03") |"
-            echo "| TC-CF04 | \`CLOUDFLARE_ACCOUNT_ID\`   | Exists 是否存在                       | $(icon "$OUTCOME_CF04") |"
-            echo "| TC-CF05 | \`CLOUDFLARE_ACCOUNT_ID\`   | Format Check (32-char hex) 格式验证          | $(icon "$OUTCOME_CF05") |"
-            echo "| TC-CF06 | \`CLOUDFLARE_ACCOUNT_ID\`   | Can Access Account Workers 可存取帐号下的 Workers         | $(icon "$OUTCOME_CF06") |"
-            echo "| TC-GH01 | \`CLAW_SYS_GITHUB_TOKEN\`         | Exists 是否存在                       | $(icon "$OUTCOME_GH01") |"
-            echo "| TC-GH02 | \`CLAW_SYS_GITHUB_TOKEN\`         | Format Check (known PAT format) 格式验证      | $(icon "$OUTCOME_GH02") |"
-            echo "| TC-GH03 | \`CLAW_SYS_GITHUB_TOKEN\`         | GitHub API Check (GET /user) 验证   | $(icon "$OUTCOME_GH03") |"
-            echo "| TC-GH04 | \`CLAW_SYS_GITHUB_TOKEN\`         | Repository Access Check 存取验证            | $(icon "$OUTCOME_GH04") |"
-            echo "| TC-GH05 | \`CLAW_SYS_GITHUB_TOKEN\`         | Issues Read Permission 读取权限                | $(icon "$OUTCOME_GH05") |"
-            echo "| TC-GH06 | \`CLAW_SYS_GITHUB_TOKEN\`         | Actions Read Permission 读取权限               | $(icon "$OUTCOME_GH06") |"
-            echo "| TC-GH07 | \`CLAW_SYS_GITHUB_TOKEN\`         | Actions Write (workflow dispatch) 写入| $(icon "$OUTCOME_GH07") |"
-            echo "| TC-GH08 | \`GitHub App\`              | Repository Installation Check 检查   | $(icon "$OUTCOME_GH08") |"
-            echo "| TC-WS01 | \`GH_WEBHOOK_SECRET\`       | Exists 是否存在                       | $(icon "$OUTCOME_WS01") |"
-            echo "| TC-WS02 | \`GH_WEBHOOK_SECRET\`       | Length At Least 8 Chars 长度至少 8 字元                | $(icon "$OUTCOME_WS02") |"
-            echo "| TC-WS03 | \`GH_WEBHOOK_SECRET\`       | No Obvious Weak Password 不含明显弱密码                 | $(icon "$OUTCOME_WS03") |"
-            echo "| TC-TG01 | \`TELEGRAM_BOT_TOKEN\`      | Exists 是否存在                       | $(icon "$OUTCOME_TG01") |"
-            echo "| TC-TG02 | \`TELEGRAM_BOT_TOKEN\`      | Format Check ({id}:{token}) 格式验证       | $(icon "$OUTCOME_TG02") |"
-            echo "| TC-TG03 | \`TELEGRAM_BOT_TOKEN\`      | Telegram API Check (getMe) 验证     | $(icon "$OUTCOME_TG03") |"
-            echo "| TC-TG04 | \`TELEGRAM_BOT_TOKEN\`      | Telegram Webhook Config Check 设定检查      | $(icon "$OUTCOME_TG04") |"
-            echo "| TC-TW01 | \`TELEGRAM_WEBHOOK_SECRET\` | Exists 是否存在                       | $(icon "$OUTCOME_TW01") |"
-            echo "| TC-TW02 | \`TELEGRAM_WEBHOOK_SECRET\` | Length At Least 8 Chars 长度至少 8 字元                | $(icon "$OUTCOME_TW02") |"
-            echo "| TC-TW03 | \`TELEGRAM_WEBHOOK_SECRET\` | Character Restriction (A-Z a-z 0-9 _ -) 字元限制   | $(icon "$OUTCOME_TW03") |"
+            echo "| TC-CF01 | \`CLOUDFLARE_API_TOKEN\`    | 是否存在                       | $(icon "$OUTCOME_CF01") |"
+            echo "| TC-CF02 | \`CLOUDFLARE_API_TOKEN\`    | 格式验证（長度 ≥ 30）          | $(icon "$OUTCOME_CF02") |"
+            echo "| TC-CF03 | \`CLOUDFLARE_API_TOKEN\`    | Cloudflare API Token 验证     | $(icon "$OUTCOME_CF03") |"
+            echo "| TC-CF04 | \`CLOUDFLARE_ACCOUNT_ID\`   | 是否存在                       | $(icon "$OUTCOME_CF04") |"
+            echo "| TC-CF05 | \`CLOUDFLARE_ACCOUNT_ID\`   | 格式验证（32 位 hex）          | $(icon "$OUTCOME_CF05") |"
+            echo "| TC-CF06 | \`CLOUDFLARE_ACCOUNT_ID\`   | 可存取帳號下的 Workers         | $(icon "$OUTCOME_CF06") |"
+            echo "| TC-GH01 | \`CLAW_SYS_GITHUB_TOKEN\`         | 是否存在                       | $(icon "$OUTCOME_GH01") |"
+            echo "| TC-GH02 | \`CLAW_SYS_GITHUB_TOKEN\`         | 格式验证（已知 PAT 格式）      | $(icon "$OUTCOME_GH02") |"
+            echo "| TC-GH03 | \`CLAW_SYS_GITHUB_TOKEN\`         | GitHub API 验证（GET /user）   | $(icon "$OUTCOME_GH03") |"
+            echo "| TC-GH04 | \`CLAW_SYS_GITHUB_TOKEN\`         | Repository 存取验证            | $(icon "$OUTCOME_GH04") |"
+            echo "| TC-GH05 | \`CLAW_SYS_GITHUB_TOKEN\`         | Issues 讀取權限                | $(icon "$OUTCOME_GH05") |"
+            echo "| TC-GH06 | \`CLAW_SYS_GITHUB_TOKEN\`         | Actions 讀取權限               | $(icon "$OUTCOME_GH06") |"
+            echo "| TC-GH07 | \`CLAW_SYS_GITHUB_TOKEN\`         | Actions 寫入（workflow dispatch）| $(icon "$OUTCOME_GH07") |"
+            echo "| TC-GH08 | \`GitHub App\`              | Repository Installation 檢查   | $(icon "$OUTCOME_GH08") |"
+            echo "| TC-WS01 | \`GH_WEBHOOK_SECRET\`       | 是否存在                       | $(icon "$OUTCOME_WS01") |"
+            echo "| TC-WS02 | \`GH_WEBHOOK_SECRET\`       | 長度至少 8 字元                | $(icon "$OUTCOME_WS02") |"
+            echo "| TC-WS03 | \`GH_WEBHOOK_SECRET\`       | 不含明顯弱密碼                 | $(icon "$OUTCOME_WS03") |"
+            echo "| TC-TG01 | \`TELEGRAM_BOT_TOKEN\`      | 是否存在                       | $(icon "$OUTCOME_TG01") |"
+            echo "| TC-TG02 | \`TELEGRAM_BOT_TOKEN\`      | 格式验证（{id}:{token}）       | $(icon "$OUTCOME_TG02") |"
+            echo "| TC-TG03 | \`TELEGRAM_BOT_TOKEN\`      | Telegram API 验证（getMe）     | $(icon "$OUTCOME_TG03") |"
+            echo "| TC-TG04 | \`TELEGRAM_BOT_TOKEN\`      | Telegram Webhook 設定檢查      | $(icon "$OUTCOME_TG04") |"
+            echo "| TC-TW01 | \`TELEGRAM_WEBHOOK_SECRET\` | 是否存在                       | $(icon "$OUTCOME_TW01") |"
+            echo "| TC-TW02 | \`TELEGRAM_WEBHOOK_SECRET\` | 長度至少 8 字元                | $(icon "$OUTCOME_TW02") |"
+            echo "| TC-TW03 | \`TELEGRAM_WEBHOOK_SECRET\` | 字元限制（A-Z a-z 0-9 _ -）   | $(icon "$OUTCOME_TW03") |"
             echo ""
 
-            echo "#### Optional Secrets 选填 Secrets"
+            echo "#### 選填 Secrets"
             echo ""
-            echo "| Test Case 测试案例 | Variable 变数 | Description 说明 | Result 结果 |"
+            echo "| 測試案例 | 变數 | 说明 | 結果 |"
             echo "|---------|------|------|:----:|"
-            echo "| TC-CS01 | \`COPILOT_GITHUB_TOKEN\`  | Exists (optional) 是否存在               | $(icon "$OUTCOME_CS01") |"
-            echo "| TC-CS02 | \`COPILOT_GITHUB_TOKEN\`  | Format Check (if present) 格式验证             | $(icon "$OUTCOME_CS02") |"
-            echo "| TC-CS03 | \`COPILOT_GITHUB_TOKEN\`  | GitHub API Check (if present) 验证      | $(icon "$OUTCOME_CS03") |"
-            echo "| TC-GM01 | \`GEMINI_API_KEY\`      | Exists (optional) 是否存在               | $(icon "$OUTCOME_GM01") |"
-            echo "| TC-GM02 | \`GEMINI_API_KEY\`      | Format Check (if present) 格式验证             | $(icon "$OUTCOME_GM02") |"
-            echo "| TC-GM03 | \`GEMINI_API_KEY\`      | Google AI API Check (if present) 验证  | $(icon "$OUTCOME_GM03") |"
-            echo "| TC-CB01 | \`CLAWBRAIN_API_KEY\`   | Exists (optional) 是否存在               | $(icon "$OUTCOME_CB01") |"
-            echo "| TC-CB02 | \`CLAWBRAIN_API_KEY\`   | Non-blank Check (if present) 非空白验证           | $(icon "$OUTCOME_CB02") |"
-            echo "| TC-CB03 | \`CLAWBRAIN_API_KEY\`   | Provider API Check (if present) 验证   | $(icon "$OUTCOME_CB03") |"
-            echo "| TC-FL01 | \`FELO_API_KEY\`        | Exists (optional) 是否存在               | $(icon "$OUTCOME_FL01") |"
-            echo "| TC-FL02 | \`FELO_API_KEY\`        | Non-blank Check (if present) 非空白验证           | $(icon "$OUTCOME_FL02") |"
-            echo "| TC-FL03 | \`FELO_API_KEY\`        | Felo API Check (if present) 验证       | $(icon "$OUTCOME_FL03") |"
+            echo "| TC-CS01 | \`COPILOT_GITHUB_TOKEN\`  | 是否存在（選填）               | $(icon "$OUTCOME_CS01") |"
+            echo "| TC-CS02 | \`COPILOT_GITHUB_TOKEN\`  | 格式验证（若存在）             | $(icon "$OUTCOME_CS02") |"
+            echo "| TC-CS03 | \`COPILOT_GITHUB_TOKEN\`  | GitHub API 验证（若存在）      | $(icon "$OUTCOME_CS03") |"
+            echo "| TC-GM01 | \`GEMINI_API_KEY\`      | 是否存在（選填）               | $(icon "$OUTCOME_GM01") |"
+            echo "| TC-GM02 | \`GEMINI_API_KEY\`      | 格式验证（若存在）             | $(icon "$OUTCOME_GM02") |"
+            echo "| TC-GM03 | \`GEMINI_API_KEY\`      | Google AI API 验证（若存在）  | $(icon "$OUTCOME_GM03") |"
+            echo "| TC-CB01 | \`CLAWBRAIN_API_KEY\`   | 是否存在（選填）               | $(icon "$OUTCOME_CB01") |"
+            echo "| TC-CB02 | \`CLAWBRAIN_API_KEY\`   | 非空白验证（若存在）           | $(icon "$OUTCOME_CB02") |"
+            echo "| TC-CB03 | \`CLAWBRAIN_API_KEY\`   | Provider API 验证（若存在）   | $(icon "$OUTCOME_CB03") |"
+            echo "| TC-FL01 | \`FELO_API_KEY\`        | 是否存在（選填）               | $(icon "$OUTCOME_FL01") |"
+            echo "| TC-FL02 | \`FELO_API_KEY\`        | 非空白验证（若存在）           | $(icon "$OUTCOME_FL02") |"
+            echo "| TC-FL03 | \`FELO_API_KEY\`        | Felo API 验证（若存在）       | $(icon "$OUTCOME_FL03") |"
             echo ""
 
             echo "#### Repository Variables"
             echo ""
-            echo "| Test Case 测试案例 | Variable 变数 | Description 说明 | Result 结果 |"
+            echo "| 測試案例 | 变數 | 说明 | 結果 |"
             echo "|---------|------|------|:----:|"
-            echo "| TC-WN01  | \`WORKER_NAME\`       | Exists 是否存在                        | $(icon "$OUTCOME_WN01") |"
-            echo "| TC-WN02  | \`WORKER_NAME\`       | Format Check (Cloudflare rules) 格式验证     | $(icon "$OUTCOME_WN02") |"
-            echo "| TC-WN03  | \`WORKER_NAME\`       | Worker Exists in Cloudflare 存在       | $(icon "$OUTCOME_WN03") |"
-            echo "| TC-SUB01 | \`WORKERS_SUBDOMAIN\` | Exists 是否存在                        | $(icon "$OUTCOME_SUB01") |"
-            echo "| TC-SUB02 | \`WORKERS_SUBDOMAIN\` | Format Check (alphanumeric+hyphen) 格式验证 | $(icon "$OUTCOME_SUB02") |"
-            echo "| TC-WU01  | \`WORKER_URL\`        | Exists 是否存在                        | $(icon "$OUTCOME_WU01") |"
-            echo "| TC-WU02  | \`WORKER_URL\`        | Format Check (HTTPS URL) 格式验证           | $(icon "$OUTCOME_WU02") |"
-            echo "| TC-WU03  | \`WORKER_URL\`        | Worker /health Endpoint Reachable 端点可存取       | $(icon "$OUTCOME_WU03") |"
-            echo "| TC-CP01  | \`CLAWBRAIN_PROVIDER\` | Exists (optional) 是否存在               | $(icon "$OUTCOME_CP01") |"
-            echo "| TC-CP02  | \`CLAWBRAIN_PROVIDER\` | Is a Known AI Provider (if present) 若存在     | $(icon "$OUTCOME_CP02") |"
-            echo "| TC-CM01  | \`CLAWBRAIN_MODEL\`    | Exists (optional) 是否存在               | $(icon "$OUTCOME_CM01") |"
-            echo "| TC-CM02  | \`CLAWBRAIN_MODEL\`    | Non-blank Check (if present) 非空白验证           | $(icon "$OUTCOME_CM02") |"
+            echo "| TC-WN01  | \`WORKER_NAME\`       | 是否存在                        | $(icon "$OUTCOME_WN01") |"
+            echo "| TC-WN02  | \`WORKER_NAME\`       | 格式验证（Cloudflare 規則）     | $(icon "$OUTCOME_WN02") |"
+            echo "| TC-WN03  | \`WORKER_NAME\`       | Worker 在 Cloudflare 存在       | $(icon "$OUTCOME_WN03") |"
+            echo "| TC-SUB01 | \`WORKERS_SUBDOMAIN\` | 是否存在                        | $(icon "$OUTCOME_SUB01") |"
+            echo "| TC-SUB02 | \`WORKERS_SUBDOMAIN\` | 格式验证（alphanumeric+hyphen） | $(icon "$OUTCOME_SUB02") |"
+            echo "| TC-WU01  | \`WORKER_URL\`        | 是否存在                        | $(icon "$OUTCOME_WU01") |"
+            echo "| TC-WU02  | \`WORKER_URL\`        | 格式验证（HTTPS URL）           | $(icon "$OUTCOME_WU02") |"
+            echo "| TC-WU03  | \`WORKER_URL\`        | Worker /health 端點可存取       | $(icon "$OUTCOME_WU03") |"
+            echo "| TC-CP01  | \`CLAWBRAIN_PROVIDER\` | 是否存在（選填）               | $(icon "$OUTCOME_CP01") |"
+            echo "| TC-CP02  | \`CLAWBRAIN_PROVIDER\` | 是已知 AI 提供者（若存在）     | $(icon "$OUTCOME_CP02") |"
+            echo "| TC-CM01  | \`CLAWBRAIN_MODEL\`    | 是否存在（選填）               | $(icon "$OUTCOME_CM01") |"
+            echo "| TC-CM02  | \`CLAWBRAIN_MODEL\`    | 非空白验证（若存在）           | $(icon "$OUTCOME_CM02") |"
           } >> "$GITHUB_STEP_SUMMARY"
 
           echo ""
-          echo "📊 Test Complete 测试完成：Passed 通过 ${PASS}，Failed 失败 ${FAIL}，Skipped 跳过 ${SKIP}"
-          echo "   See the Job Summary or each Step's status for full results 完整结果请查看 Job Summary 或各个 Step 的执行状态"
+          echo "📊 測試完成：通過 ${PASS}，失敗 ${FAIL}，跳過 ${SKIP}"
+          echo "   完整結果請查看 Job Summary 或各个 Step 的執行狀態"
