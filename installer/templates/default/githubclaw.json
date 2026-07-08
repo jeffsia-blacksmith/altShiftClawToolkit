@@ -16,20 +16,21 @@
   },
   "providers": [
     {
-      "id": "cloudflare-workers-ai",
-      "label": "Cloudflare Workers AI",
-      "description": "Use the Cloudflare Workers AI inference API (free tier available).",
-      "secretName": "CLOUDFLARE_API_TOKEN",
-      "defaultModel": "@cf/moonshotai/kimi-k2.6",
+      "id": "google",
+      "label": "Google Gemini",
+      "description": "Use Google Gemini family models.",
+      "secretName": "GEMINI_API_KEY",
+      "defaultModel": "gemini-3.5-flash",
       "models": [
-        { "value": "@cf/zai-org/glm-4.7-flash", "label": "GLM 4.7 Flash" },
-        { "value": "@cf/google/gemma-4-26b-a4b-it", "label": "Gemma 4 26B" },
-        { "value": "@cf/meta/llama-4-scout-17b-16e-instruct", "label": "Llama 4 Scout 17B" },
-        { "value": "@cf/moonshotai/kimi-k2.5", "label": "Kimi K2.5" },
-        { "value": "@cf/moonshotai/kimi-k2.6", "label": "Kimi K2.6" },
-        { "value": "@cf/nvidia/nemotron-3-120b-a12b", "label": "Nemotron 3 120B" },
-        { "value": "@cf/openai/gpt-oss-120b", "label": "GPT OSS 120B" },
-        { "value": "@cf/openai/gpt-oss-20b", "label": "GPT OSS 20B" }
+        { "value": "gemini-3.5-flash",             "label": "Gemini 3.5 Flash ⭐" },
+        { "value": "gemini-3.5-pro",               "label": "Gemini 3.5 Pro" },
+        { "value": "gemini-3.1-pro",               "label": "Gemini 3.1 Pro" },
+        { "value": "gemini-3.1-flash-lite-preview", "label": "Gemini 3.1 Flash Lite (Preview)" },
+        { "value": "gemini-3-flash-preview",        "label": "Gemini 3 Flash (Preview)" },
+        { "value": "gemini-3-pro-preview",          "label": "Gemini 3 Pro (Preview)" },
+        { "value": "gemini-2.5-pro",               "label": "Gemini 2.5 Pro (legacy)" },
+        { "value": "gemini-2.5-flash",             "label": "Gemini 2.5 Flash (legacy)" },
+        { "value": "gemini-2.0-flash",             "label": "Gemini 2.0 Flash (legacy)" }
       ]
     },
     {
@@ -37,12 +38,14 @@
       "label": "Anthropic",
       "description": "Use the Anthropic Claude family of models.",
       "secretName": "ANTHROPIC_API_KEY",
-      "defaultModel": "claude-sonnet-4-6",
+      "defaultModel": "claude-sonnet-5",
       "models": [
-        { "value": "claude-sonnet-4-6", "label": "Claude Sonnet 4.6" },
-        { "value": "claude-opus-4-7", "label": "Claude Opus 4.7" },
-        { "value": "claude-opus-4-6", "label": "Claude Opus 4.6" },
-        { "value": "claude-haiku-4-5", "label": "Claude Haiku 4.5" }
+        { "value": "claude-sonnet-5",   "label": "Claude Sonnet 5 ⭐" },
+        { "value": "claude-fable-5",    "label": "Claude Fable 5" },
+        { "value": "claude-opus-4-8",   "label": "Claude Opus 4.8" },
+        { "value": "claude-haiku-4-5",  "label": "Claude Haiku 4.5" },
+        { "value": "claude-sonnet-4-6", "label": "Claude Sonnet 4.6 (legacy)" },
+        { "value": "claude-opus-4-7",   "label": "Claude Opus 4.7 (legacy)" }
       ]
     },
     {
@@ -50,14 +53,15 @@
       "label": "OpenAI",
       "description": "Use the OpenAI GPT family of models.",
       "secretName": "OPENAI_API_KEY",
-      "defaultModel": "gpt-5-mini",
+      "defaultModel": "gpt-5.4-mini",
       "models": [
-        { "value": "gpt-5.5", "label": "GPT-5.5" },
-        { "value": "gpt-5.4", "label": "GPT-5.4" },
-        { "value": "gpt-5.4-mini", "label": "GPT-5.4 Mini" },
-        { "value": "gpt-5.3-codex", "label": "GPT-5.3 Codex" },
-        { "value": "gpt-5-mini", "label": "GPT-5 Mini" },
-        { "value": "gpt-4.1", "label": "GPT-4.1" }
+        { "value": "gpt-5.4-mini",    "label": "GPT-5.4 Mini ⭐" },
+        { "value": "gpt-5.4",         "label": "GPT-5.4" },
+        { "value": "gpt-5.5",         "label": "GPT-5.5" },
+        { "value": "gpt-5.4-nano",    "label": "GPT-5.4 Nano" },
+        { "value": "gpt-5.3-codex",   "label": "GPT-5.3 Codex" },
+        { "value": "gpt-5-mini",      "label": "GPT-5 Mini (legacy)" },
+        { "value": "gpt-4.1",         "label": "GPT-4.1 (legacy)" }
       ]
     },
     {
@@ -65,36 +69,37 @@
       "label": "Groq",
       "description": "Use the Groq high-speed inference API.",
       "secretName": "GROQ_API_KEY",
-      "defaultModel": "openai/gpt-oss-120b",
+      "defaultModel": "llama-3.3-70b-versatile",
       "models": [
-        { "value": "openai/gpt-oss-120b", "label": "GPT OSS 120B" },
-        { "value": "openai/gpt-oss-20b", "label": "GPT OSS 20B" },
-        { "value": "moonshotai/kimi-k2-instruct", "label": "Kimi K2 Instruct" },
-        { "value": "moonshotai/kimi-k2-instruct-0905", "label": "Kimi K2 Instruct 0905" },
-        { "value": "qwen/qwen3-32b", "label": "Qwen3 32B" },
-        { "value": "qwen-qwq-32b", "label": "Qwen QwQ 32B" },
-        { "value": "deepseek-r1-distill-llama-70b", "label": "DeepSeek R1 Distill Llama 70B" },
-        { "value": "llama-3.3-70b-versatile", "label": "Llama 3.3 70B Versatile" },
-        { "value": "llama-3.1-8b-instant", "label": "Llama 3.1 8B Instant" },
+        { "value": "llama-3.3-70b-versatile",                    "label": "Llama 3.3 70B ⭐" },
+        { "value": "openai/gpt-oss-120b",                        "label": "GPT OSS 120B" },
+        { "value": "groq/compound",                              "label": "Groq Compound" },
+        { "value": "moonshotai/kimi-k2-instruct",                "label": "Kimi K2 Instruct" },
+        { "value": "moonshotai/kimi-k2-instruct-0905",           "label": "Kimi K2 Instruct 0905" },
         { "value": "meta-llama/llama-4-maverick-17b-128e-instruct", "label": "Llama 4 Maverick 17B" },
-        { "value": "meta-llama/llama-4-scout-17b-16e-instruct", "label": "Llama 4 Scout 17B" },
-        { "value": "mistral-saba-24b", "label": "Mistral Saba 24B" },
-        { "value": "gemma2-9b-it", "label": "Gemma 2 9B" }
+        { "value": "meta-llama/llama-4-scout-17b-16e-instruct",  "label": "Llama 4 Scout 17B" },
+        { "value": "qwen/qwen3-32b",                             "label": "Qwen3 32B" },
+        { "value": "deepseek-r1-distill-llama-70b",              "label": "DeepSeek R1 Distill 70B" },
+        { "value": "llama-3.1-8b-instant",                       "label": "Llama 3.1 8B Instant" }
       ]
     },
     {
-      "id": "google",
-      "label": "Google Gemini",
-      "description": "Use Google Gemini family models.",
-      "secretName": "GEMINI_API_KEY",
-      "defaultModel": "gemini-3.5-flash",
+      "id": "cloudflare-workers-ai",
+      "label": "Cloudflare Workers AI",
+      "description": "Use the Cloudflare Workers AI inference API (free tier available).",
+      "secretName": "CLOUDFLARE_API_TOKEN",
+      "defaultModel": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
       "models": [
-        { "value": "gemini-3.5-flash", "label": "Gemini 3.5 Flash" },
-        { "value": "gemini-3.5-pro", "label": "Gemini 3.5 Pro" },
-        { "value": "gemini-3.1-pro-preview", "label": "Gemini 3.1 Pro (Preview)" },
-        { "value": "gemini-3.1-flash-lite-preview", "label": "Gemini 3.1 Flash Lite (Preview)" },
-        { "value": "gemini-2.5-pro", "label": "Gemini 2.5 Pro (Legacy)" },
-        { "value": "gemini-2.5-flash", "label": "Gemini 2.5 Flash (Legacy)" }
+        { "value": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",  "label": "Llama 3.3 70B FP8 ⭐" },
+        { "value": "@cf/meta/llama-4-scout-17b-16e-instruct",   "label": "Llama 4 Scout 17B" },
+        { "value": "@cf/meta/llama-3.2-11b-vision-instruct",    "label": "Llama 3.2 11B Vision" },
+        { "value": "@cf/meta/llama-3.1-8b-instruct-fp8",        "label": "Llama 3.1 8B FP8" },
+        { "value": "@cf/moonshotai/kimi-k2.6",                  "label": "Kimi K2.6" },
+        { "value": "@cf/moonshotai/kimi-k2.5",                  "label": "Kimi K2.5" },
+        { "value": "@cf/openai/gpt-oss-120b",                   "label": "GPT OSS 120B" },
+        { "value": "@cf/openai/gpt-oss-20b",                    "label": "GPT OSS 20B" },
+        { "value": "@cf/google/gemma-4-26b-a4b-it",             "label": "Gemma 4 26B" },
+        { "value": "@cf/zai-org/glm-4.7-flash",                 "label": "GLM 4.7 Flash" }
       ]
     },
     {
@@ -104,11 +109,11 @@
       "secretName": "PIONEER_API_KEY",
       "defaultModel": "gpt-5.5",
       "models": [
-        { "value": "gpt-5.5", "label": "Pioneer GPT-5.5" },
-        { "value": "claude-sonnet-4-6", "label": "Pioneer Claude Sonnet 4.6" },
-        { "value": "claude-opus-4-7", "label": "Pioneer Claude Opus 4.7" },
-        { "value": "deepseek-ai/DeepSeek-V4-Pro", "label": "Pioneer DeepSeek V4 Pro" },
-        { "value": "moonshotai/Kimi-K2.6", "label": "Pioneer Kimi K2.6" }
+        { "value": "gpt-5.5",                      "label": "Pioneer GPT-5.5" },
+        { "value": "claude-sonnet-4-6",             "label": "Pioneer Claude Sonnet 4.6" },
+        { "value": "claude-opus-4-7",               "label": "Pioneer Claude Opus 4.7" },
+        { "value": "deepseek-ai/DeepSeek-V4-Pro",   "label": "Pioneer DeepSeek V4 Pro" },
+        { "value": "moonshotai/Kimi-K2.6",          "label": "Pioneer Kimi K2.6" }
       ]
     },
     {
@@ -119,11 +124,14 @@
       "secretName": "OPENROUTER_API_KEY",
       "defaultModel": "deepseek/deepseek-v4-flash",
       "models": [
-        { "value": "deepseek/deepseek-v4-flash", "label": "DeepSeek V4 Flash" },
-        { "value": "openai/gpt-oss-120b:free", "label": "GPT OSS 120B (free)" },
-        { "value": "google/gemma-4-31b-it:free", "label": "Gemma 4 31B (free)" },
-        { "value": "moonshotai/kimi-k2.6:free", "label": "Kimi K2.6 (free)" },
-        { "value": "qwen/qwen3-coder:free", "label": "Qwen3 Coder (free)" }
+        { "value": "deepseek/deepseek-v4-flash",        "label": "DeepSeek V4 Flash ⭐" },
+        { "value": "openai/gpt-5.5",                    "label": "GPT-5.5 (OR)" },
+        { "value": "anthropic/claude-fable-5",          "label": "Claude Fable 5 (OR)" },
+        { "value": "google/gemini-3.1-pro-preview",     "label": "Gemini 3.1 Pro (OR)" },
+        { "value": "openai/gpt-oss-120b:free",          "label": "GPT OSS 120B (free)" },
+        { "value": "google/gemma-4-31b-it:free",        "label": "Gemma 4 31B (free)" },
+        { "value": "moonshotai/kimi-k2.6:free",         "label": "Kimi K2.6 (free)" },
+        { "value": "qwen/qwen3-coder:free",             "label": "Qwen3 Coder (free)" }
       ]
     },
     {
@@ -133,15 +141,15 @@
       "secretName": "OLLAMA_API_KEY",
       "defaultModel": "kimi-k2.6",
       "models": [
-        { "value": "kimi-k2.6", "label": "Kimi K2.6 ⭐" },
-        { "value": "glm-5.2", "label": "GLM-5.2" },
-        { "value": "deepseek-v4-pro", "label": "DeepSeek-V4-Pro" },
-        { "value": "glm-5.1", "label": "GLM-5.1" },
-        { "value": "qwen3.5:397b", "label": "Qwen3.5 397B" },
-        { "value": "minimax-m2.7", "label": "minimax-m2.7" },
-        { "value": "deepseek-v3.2", "label": "DeepSeek-V3.2" },
-        { "value": "nemotron-3-super", "label": "Nemotron-3-Super" },
-        { "value": "gemma4:31b", "label": "Gemma4 31B" },
+        { "value": "kimi-k2.6",         "label": "Kimi K2.6 ⭐" },
+        { "value": "glm-5.2",           "label": "GLM-5.2" },
+        { "value": "deepseek-v4-pro",   "label": "DeepSeek-V4-Pro" },
+        { "value": "glm-5.1",           "label": "GLM-5.1" },
+        { "value": "qwen3.5:397b",      "label": "Qwen3.5 397B" },
+        { "value": "minimax-m2.7",      "label": "minimax-m2.7" },
+        { "value": "deepseek-v3.2",     "label": "DeepSeek-V3.2" },
+        { "value": "nemotron-3-super",  "label": "Nemotron-3-Super" },
+        { "value": "gemma4:31b",        "label": "Gemma4 31B" },
         { "value": "deepseek-v4-flash", "label": "DeepSeek-V4-Flash" }
       ]
     }

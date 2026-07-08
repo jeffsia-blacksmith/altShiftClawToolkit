@@ -63,7 +63,6 @@ env:
   COMMENT_ID: "${{ github.event_name == 'repository_dispatch' && github.event.client_payload.comment_id || inputs.comment_id }}"
   # User comment id from this trigger; used to read the corresponding user.md.
   USER_COMMENT_ID: "${{ github.event_name == 'repository_dispatch' && github.event.client_payload.user_comment_id || inputs.user_comment_id }}"
-  CLAW_LANGUAGE: "${{ vars.CLAW_LANGUAGE || 'en' }}"
 
 jobs:
   # Single main job: validate, run the agent, and write back results on a GitHub-hosted runner.
