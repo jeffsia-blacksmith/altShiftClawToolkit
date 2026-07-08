@@ -5,6 +5,7 @@ on:
     inputs:
       profile_name: { required: false, type: string, default: "" }
       personality: { required: false, type: string, default: "" }
+      claw_language: { required: false, type: string, default: "" }
       claw_sys_github_token: { required: false, type: string, default: "" }
       copilot_github_token: { required: false, type: string, default: "" }
       github_webhook_secret: { required: false, type: string, default: "" }
@@ -23,6 +24,7 @@ on:
     inputs:
       profile_name: { required: true, type: string }
       personality: { required: true, type: string }
+      claw_language: { required: false, type: string, default: "" }
       claw_sys_github_token: { required: false, type: string, default: "" }
       copilot_github_token: { required: false, type: string, default: "" }
       github_webhook_secret: { required: true, type: string }
@@ -66,6 +68,7 @@ jobs:
       TF_VAR_cloudflare_account_id: ${{ inputs.cloudflare_account_id || secrets.CLOUDFLARE_ACCOUNT_ID }}
       TF_VAR_profile_name: ${{ inputs.profile_name || vars.PROFILE_NAME }}
       TF_VAR_personality: ${{ inputs.personality || vars.PERSONALITY }}
+      TF_VAR_claw_language: ${{ inputs.claw_language || vars.CLAW_LANGUAGE || 'zh-CN' }}
       TF_VAR_telegram_bot_token: ${{ inputs.telegram_bot_token || secrets.TELEGRAM_BOT_TOKEN }}
       TF_VAR_telegram_webhook_secret: ${{ inputs.telegram_webhook_secret || secrets.TELEGRAM_WEBHOOK_SECRET }}
       TF_VAR_telegram_chat_id: ${{ inputs.telegram_chat_id || secrets.TELEGRAM_CHAT_ID }}
@@ -215,6 +218,7 @@ jobs:
           GH_TOKEN: ${{ inputs.claw_sys_github_token || secrets.CLAW_SYS_GITHUB_TOKEN }}
           PROFILE_NAME: ${{ inputs.profile_name || vars.PROFILE_NAME }}
           PERSONALITY: ${{ inputs.personality || vars.PERSONALITY }}
+          CLAW_LANGUAGE: ${{ inputs.claw_language || vars.CLAW_LANGUAGE || 'zh-CN' }}
           DEBUG_MODE: ${{ inputs.debug_mode || vars.DEBUG_MODE || 'false' }}
           INIT_GITHUB_CLAW: ${{ inputs.init_github_claw || vars.INIT_GITHUB_CLAW || 'true' }}
           CLOUDFLARE_API_TOKEN: ${{ inputs.cloudflare_api_token || secrets.CLOUDFLARE_API_TOKEN }}
@@ -234,6 +238,7 @@ jobs:
 
           gh variable set PROFILE_NAME --body "${PROFILE_NAME}" --repo "${GITHUB_REPOSITORY}"
           gh variable set PERSONALITY --body "${PERSONALITY}" --repo "${GITHUB_REPOSITORY}"
+          gh variable set CLAW_LANGUAGE --body "${CLAW_LANGUAGE}" --repo "${GITHUB_REPOSITORY}"
           gh variable set DEBUG_MODE --body "${DEBUG_MODE}" --repo "${GITHUB_REPOSITORY}"
           gh variable set INIT_GITHUB_CLAW --body "${INIT_GITHUB_CLAW}" --repo "${GITHUB_REPOSITORY}"
 
