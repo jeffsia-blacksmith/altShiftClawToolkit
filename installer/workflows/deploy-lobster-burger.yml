@@ -20,25 +20,23 @@ on:
       felo_api_key: { required: false, type: string, default: "" }
       debug_mode: { required: false, type: string, default: "false" }
       init_github_claw: { required: false, type: string, default: "true" }
+  # GitHub caps workflow_dispatch at 10 defined inputs (see actions/runner#1425),
+  # so all fields are bundled into a single JSON payload string here instead of
+  # one input per field. workflow_call above is unaffected by that cap and keeps
+  # named inputs (it's also never actually given `with:` values today — see
+  # autoupdate.yml — so it only exercises the secrets/vars fallback path).
   workflow_dispatch:
     inputs:
-      profile_name: { required: true, type: string }
-      personality: { required: true, type: string }
-      claw_language: { required: false, type: string, default: "" }
-      claw_sys_github_token: { required: false, type: string, default: "" }
-      copilot_github_token: { required: false, type: string, default: "" }
-      github_webhook_secret: { required: true, type: string }
-      cloudflare_api_token: { required: true, type: string }
-      cloudflare_account_id: { required: true, type: string }
-      telegram_bot_token: { required: true, type: string }
-      telegram_webhook_secret: { required: true, type: string }
-      telegram_chat_id: { required: true, type: string }
-      telegram_allowed_chat_id: { required: false, type: string, default: "" }
-      telegram_allowed_from_id: { required: false, type: string, default: "" }
-      gemini_api_key: { required: false, type: string, default: "" }
-      felo_api_key: { required: false, type: string, default: "" }
-      debug_mode: { required: false, type: string, default: "false" }
-      init_github_claw: { required: false, type: string, default: "true" }
+      payload_json:
+        description: >-
+          JSON object with: profile_name, personality, claw_language,
+          claw_sys_github_token, copilot_github_token, github_webhook_secret,
+          cloudflare_api_token, cloudflare_account_id, telegram_bot_token,
+          telegram_webhook_secret, telegram_chat_id, telegram_allowed_chat_id,
+          telegram_allowed_from_id, gemini_api_key, felo_api_key, debug_mode,
+          init_github_claw
+        required: true
+        type: string
 
 run-name: "⚒️ 部署龙虾堡"
 
@@ -62,22 +60,6 @@ jobs:
       TF_INPUT: "false"
       TF_VAR_github_owner: ${{ github.repository_owner }}
       TF_VAR_github_repo: ${{ github.event.repository.name }}
-      TF_VAR_claw_sys_github_token: ${{ inputs.claw_sys_github_token || secrets.CLAW_SYS_GITHUB_TOKEN }}
-      TF_VAR_github_webhook_secret: ${{ inputs.github_webhook_secret || secrets.GH_WEBHOOK_SECRET }}
-      TF_VAR_cloudflare_api_token: ${{ inputs.cloudflare_api_token || secrets.CLOUDFLARE_API_TOKEN }}
-      TF_VAR_cloudflare_account_id: ${{ inputs.cloudflare_account_id || secrets.CLOUDFLARE_ACCOUNT_ID }}
-      TF_VAR_profile_name: ${{ inputs.profile_name || vars.PROFILE_NAME }}
-      TF_VAR_personality: ${{ inputs.personality || vars.PERSONALITY }}
-      TF_VAR_claw_language: ${{ inputs.claw_language || vars.CLAW_LANGUAGE || 'zh-CN' }}
-      TF_VAR_telegram_bot_token: ${{ inputs.telegram_bot_token || secrets.TELEGRAM_BOT_TOKEN }}
-      TF_VAR_telegram_webhook_secret: ${{ inputs.telegram_webhook_secret || secrets.TELEGRAM_WEBHOOK_SECRET }}
-      TF_VAR_telegram_chat_id: ${{ inputs.telegram_chat_id || secrets.TELEGRAM_CHAT_ID }}
-      TF_VAR_telegram_allowed_chat_id: ${{ inputs.telegram_allowed_chat_id || inputs.telegram_chat_id || secrets.TELEGRAM_ALLOWED_CHAT_ID || secrets.TELEGRAM_CHAT_ID }}
-      TF_VAR_telegram_allowed_from_id: ${{ inputs.telegram_allowed_from_id || inputs.telegram_chat_id || secrets.TELEGRAM_ALLOWED_FROM_ID || secrets.TELEGRAM_CHAT_ID }}
-      TF_VAR_gemini_api_key: ${{ inputs.gemini_api_key || secrets.GEMINI_API_KEY }}
-      TF_VAR_felo_api_key: ${{ inputs.felo_api_key || secrets.FELO_API_KEY }}
-      TF_VAR_debug_mode: ${{ (inputs.debug_mode || vars.DEBUG_MODE || 'false') == 'true' }}
-      TF_VAR_init_github_claw: ${{ (inputs.init_github_claw || vars.INIT_GITHUB_CLAW || 'true') == 'true' }}
 
     steps:
       - name: Checkout repository
@@ -86,6 +68,142 @@ jobs:
           ref: main
           fetch-depth: 0
           persist-credentials: false
+
+      # Normalizes both trigger shapes (workflow_dispatch's single JSON payload,
+      # workflow_call's named inputs) into one set of TF_VAR_* / COPILOT_GITHUB_TOKEN
+      # env vars for the rest of the job, applying the same
+      # "explicit input > stored repo secret/var > default" precedence the
+      # inline `${{ inputs.X || secrets.Y }}` expressions used before.
+      - name: Resolve deploy inputs
+        env:
+          PAYLOAD_JSON: ${{ github.event_name == 'workflow_dispatch' && inputs.payload_json || '' }}
+          WC_PROFILE_NAME: ${{ inputs.profile_name }}
+          WC_PERSONALITY: ${{ inputs.personality }}
+          WC_CLAW_LANGUAGE: ${{ inputs.claw_language }}
+          WC_CLAW_SYS_GITHUB_TOKEN: ${{ inputs.claw_sys_github_token }}
+          WC_COPILOT_GITHUB_TOKEN: ${{ inputs.copilot_github_token }}
+          WC_GITHUB_WEBHOOK_SECRET: ${{ inputs.github_webhook_secret }}
+          WC_CLOUDFLARE_API_TOKEN: ${{ inputs.cloudflare_api_token }}
+          WC_CLOUDFLARE_ACCOUNT_ID: ${{ inputs.cloudflare_account_id }}
+          WC_TELEGRAM_BOT_TOKEN: ${{ inputs.telegram_bot_token }}
+          WC_TELEGRAM_WEBHOOK_SECRET: ${{ inputs.telegram_webhook_secret }}
+          WC_TELEGRAM_CHAT_ID: ${{ inputs.telegram_chat_id }}
+          WC_TELEGRAM_ALLOWED_CHAT_ID: ${{ inputs.telegram_allowed_chat_id }}
+          WC_TELEGRAM_ALLOWED_FROM_ID: ${{ inputs.telegram_allowed_from_id }}
+          WC_GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
+          WC_FELO_API_KEY: ${{ inputs.felo_api_key }}
+          WC_DEBUG_MODE: ${{ inputs.debug_mode }}
+          WC_INIT_GITHUB_CLAW: ${{ inputs.init_github_claw }}
+          SECRET_CLAW_SYS_GITHUB_TOKEN: ${{ secrets.CLAW_SYS_GITHUB_TOKEN }}
+          SECRET_COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          SECRET_GH_WEBHOOK_SECRET: ${{ secrets.GH_WEBHOOK_SECRET }}
+          SECRET_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          SECRET_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          SECRET_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          SECRET_TELEGRAM_WEBHOOK_SECRET: ${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
+          SECRET_TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SECRET_TELEGRAM_ALLOWED_CHAT_ID: ${{ secrets.TELEGRAM_ALLOWED_CHAT_ID }}
+          SECRET_TELEGRAM_ALLOWED_FROM_ID: ${{ secrets.TELEGRAM_ALLOWED_FROM_ID }}
+          SECRET_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SECRET_FELO_API_KEY: ${{ secrets.FELO_API_KEY }}
+          VAR_PROFILE_NAME: ${{ vars.PROFILE_NAME }}
+          VAR_PERSONALITY: ${{ vars.PERSONALITY }}
+          VAR_CLAW_LANGUAGE: ${{ vars.CLAW_LANGUAGE }}
+          VAR_DEBUG_MODE: ${{ vars.DEBUG_MODE }}
+          VAR_INIT_GITHUB_CLAW: ${{ vars.INIT_GITHUB_CLAW }}
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${PAYLOAD_JSON}" ]]; then
+            json_get() { jq -r --arg k "$1" '.[$k] // empty' <<<"${PAYLOAD_JSON}"; }
+            profile_name="$(json_get profile_name)"
+            personality="$(json_get personality)"
+            claw_language="$(json_get claw_language)"
+            claw_sys_github_token="$(json_get claw_sys_github_token)"
+            copilot_github_token="$(json_get copilot_github_token)"
+            github_webhook_secret="$(json_get github_webhook_secret)"
+            cloudflare_api_token="$(json_get cloudflare_api_token)"
+            cloudflare_account_id="$(json_get cloudflare_account_id)"
+            telegram_bot_token="$(json_get telegram_bot_token)"
+            telegram_webhook_secret="$(json_get telegram_webhook_secret)"
+            telegram_chat_id="$(json_get telegram_chat_id)"
+            telegram_allowed_chat_id="$(json_get telegram_allowed_chat_id)"
+            telegram_allowed_from_id="$(json_get telegram_allowed_from_id)"
+            gemini_api_key="$(json_get gemini_api_key)"
+            felo_api_key="$(json_get felo_api_key)"
+            debug_mode="$(json_get debug_mode)"
+            init_github_claw="$(json_get init_github_claw)"
+          else
+            profile_name="${WC_PROFILE_NAME:-}"
+            personality="${WC_PERSONALITY:-}"
+            claw_language="${WC_CLAW_LANGUAGE:-}"
+            claw_sys_github_token="${WC_CLAW_SYS_GITHUB_TOKEN:-}"
+            copilot_github_token="${WC_COPILOT_GITHUB_TOKEN:-}"
+            github_webhook_secret="${WC_GITHUB_WEBHOOK_SECRET:-}"
+            cloudflare_api_token="${WC_CLOUDFLARE_API_TOKEN:-}"
+            cloudflare_account_id="${WC_CLOUDFLARE_ACCOUNT_ID:-}"
+            telegram_bot_token="${WC_TELEGRAM_BOT_TOKEN:-}"
+            telegram_webhook_secret="${WC_TELEGRAM_WEBHOOK_SECRET:-}"
+            telegram_chat_id="${WC_TELEGRAM_CHAT_ID:-}"
+            telegram_allowed_chat_id="${WC_TELEGRAM_ALLOWED_CHAT_ID:-}"
+            telegram_allowed_from_id="${WC_TELEGRAM_ALLOWED_FROM_ID:-}"
+            gemini_api_key="${WC_GEMINI_API_KEY:-}"
+            felo_api_key="${WC_FELO_API_KEY:-}"
+            debug_mode="${WC_DEBUG_MODE:-}"
+            init_github_claw="${WC_INIT_GITHUB_CLAW:-}"
+          fi
+
+          # explicit input > stored repo secret/var > default
+          claw_sys_github_token="${claw_sys_github_token:-$SECRET_CLAW_SYS_GITHUB_TOKEN}"
+          copilot_github_token="${copilot_github_token:-${SECRET_COPILOT_GITHUB_TOKEN:-$claw_sys_github_token}}"
+          github_webhook_secret="${github_webhook_secret:-$SECRET_GH_WEBHOOK_SECRET}"
+          cloudflare_api_token="${cloudflare_api_token:-$SECRET_CLOUDFLARE_API_TOKEN}"
+          cloudflare_account_id="${cloudflare_account_id:-$SECRET_CLOUDFLARE_ACCOUNT_ID}"
+          profile_name="${profile_name:-$VAR_PROFILE_NAME}"
+          personality="${personality:-$VAR_PERSONALITY}"
+          claw_language="${claw_language:-${VAR_CLAW_LANGUAGE:-zh-CN}}"
+          telegram_bot_token="${telegram_bot_token:-$SECRET_TELEGRAM_BOT_TOKEN}"
+          telegram_webhook_secret="${telegram_webhook_secret:-$SECRET_TELEGRAM_WEBHOOK_SECRET}"
+          telegram_chat_id="${telegram_chat_id:-$SECRET_TELEGRAM_CHAT_ID}"
+          telegram_allowed_chat_id="${telegram_allowed_chat_id:-${SECRET_TELEGRAM_ALLOWED_CHAT_ID:-$telegram_chat_id}}"
+          telegram_allowed_from_id="${telegram_allowed_from_id:-${SECRET_TELEGRAM_ALLOWED_FROM_ID:-$telegram_chat_id}}"
+          gemini_api_key="${gemini_api_key:-$SECRET_GEMINI_API_KEY}"
+          felo_api_key="${felo_api_key:-$SECRET_FELO_API_KEY}"
+          debug_mode="${debug_mode:-${VAR_DEBUG_MODE:-false}}"
+          init_github_claw="${init_github_claw:-${VAR_INIT_GITHUB_CLAW:-true}}"
+          [[ "$debug_mode" == "true" ]] && debug_mode=true || debug_mode=false
+          [[ "$init_github_claw" == "true" ]] && init_github_claw=true || init_github_claw=false
+
+          for v in "$claw_sys_github_token" "$copilot_github_token" "$github_webhook_secret" \
+                   "$cloudflare_api_token" "$telegram_bot_token" "$telegram_webhook_secret" \
+                   "$gemini_api_key" "$felo_api_key"; do
+            [[ -n "$v" ]] && echo "::add-mask::$v"
+          done
+
+          write_env() {
+            local name="$1" value="$2"
+            echo "${name}<<__ENV_EOF__" >> "$GITHUB_ENV"
+            printf '%s\n' "$value" >> "$GITHUB_ENV"
+            echo "__ENV_EOF__" >> "$GITHUB_ENV"
+          }
+
+          write_env TF_VAR_claw_sys_github_token "$claw_sys_github_token"
+          write_env TF_VAR_github_webhook_secret "$github_webhook_secret"
+          write_env TF_VAR_cloudflare_api_token "$cloudflare_api_token"
+          write_env TF_VAR_cloudflare_account_id "$cloudflare_account_id"
+          write_env TF_VAR_profile_name "$profile_name"
+          write_env TF_VAR_personality "$personality"
+          write_env TF_VAR_claw_language "$claw_language"
+          write_env TF_VAR_telegram_bot_token "$telegram_bot_token"
+          write_env TF_VAR_telegram_webhook_secret "$telegram_webhook_secret"
+          write_env TF_VAR_telegram_chat_id "$telegram_chat_id"
+          write_env TF_VAR_telegram_allowed_chat_id "$telegram_allowed_chat_id"
+          write_env TF_VAR_telegram_allowed_from_id "$telegram_allowed_from_id"
+          write_env TF_VAR_gemini_api_key "$gemini_api_key"
+          write_env TF_VAR_felo_api_key "$felo_api_key"
+          write_env TF_VAR_debug_mode "$debug_mode"
+          write_env TF_VAR_init_github_claw "$init_github_claw"
+          write_env COPILOT_GITHUB_TOKEN "$copilot_github_token"
 
       - name: Fetch and unpack remote worker package
         run: |
@@ -215,24 +333,24 @@ jobs:
 
       - name: Sync GitHub settings
         env:
-          GH_TOKEN: ${{ inputs.claw_sys_github_token || secrets.CLAW_SYS_GITHUB_TOKEN }}
-          PROFILE_NAME: ${{ inputs.profile_name || vars.PROFILE_NAME }}
-          PERSONALITY: ${{ inputs.personality || vars.PERSONALITY }}
-          CLAW_LANGUAGE: ${{ inputs.claw_language || vars.CLAW_LANGUAGE || 'zh-CN' }}
-          DEBUG_MODE: ${{ inputs.debug_mode || vars.DEBUG_MODE || 'false' }}
-          INIT_GITHUB_CLAW: ${{ inputs.init_github_claw || vars.INIT_GITHUB_CLAW || 'true' }}
-          CLOUDFLARE_API_TOKEN: ${{ inputs.cloudflare_api_token || secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ inputs.cloudflare_account_id || secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLAW_SYS_GITHUB_TOKEN: ${{ inputs.claw_sys_github_token || secrets.CLAW_SYS_GITHUB_TOKEN }}
-          COPILOT_GITHUB_TOKEN: ${{ inputs.copilot_github_token || secrets.COPILOT_GITHUB_TOKEN || inputs.claw_sys_github_token || secrets.CLAW_SYS_GITHUB_TOKEN }}
-          GH_WEBHOOK_SECRET: ${{ inputs.github_webhook_secret || secrets.GH_WEBHOOK_SECRET }}
-          TELEGRAM_BOT_TOKEN: ${{ inputs.telegram_bot_token || secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_WEBHOOK_SECRET: ${{ inputs.telegram_webhook_secret || secrets.TELEGRAM_WEBHOOK_SECRET }}
-          TELEGRAM_CHAT_ID: ${{ inputs.telegram_chat_id || secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_ALLOWED_CHAT_ID: ${{ inputs.telegram_allowed_chat_id || inputs.telegram_chat_id || secrets.TELEGRAM_ALLOWED_CHAT_ID || secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_ALLOWED_FROM_ID: ${{ inputs.telegram_allowed_from_id || inputs.telegram_chat_id || secrets.TELEGRAM_ALLOWED_FROM_ID || secrets.TELEGRAM_CHAT_ID }}
-          GEMINI_API_KEY: ${{ inputs.gemini_api_key || secrets.GEMINI_API_KEY }}
-          FELO_API_KEY: ${{ inputs.felo_api_key || secrets.FELO_API_KEY }}
+          GH_TOKEN: ${{ env.TF_VAR_claw_sys_github_token }}
+          PROFILE_NAME: ${{ env.TF_VAR_profile_name }}
+          PERSONALITY: ${{ env.TF_VAR_personality }}
+          CLAW_LANGUAGE: ${{ env.TF_VAR_claw_language }}
+          DEBUG_MODE: ${{ env.TF_VAR_debug_mode }}
+          INIT_GITHUB_CLAW: ${{ env.TF_VAR_init_github_claw }}
+          CLOUDFLARE_API_TOKEN: ${{ env.TF_VAR_cloudflare_api_token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ env.TF_VAR_cloudflare_account_id }}
+          CLAW_SYS_GITHUB_TOKEN: ${{ env.TF_VAR_claw_sys_github_token }}
+          COPILOT_GITHUB_TOKEN: ${{ env.COPILOT_GITHUB_TOKEN }}
+          GH_WEBHOOK_SECRET: ${{ env.TF_VAR_github_webhook_secret }}
+          TELEGRAM_BOT_TOKEN: ${{ env.TF_VAR_telegram_bot_token }}
+          TELEGRAM_WEBHOOK_SECRET: ${{ env.TF_VAR_telegram_webhook_secret }}
+          TELEGRAM_CHAT_ID: ${{ env.TF_VAR_telegram_chat_id }}
+          TELEGRAM_ALLOWED_CHAT_ID: ${{ env.TF_VAR_telegram_allowed_chat_id }}
+          TELEGRAM_ALLOWED_FROM_ID: ${{ env.TF_VAR_telegram_allowed_from_id }}
+          GEMINI_API_KEY: ${{ env.TF_VAR_gemini_api_key }}
+          FELO_API_KEY: ${{ env.TF_VAR_felo_api_key }}
         run: |
           set -euo pipefail
 
@@ -404,14 +522,14 @@ jobs:
       - name: Apply D1 migrations
         uses: cloudflare/wrangler-action@v4
         with:
-          apiToken: ${{ inputs.cloudflare_api_token || secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ inputs.cloudflare_account_id || secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ env.TF_VAR_cloudflare_api_token }}
+          accountId: ${{ env.TF_VAR_cloudflare_account_id }}
           workingDirectory: GitHubClawCore
           command: d1 migrations apply SCHEDULES_DB --remote --config wrangler.migrations.toml
 
       - name: Sync GitHubClaw Worker metadata variables
         env:
-          GH_TOKEN: ${{ inputs.claw_sys_github_token || secrets.CLAW_SYS_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ env.TF_VAR_claw_sys_github_token }}
           WORKER_NAME: ${{ steps.tf_outputs.outputs.worker_name }}
           WORKER_URL: ${{ steps.tf_outputs.outputs.worker_url }}
           WORKERS_SUBDOMAIN: ${{ steps.workers_subdomain.outputs.subdomain }}
@@ -450,8 +568,8 @@ jobs:
       - name: Configure Telegram webhook
         env:
           WORKER_URL: ${{ steps.tf_outputs.outputs.worker_url }}
-          TELEGRAM_BOT_TOKEN: ${{ inputs.telegram_bot_token || secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_WEBHOOK_SECRET: ${{ inputs.telegram_webhook_secret || secrets.TELEGRAM_WEBHOOK_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ env.TF_VAR_telegram_bot_token }}
+          TELEGRAM_WEBHOOK_SECRET: ${{ env.TF_VAR_telegram_webhook_secret }}
         run: |
           set -euo pipefail
 
