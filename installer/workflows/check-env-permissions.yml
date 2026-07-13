@@ -661,8 +661,8 @@ jobs:
             exit 0
           fi
           len=${#GEMINI_API_KEY}
-          if [[ "${GEMINI_API_KEY}" =~ ^AIza[A-Za-z0-9_-]{35,}$ ]]; then
-            echo "✅ GEMINI_API_KEY 格式符合 Google AI API Key 格式（AIza 开头，长度: ${len}）"
+          if [[ "${GEMINI_API_KEY}" =~ ^(AIza[A-Za-z0-9_-]{35,}|AQ\.[A-Za-z0-9_-]{30,})$ ]]; then
+            echo "✅ GEMINI_API_KEY 格式符合 Google AI API Key 格式（AIza 或 AQ. 开头，长度: ${len}）"
           elif [[ $len -ge 20 ]]; then
             echo "⚠️ GEMINI_API_KEY 格式未能识别标准 Google AI API Key 格式（长度: ${len}）；若使用 Vertex AI 或企业端点，格式可能不同"
           else
