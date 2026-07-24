@@ -18,7 +18,7 @@
     {
       "id": "google",
       "label": "Google Gemini",
-      "description": "Use Google Gemini family models.",
+      "description": "Use Google Gemini family models. Requires GEMINI_API_KEY.",
       "secretName": "GEMINI_API_KEY",
       "defaultModel": "gemini-3.5-flash",
       "models": [
@@ -36,7 +36,7 @@
     {
       "id": "anthropic",
       "label": "Anthropic",
-      "description": "Use the Anthropic Claude family of models.",
+      "description": "Use the Anthropic Claude family of models. Requires ANTHROPIC_API_KEY.",
       "secretName": "ANTHROPIC_API_KEY",
       "defaultModel": "claude-sonnet-5",
       "models": [
@@ -51,7 +51,7 @@
     {
       "id": "openai",
       "label": "OpenAI",
-      "description": "Use the OpenAI GPT family of models.",
+      "description": "Use the OpenAI GPT family of models. Requires OPENAI_API_KEY.",
       "secretName": "OPENAI_API_KEY",
       "defaultModel": "gpt-5.4-mini",
       "models": [
@@ -67,7 +67,7 @@
     {
       "id": "groq",
       "label": "Groq",
-      "description": "Use the Groq high-speed inference API.",
+      "description": "Use the Groq high-speed inference API. Requires GROQ_API_KEY.",
       "secretName": "GROQ_API_KEY",
       "defaultModel": "llama-3.3-70b-versatile",
       "models": [
@@ -86,7 +86,7 @@
     {
       "id": "cloudflare-workers-ai",
       "label": "Cloudflare Workers AI",
-      "description": "Use the Cloudflare Workers AI inference API (free tier available).",
+      "description": "Use the Cloudflare Workers AI inference API (free tier available). Requires CLOUDFLARE_API_TOKEN.",
       "secretName": "CLOUDFLARE_API_TOKEN",
       "defaultModel": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
       "models": [
@@ -109,7 +109,7 @@
       "secretName": "PIONEER_API_KEY",
       "defaultModel": "gpt-5.5",
       "models": [
-        { "value": "gpt-5.5",                      "label": "Pioneer GPT-5.5" },
+        { "value": "gpt-5.5",                      "label": "Pioneer GPT-5.5 ⭐" },
         { "value": "claude-sonnet-4-6",             "label": "Pioneer Claude Sonnet 4.6" },
         { "value": "claude-opus-4-7",               "label": "Pioneer Claude Opus 4.7" },
         { "value": "deepseek-ai/DeepSeek-V4-Pro",   "label": "Pioneer DeepSeek V4 Pro" },
