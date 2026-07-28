@@ -18,7 +18,7 @@
     {
       "id": "google",
       "label": "Google Gemini",
-      "description": "Use Google Gemini family models.",
+      "description": "Use Google Gemini family models. Requires GEMINI_API_KEY.",
       "secretName": "GEMINI_API_KEY",
       "defaultModel": "gemini-3.5-flash",
       "models": [
@@ -36,7 +36,7 @@
     {
       "id": "anthropic",
       "label": "Anthropic",
-      "description": "Use the Anthropic Claude family of models.",
+      "description": "Use the Anthropic Claude family of models. Requires ANTHROPIC_API_KEY.",
       "secretName": "ANTHROPIC_API_KEY",
       "defaultModel": "claude-sonnet-5",
       "models": [
@@ -51,7 +51,7 @@
     {
       "id": "openai",
       "label": "OpenAI",
-      "description": "Use the OpenAI GPT family of models.",
+      "description": "Use the OpenAI GPT family of models. Requires OPENAI_API_KEY.",
       "secretName": "OPENAI_API_KEY",
       "defaultModel": "gpt-5.4-mini",
       "models": [
@@ -67,7 +67,7 @@
     {
       "id": "groq",
       "label": "Groq",
-      "description": "Use the Groq high-speed inference API.",
+      "description": "Use the Groq high-speed inference API. Requires GROQ_API_KEY.",
       "secretName": "GROQ_API_KEY",
       "defaultModel": "llama-3.3-70b-versatile",
       "models": [
@@ -86,20 +86,36 @@
     {
       "id": "cloudflare-workers-ai",
       "label": "Cloudflare Workers AI",
-      "description": "Use the Cloudflare Workers AI inference API (free tier available).",
+      "description": "Use the Cloudflare Workers AI inference API (free tier available). Requires CLOUDFLARE_API_TOKEN.",
       "secretName": "CLOUDFLARE_API_TOKEN",
       "defaultModel": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
       "models": [
-        { "value": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",  "label": "Llama 3.3 70B FP8 ⭐" },
-        { "value": "@cf/meta/llama-4-scout-17b-16e-instruct",   "label": "Llama 4 Scout 17B" },
-        { "value": "@cf/meta/llama-3.2-11b-vision-instruct",    "label": "Llama 3.2 11B Vision" },
-        { "value": "@cf/meta/llama-3.1-8b-instruct-fp8",        "label": "Llama 3.1 8B FP8" },
-        { "value": "@cf/moonshotai/kimi-k2.6",                  "label": "Kimi K2.6" },
-        { "value": "@cf/moonshotai/kimi-k2.5",                  "label": "Kimi K2.5" },
-        { "value": "@cf/openai/gpt-oss-120b",                   "label": "GPT OSS 120B" },
-        { "value": "@cf/openai/gpt-oss-20b",                    "label": "GPT OSS 20B" },
-        { "value": "@cf/google/gemma-4-26b-a4b-it",             "label": "Gemma 4 26B" },
-        { "value": "@cf/zai-org/glm-4.7-flash",                 "label": "GLM 4.7 Flash" }
+        { "value": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",      "label": "Llama 3.3 70B FP8 ⭐" },
+        { "value": "@cf/meta/llama-4-scout-17b-16e-instruct",       "label": "Llama 4 Scout 17B" },
+        { "value": "@cf/meta/llama-3.2-11b-vision-instruct",        "label": "Llama 3.2 11B Vision" },
+        { "value": "@cf/meta/llama-3.2-3b-instruct",                "label": "Llama 3.2 3B" },
+        { "value": "@cf/meta/llama-3.2-1b-instruct",               "label": "Llama 3.2 1B" },
+        { "value": "@cf/meta/llama-3.1-8b-instruct-fp8",            "label": "Llama 3.1 8B FP8" },
+        { "value": "@cf/meta/llama-guard-3-8b",                     "label": "Llama Guard 3 8B" },
+        { "value": "@cf/meta-llama/llama-2-7b-chat-hf-lora",        "label": "Llama 2 7B Chat (LoRA)" },
+        { "value": "@cf/moonshotai/kimi-k2.6",                      "label": "Kimi K2.6" },
+        { "value": "@cf/moonshotai/kimi-k2.7-code",                 "label": "Kimi K2.7 Code" },
+        { "value": "@cf/moonshotai/kimi-k2.5",                      "label": "Kimi K2.5" },
+        { "value": "@cf/openai/gpt-oss-120b",                       "label": "GPT OSS 120B" },
+        { "value": "@cf/openai/gpt-oss-20b",                        "label": "GPT OSS 20B" },
+        { "value": "@cf/google/gemma-4-26b-a4b-it",                 "label": "Gemma 4 26B" },
+        { "value": "@cf/google/gemma-2b-it-lora",                   "label": "Gemma 2B (LoRA)" },
+        { "value": "@cf/google/gemma-7b-it-lora",                   "label": "Gemma 7B (LoRA)" },
+        { "value": "@cf/aisingapore/gemma-sea-lion-v4-27b-it",      "label": "SEA-LION 27B" },
+        { "value": "@cf/zai-org/glm-4.7-flash",                     "label": "GLM 4.7 Flash" },
+        { "value": "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",  "label": "DeepSeek R1 Distill 32B" },
+        { "value": "@cf/nvidia/nemotron-3-120b-a12b",               "label": "Nemotron 3 120B" },
+        { "value": "@cf/mistralai/mistral-small-3.1-24b-instruct", "label": "Mistral Small 3.1 24B" },
+        { "value": "@cf/mistral/mistral-7b-instruct-v0.2-lora",     "label": "Mistral 7B (LoRA)" },
+        { "value": "@cf/ibm-granite/granite-4.0-h-micro",           "label": "Granite 4.0 H Micro" },
+        { "value": "@cf/qwen/qwen2.5-coder-32b-instruct",           "label": "Qwen2.5 Coder 32B" },
+        { "value": "@cf/qwen/qwen3-30b-a3b-fp8",                    "label": "Qwen3 30B A3B" },
+        { "value": "@cf/qwen/qwq-32b",                              "label": "QwQ 32B" }
       ]
     },
     {
@@ -127,16 +143,25 @@
       "secretName": "OLLAMA_API_KEY",
       "defaultModel": "kimi-k2.6",
       "models": [
-        { "value": "kimi-k2.6",         "label": "Kimi K2.6 ⭐" },
-        { "value": "glm-5.2",           "label": "GLM-5.2" },
-        { "value": "deepseek-v4-pro",   "label": "DeepSeek-V4-Pro" },
-        { "value": "glm-5.1",           "label": "GLM-5.1" },
-        { "value": "qwen3.5:397b",      "label": "Qwen3.5 397B" },
-        { "value": "minimax-m2.7",      "label": "minimax-m2.7" },
-        { "value": "deepseek-v3.2",     "label": "DeepSeek-V3.2" },
-        { "value": "nemotron-3-super",  "label": "Nemotron-3-Super" },
-        { "value": "gemma4:31b",        "label": "Gemma4 31B" },
-        { "value": "deepseek-v4-flash", "label": "DeepSeek-V4-Flash" }
+        { "value": "kimi-k2.6",              "label": "Kimi K2.6 ⭐" },
+        { "value": "kimi-k3",                "label": "Kimi K3" },
+        { "value": "kimi-k2.7-code",         "label": "Kimi K2.7 Code" },
+        { "value": "kimi-k2.5",              "label": "Kimi K2.5" },
+        { "value": "glm-5.2",                "label": "GLM-5.2" },
+        { "value": "glm-5.1",                "label": "GLM-5.1" },
+        { "value": "deepseek-v4-pro",        "label": "DeepSeek-V4-Pro" },
+        { "value": "deepseek-v4-flash",      "label": "DeepSeek-V4-Flash" },
+        { "value": "minimax-m2.7",           "label": "MiniMax-M2.7" },
+        { "value": "minimax-m2.5",           "label": "MiniMax-M2.5" },
+        { "value": "minimax-m3",             "label": "MiniMax-M3" },
+        { "value": "qwen3.5:397b",           "label": "Qwen3.5 397B" },
+        { "value": "mistral-large-3:675b",   "label": "Mistral Large 3 675B" },
+        { "value": "nemotron-3-super",       "label": "Nemotron-3-Super" },
+        { "value": "nemotron-3-ultra",       "label": "Nemotron-3-Ultra" },
+        { "value": "nemotron-3-nano:30b",    "label": "Nemotron-3-Nano 30B" },
+        { "value": "gpt-oss:120b",           "label": "GPT-OSS 120B" },
+        { "value": "gpt-oss:20b",            "label": "GPT-OSS 20B" },
+        { "value": "gemma4:31b",             "label": "Gemma4 31B" }
       ]
     }
   ]
