@@ -103,7 +103,6 @@ jobs:
           SECRET_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SECRET_GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           SECRET_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          SECRET_PIONEER_API_KEY: ${{ secrets.PIONEER_API_KEY }}
           SECRET_OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           SECRET_OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
         run: |
@@ -130,9 +129,6 @@ jobs:
               ;;
             google)
               echo "GEMINI_API_KEY=${SECRET_GEMINI_API_KEY}" >> "$GITHUB_ENV"
-              ;;
-            pioneer)
-              echo "PIONEER_API_KEY=${SECRET_PIONEER_API_KEY}" >> "$GITHUB_ENV"
               ;;
             openrouter)
               echo "OPENROUTER_API_KEY=${SECRET_OPENROUTER_API_KEY}" >> "$GITHUB_ENV"
@@ -200,12 +196,6 @@ jobs:
           # Can be overridden via the repo variable PI_CODING_AGENT_VERSION.
           PI_CODING_AGENT_VERSION='${{ vars.PI_CODING_AGENT_VERSION }}'
           : "${PI_CODING_AGENT_VERSION:=0.70.6}"
-
-          # If pioneer is selected, install the pi-pioneer-provider extension first
-          if [[ "${PI_PROVIDER}" == "pioneer" ]]; then
-            echo "Installing pi-pioneer-provider extension..."
-            npx -y "@mariozechner/pi-coding-agent@${PI_CODING_AGENT_VERSION}" install npm:pi-pioneer-provider
-          fi
 
           # If ollama-cloud is selected, install the pi-ollama-cloud extension first
           if [[ "${PI_PROVIDER}" == "ollama-cloud" ]]; then
