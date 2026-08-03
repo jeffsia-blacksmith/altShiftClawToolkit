@@ -161,7 +161,7 @@ jobs:
           cloudflare_account_id="${cloudflare_account_id:-$SECRET_CLOUDFLARE_ACCOUNT_ID}"
           profile_name="${profile_name:-$VAR_PROFILE_NAME}"
           personality="${personality:-$VAR_PERSONALITY}"
-          claw_language="${claw_language:-${VAR_CLAW_LANGUAGE:-zh-CN}}"
+          claw_language="${claw_language:-${VAR_CLAW_LANGUAGE:-en}}"
           telegram_bot_token="${telegram_bot_token:-$SECRET_TELEGRAM_BOT_TOKEN}"
           telegram_webhook_secret="${telegram_webhook_secret:-$SECRET_TELEGRAM_WEBHOOK_SECRET}"
           telegram_chat_id="${telegram_chat_id:-$SECRET_TELEGRAM_CHAT_ID}"
