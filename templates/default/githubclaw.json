@@ -86,8 +86,8 @@
     {
       "id": "cloudflare-workers-ai",
       "label": "Cloudflare Workers AI",
-      "description": "Use the Cloudflare Workers AI inference API (free tier available). Requires CLOUDFLARE_API_TOKEN.",
-      "secretName": "CLOUDFLARE_API_TOKEN",
+      "description": "Use the Cloudflare Workers AI inference API (free tier available). Requires a dedicated CLOUDFLARE_AI_API_TOKEN (Workers AI: Edit), separate from the deploy token.",
+      "secretName": "CLOUDFLARE_AI_API_TOKEN",
       "defaultModel": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
       "models": [
         { "value": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",      "label": "Llama 3.3 70B FP8 ⭐" },
