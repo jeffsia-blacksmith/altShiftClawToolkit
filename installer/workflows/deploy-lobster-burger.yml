@@ -354,11 +354,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          gh variable set PROFILE_NAME --body "${PROFILE_NAME}" --repo "${GITHUB_REPOSITORY}"
-          gh variable set PERSONALITY --body "${PERSONALITY}" --repo "${GITHUB_REPOSITORY}"
-          gh variable set CLAW_LANGUAGE --body "${CLAW_LANGUAGE}" --repo "${GITHUB_REPOSITORY}"
-          gh variable set DEBUG_MODE --body "${DEBUG_MODE}" --repo "${GITHUB_REPOSITORY}"
-          gh variable set INIT_GITHUB_CLAW --body "${INIT_GITHUB_CLAW}" --repo "${GITHUB_REPOSITORY}"
+          # 设置 repo variable；空值跳过，避免 GitHub API 422 "missing required key: value"
+          # （PROFILE_NAME / PERSONALITY 等为 optional，autoupdate 等不传 profile inputs 时为空）
+          set_var_if_nonempty() {
+            local name="$1" val="$2"
+            if [[ -n "${val}" ]]; then
+              gh variable set "${name}" --body "${val}" --repo "${GITHUB_REPOSITORY}"
+            fi
+          }
+
+          set_var_if_nonempty PROFILE_NAME "${PROFILE_NAME}"
+          set_var_if_nonempty PERSONALITY "${PERSONALITY}"
+          set_var_if_nonempty CLAW_LANGUAGE "${CLAW_LANGUAGE}"
+          set_var_if_nonempty DEBUG_MODE "${DEBUG_MODE}"
+          set_var_if_nonempty INIT_GITHUB_CLAW "${INIT_GITHUB_CLAW}"
 
           for secret_name in \
             CLOUDFLARE_API_TOKEN \
@@ -535,10 +544,17 @@ jobs:
           WORKERS_SUBDOMAIN: ${{ steps.workers_subdomain.outputs.subdomain }}
         run: |
           set -euo pipefail
-          gh variable set WORKER_NAME --body "${WORKER_NAME}" --repo "${GITHUB_REPOSITORY}"
-          gh variable set WORKERS_SUBDOMAIN --body "${WORKERS_SUBDOMAIN}" --repo "${GITHUB_REPOSITORY}"
-          gh variable set WORKER_URL --body "${WORKER_URL}" --repo "${GITHUB_REPOSITORY}"
-          gh variable set GITHUBCLAW_WORKER_URL --body "${WORKER_URL}" --repo "${GITHUB_REPOSITORY}"
+          # 空值跳过，避免 GitHub API 422（与 Sync GitHub settings 同一防护）
+          set_var_if_nonempty() {
+            local name="$1" val="$2"
+            if [[ -n "${val}" ]]; then
+              gh variable set "${name}" --body "${val}" --repo "${GITHUB_REPOSITORY}"
+            fi
+          }
+          set_var_if_nonempty WORKER_NAME "${WORKER_NAME}"
+          set_var_if_nonempty WORKERS_SUBDOMAIN "${WORKERS_SUBDOMAIN}"
+          set_var_if_nonempty WORKER_URL "${WORKER_URL}"
+          set_var_if_nonempty GITHUBCLAW_WORKER_URL "${WORKER_URL}"
 
       - name: Wait for Worker health check
         env:
