@@ -1,4 +1,4 @@
-name: 🦞 更新龙虾堡核心
+name: 🦞 Lobster Burger Core Update
 
 on:
   schedule:
@@ -19,7 +19,7 @@ on:
         default: ""
 
 run-name: >-
-  🦞 更新龙虾堡核心: ${{ github.repository }}${{ github.event_name == 'workflow_dispatch' && inputs.request_id != '' && format(' | req:{0}', inputs.request_id) || '' }}
+  🦞 Lobster Burger Core Update: ${{ github.repository }}${{ github.event_name == 'workflow_dispatch' && inputs.request_id != '' && format(' | req:{0}', inputs.request_id) || '' }}
 
 concurrency:
   group: auto-update-${{ github.repository }}
@@ -33,7 +33,7 @@ permissions:
 
 jobs:
   check-version:
-    name: 版本比对
+    name: Version Check
     runs-on: ubuntu-latest
     permissions: {}
     outputs:
@@ -47,7 +47,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: 读取远端套件 manifest
+      - name: Read remote package manifest
         id: compare
         env:
           STORED_VERSION: ${{ vars.LOBSTER_BURGER_PACKAGE_VERSION }}
@@ -96,7 +96,7 @@ jobs:
             echo "should_update=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: 略过摘要
+      - name: Skip summary
         if: steps.compare.outputs.should_update == 'false'
         env:
           REMOTE_VERSION: ${{ steps.compare.outputs.remote_version }}
@@ -117,14 +117,14 @@ jobs:
           echo "| 已储存修订版 | \`${STORED_REVISION:-未设定}\` |" >> "$GITHUB_STEP_SUMMARY"
 
   deploy:
-    name: 触发部署
+    name: Trigger deploy
     needs: check-version
     if: needs.check-version.outputs.should_update == 'true'
     uses: ./.github/workflows/deploy-lobster-burger.yml
     secrets: inherit
 
   update-state:
-    name: 更新已部署版本资讯
+    name: Update deployed version metadata
     needs:
       - check-version
       - deploy
