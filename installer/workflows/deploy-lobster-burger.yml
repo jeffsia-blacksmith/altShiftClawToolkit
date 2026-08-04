@@ -7,7 +7,6 @@ on:
       personality: { required: false, type: string, default: "" }
       claw_language: { required: false, type: string, default: "" }
       claw_sys_github_token: { required: false, type: string, default: "" }
-      copilot_github_token: { required: false, type: string, default: "" }
       github_webhook_secret: { required: false, type: string, default: "" }
       cloudflare_api_token: { required: false, type: string, default: "" }
       cloudflare_account_id: { required: false, type: string, default: "" }
@@ -30,7 +29,7 @@ on:
       payload_json:
         description: >-
           JSON object with: profile_name, personality, claw_language,
-          claw_sys_github_token, copilot_github_token, github_webhook_secret,
+          claw_sys_github_token, github_webhook_secret,
           cloudflare_api_token, cloudflare_account_id, telegram_bot_token,
           telegram_webhook_secret, telegram_chat_id, telegram_allowed_chat_id,
           telegram_allowed_from_id, gemini_api_key, felo_api_key, debug_mode,
@@ -70,8 +69,7 @@ jobs:
           persist-credentials: false
 
       # Normalizes both trigger shapes (workflow_dispatch's single JSON payload,
-      # workflow_call's named inputs) into one set of TF_VAR_* / COPILOT_GITHUB_TOKEN
-      # env vars for the rest of the job, applying the same
+      # workflow_call's named inputs) into one set of TF_VAR_* env vars for the rest of the job, applying the same
       # "explicit input > stored repo secret/var > default" precedence the
       # inline `${{ inputs.X || secrets.Y }}` expressions used before.
       - name: Resolve deploy inputs
@@ -81,7 +79,6 @@ jobs:
           WC_PERSONALITY: ${{ inputs.personality }}
           WC_CLAW_LANGUAGE: ${{ inputs.claw_language }}
           WC_CLAW_SYS_GITHUB_TOKEN: ${{ inputs.claw_sys_github_token }}
-          WC_COPILOT_GITHUB_TOKEN: ${{ inputs.copilot_github_token }}
           WC_GITHUB_WEBHOOK_SECRET: ${{ inputs.github_webhook_secret }}
           WC_CLOUDFLARE_API_TOKEN: ${{ inputs.cloudflare_api_token }}
           WC_CLOUDFLARE_ACCOUNT_ID: ${{ inputs.cloudflare_account_id }}
@@ -95,7 +92,6 @@ jobs:
           WC_DEBUG_MODE: ${{ inputs.debug_mode }}
           WC_INIT_GITHUB_CLAW: ${{ inputs.init_github_claw }}
           SECRET_CLAW_SYS_GITHUB_TOKEN: ${{ secrets.CLAW_SYS_GITHUB_TOKEN }}
-          SECRET_COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
           SECRET_GH_WEBHOOK_SECRET: ${{ secrets.GH_WEBHOOK_SECRET }}
           SECRET_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           SECRET_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -120,7 +116,6 @@ jobs:
             personality="$(json_get personality)"
             claw_language="$(json_get claw_language)"
             claw_sys_github_token="$(json_get claw_sys_github_token)"
-            copilot_github_token="$(json_get copilot_github_token)"
             github_webhook_secret="$(json_get github_webhook_secret)"
             cloudflare_api_token="$(json_get cloudflare_api_token)"
             cloudflare_account_id="$(json_get cloudflare_account_id)"
@@ -138,7 +133,6 @@ jobs:
             personality="${WC_PERSONALITY:-}"
             claw_language="${WC_CLAW_LANGUAGE:-}"
             claw_sys_github_token="${WC_CLAW_SYS_GITHUB_TOKEN:-}"
-            copilot_github_token="${WC_COPILOT_GITHUB_TOKEN:-}"
             github_webhook_secret="${WC_GITHUB_WEBHOOK_SECRET:-}"
             cloudflare_api_token="${WC_CLOUDFLARE_API_TOKEN:-}"
             cloudflare_account_id="${WC_CLOUDFLARE_ACCOUNT_ID:-}"
@@ -155,7 +149,6 @@ jobs:
 
           # explicit input > stored repo secret/var > default
           claw_sys_github_token="${claw_sys_github_token:-$SECRET_CLAW_SYS_GITHUB_TOKEN}"
-          copilot_github_token="${copilot_github_token:-${SECRET_COPILOT_GITHUB_TOKEN:-$claw_sys_github_token}}"
           github_webhook_secret="${github_webhook_secret:-$SECRET_GH_WEBHOOK_SECRET}"
           cloudflare_api_token="${cloudflare_api_token:-$SECRET_CLOUDFLARE_API_TOKEN}"
           cloudflare_account_id="${cloudflare_account_id:-$SECRET_CLOUDFLARE_ACCOUNT_ID}"
@@ -174,7 +167,7 @@ jobs:
           [[ "$debug_mode" == "true" ]] && debug_mode=true || debug_mode=false
           [[ "$init_github_claw" == "true" ]] && init_github_claw=true || init_github_claw=false
 
-          for v in "$claw_sys_github_token" "$copilot_github_token" "$github_webhook_secret" \
+          for v in "$claw_sys_github_token" "$github_webhook_secret" \
                    "$cloudflare_api_token" "$telegram_bot_token" "$telegram_webhook_secret" \
                    "$gemini_api_key" "$felo_api_key"; do
             [[ -n "$v" ]] && echo "::add-mask::$v"
@@ -203,7 +196,6 @@ jobs:
           write_env TF_VAR_felo_api_key "$felo_api_key"
           write_env TF_VAR_debug_mode "$debug_mode"
           write_env TF_VAR_init_github_claw "$init_github_claw"
-          write_env COPILOT_GITHUB_TOKEN "$copilot_github_token"
 
       - name: Fetch and unpack remote worker package
         run: |
@@ -342,7 +334,6 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ env.TF_VAR_cloudflare_api_token }}
           CLOUDFLARE_ACCOUNT_ID: ${{ env.TF_VAR_cloudflare_account_id }}
           CLAW_SYS_GITHUB_TOKEN: ${{ env.TF_VAR_claw_sys_github_token }}
-          COPILOT_GITHUB_TOKEN: ${{ env.COPILOT_GITHUB_TOKEN }}
           GH_WEBHOOK_SECRET: ${{ env.TF_VAR_github_webhook_secret }}
           TELEGRAM_BOT_TOKEN: ${{ env.TF_VAR_telegram_bot_token }}
           TELEGRAM_WEBHOOK_SECRET: ${{ env.TF_VAR_telegram_webhook_secret }}
@@ -373,7 +364,6 @@ jobs:
             CLOUDFLARE_API_TOKEN \
             CLOUDFLARE_ACCOUNT_ID \
             CLAW_SYS_GITHUB_TOKEN \
-            COPILOT_GITHUB_TOKEN \
             GH_WEBHOOK_SECRET \
             TELEGRAM_BOT_TOKEN \
             TELEGRAM_WEBHOOK_SECRET \
