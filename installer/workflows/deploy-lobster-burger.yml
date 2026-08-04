@@ -241,6 +241,8 @@ jobs:
           TOOLKIT_REPO="https://github.com/jeffsia-blacksmith/altShiftClawToolkit.git"
           TOOLKIT_DIR="${RUNNER_TEMP}/altShiftClawToolkit"
           LOCAL_TEMPLATE_DIR="${GITHUB_WORKSPACE}/templates"
+          # 单一权威源：installer/templates（与 AdminPage seed 同源，避免 templates/ 与 installer/templates 分叉）
+          TOOLKIT_TEMPLATE_SRC="${TOOLKIT_DIR}/installer/templates"
 
           mkdir -p "${LOCAL_TEMPLATE_DIR}"
 
@@ -255,13 +257,13 @@ jobs:
 
           git clone --depth 1 "$TOOLKIT_REPO" "$TOOLKIT_DIR"
 
-          if [[ ! -d "${TOOLKIT_DIR}/templates" ]]; then
-            echo "::error::altShiftClawToolkit 目录缺少 templates"
+          if [[ ! -d "${TOOLKIT_TEMPLATE_SRC}" ]]; then
+            echo "::error::altShiftClawToolkit 缺少 installer/templates"
             exit 1
           fi
 
           readarray -t TOOLKIT_TEMPLATES < <(
-            find "${TOOLKIT_DIR}/templates" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort || true
+            find "${TOOLKIT_TEMPLATE_SRC}" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort || true
           )
 
           declare -A TOOLKIT_TEMPLATE_SET
@@ -276,7 +278,7 @@ jobs:
             if [[ -n "${TOOLKIT_TEMPLATE_SET[$template_name]:-}" ]]; then
               rm -rf "${LOCAL_TEMPLATE_DIR}/${template_name}"
               mkdir -p "${LOCAL_TEMPLATE_DIR}/${template_name}"
-              cp -R "${TOOLKIT_DIR}/templates/${template_name}/." \
+              cp -R "${TOOLKIT_TEMPLATE_SRC}/${template_name}/." \
                 "${LOCAL_TEMPLATE_DIR}/${template_name}/"
               updated_templates+=("${template_name}")
             else
