@@ -196,19 +196,20 @@ jobs:
           # Pin the Pi Coding Agent version to avoid non-reproducible results or breaking changes from @latest.
           # Can be overridden via the repo variable PI_CODING_AGENT_VERSION.
           PI_CODING_AGENT_VERSION='${{ vars.PI_CODING_AGENT_VERSION }}'
-          : "${PI_CODING_AGENT_VERSION:=0.70.6}"
+          : "${PI_CODING_AGENT_VERSION:=0.83.0}"
+          PI_CODING_AGENT_PKG="@earendil-works/pi-coding-agent"
 
           # If ollama-cloud is selected, install the pi-ollama-cloud extension first
           if [[ "${PI_PROVIDER}" == "ollama-cloud" ]]; then
             echo "Installing pi-ollama-cloud extension..."
-            npx -y "@mariozechner/pi-coding-agent@${PI_CODING_AGENT_VERSION}" install npm:pi-ollama-cloud
+            npx -y "${PI_CODING_AGENT_PKG}@${PI_CODING_AGENT_VERSION}" install npm:pi-ollama-cloud
           fi
 
           # Pi reads settings.json and models.json from the template via PI_CODING_AGENT_DIR=.pi
           # Run with error loglevel so npm warnings don't pollute error.log
           set +e
           set -o pipefail
-          npm_config_loglevel=error npx -y "@mariozechner/pi-coding-agent@${PI_CODING_AGENT_VERSION}" \
+          npm_config_loglevel=error npx -y "${PI_CODING_AGENT_PKG}@${PI_CODING_AGENT_VERSION}" \
             -p "Please write the final result to artifacts/${COMMENT_ID}/result.md . My prompt is: ${USER_PROMPT_CONTENT}" \
             --mode json \
             2> "artifacts/${COMMENT_ID}/error.log" \
