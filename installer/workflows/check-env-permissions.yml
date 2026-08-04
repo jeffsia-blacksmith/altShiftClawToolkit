@@ -27,7 +27,6 @@ jobs:
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_WEBHOOK_SECRET: ${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
       # ── 选填 Secrets ─────────────────────────────────────────────────────
-      COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       CLAWBRAIN_API_KEY: ${{ secrets.CLAWBRAIN_API_KEY }}
       FELO_API_KEY: ${{ secrets.FELO_API_KEY }}
@@ -584,61 +583,6 @@ jobs:
           echo "✅ TELEGRAM_WEBHOOK_SECRET 字元符合 Telegram Webhook Secret 限制"
 
       # ══════════════════════════════════════════════════════════════════════
-      # COPILOT_GITHUB_TOKEN（选填）
-      # ══════════════════════════════════════════════════════════════════════
-
-      - name: "[TC-CS01] COPILOT_GITHUB_TOKEN — 是否存在（选填）"
-        id: tc_cs01
-        continue-on-error: true
-        run: |
-          if [[ -z "${COPILOT_GITHUB_TOKEN:-}" ]]; then
-            echo "::warning::COPILOT_GITHUB_TOKEN 未设定（选填；未设定时 coding-agent workflow 会 fallback 到 CLAW_SYS_GITHUB_TOKEN）"
-            exit 0
-          fi
-          echo "✅ COPILOT_GITHUB_TOKEN 已设定"
-
-      - name: "[TC-CS02] COPILOT_GITHUB_TOKEN — 格式验证（若存在）"
-        id: tc_cs02
-        continue-on-error: true
-        run: |
-          if [[ -z "${COPILOT_GITHUB_TOKEN:-}" ]]; then
-            echo "ℹ️ COPILOT_GITHUB_TOKEN 未设定，跳过格式验证"
-            exit 0
-          fi
-          len=${#COPILOT_GITHUB_TOKEN}
-          if [[ "${COPILOT_GITHUB_TOKEN}" =~ ^ghp_[A-Za-z0-9]{36}$ ]]; then
-            echo "✅ COPILOT_GITHUB_TOKEN 符合 Classic PAT 格式（ghp_...）"
-          elif [[ "${COPILOT_GITHUB_TOKEN}" =~ ^github_pat_[A-Za-z0-9_]{82}$ ]]; then
-            echo "✅ COPILOT_GITHUB_TOKEN 符合 Fine-grained PAT 格式（github_pat_...）"
-          elif [[ "${COPILOT_GITHUB_TOKEN}" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "✅ COPILOT_GITHUB_TOKEN 符合旧版 Classic PAT 格式（40 位 hex）"
-          elif [[ $len -ge 20 ]]; then
-            echo "⚠️ COPILOT_GITHUB_TOKEN 格式未能识别已知格式，但长度足够（${len} 字元），可能是自订格式"
-          else
-            echo "::error::COPILOT_GITHUB_TOKEN 长度异常（${len} 字元），可能不是有效的 GitHub Token"
-            exit 1
-          fi
-
-      - name: "[TC-CS03] COPILOT_GITHUB_TOKEN — GitHub API 验证（GET /user）"
-        id: tc_cs03
-        continue-on-error: true
-        run: |
-          if [[ -z "${COPILOT_GITHUB_TOKEN:-}" ]]; then
-            echo "ℹ️ COPILOT_GITHUB_TOKEN 未设定，跳过 API 验证"
-            exit 0
-          fi
-          RESPONSE=$(curl -sS \
-            -H "Authorization: Bearer ${COPILOT_GITHUB_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/user")
-          LOGIN=$(echo "$RESPONSE" | jq -r '.login // empty')
-          if [[ -z "$LOGIN" ]]; then
-            echo "::error::COPILOT_GITHUB_TOKEN 无效或已过期: $(echo "$RESPONSE" | jq -c '{message}')"
-            exit 1
-          fi
-          echo "✅ COPILOT_GITHUB_TOKEN 有效（GitHub 使用者: ${LOGIN}）"
-
-      # ══════════════════════════════════════════════════════════════════════
       # GEMINI_API_KEY（选填）
       # ══════════════════════════════════════════════════════════════════════
 
@@ -1098,10 +1042,6 @@ jobs:
           OUTCOME_TW01: ${{ steps.tc_tw01.outcome }}
           OUTCOME_TW02: ${{ steps.tc_tw02.outcome }}
           OUTCOME_TW03: ${{ steps.tc_tw03.outcome }}
-          # GH Codespace Token (optional)
-          OUTCOME_CS01: ${{ steps.tc_cs01.outcome }}
-          OUTCOME_CS02: ${{ steps.tc_cs02.outcome }}
-          OUTCOME_CS03: ${{ steps.tc_cs03.outcome }}
           # Gemini API Key (optional)
           OUTCOME_GM01: ${{ steps.tc_gm01.outcome }}
           OUTCOME_GM02: ${{ steps.tc_gm02.outcome }}
@@ -1161,7 +1101,6 @@ jobs:
             "$OUTCOME_WS01" "$OUTCOME_WS02" "$OUTCOME_WS03" \
             "$OUTCOME_TG01" "$OUTCOME_TG02" "$OUTCOME_TG03" "$OUTCOME_TG04" \
             "$OUTCOME_TW01" "$OUTCOME_TW02" "$OUTCOME_TW03" \
-            "$OUTCOME_CS01" "$OUTCOME_CS02" "$OUTCOME_CS03" \
             "$OUTCOME_GM01" "$OUTCOME_GM02" "$OUTCOME_GM03" \
             "$OUTCOME_CB01" "$OUTCOME_CB02" "$OUTCOME_CB03" \
             "$OUTCOME_FL01" "$OUTCOME_FL02" "$OUTCOME_FL03" \
@@ -1220,9 +1159,6 @@ jobs:
             echo ""
             echo "| 测试案例 | 变数 | 说明 | 结果 |"
             echo "|---------|------|------|:----:|"
-            echo "| TC-CS01 | \`COPILOT_GITHUB_TOKEN\`  | 是否存在（选填）               | $(icon "$OUTCOME_CS01") |"
-            echo "| TC-CS02 | \`COPILOT_GITHUB_TOKEN\`  | 格式验证（若存在）             | $(icon "$OUTCOME_CS02") |"
-            echo "| TC-CS03 | \`COPILOT_GITHUB_TOKEN\`  | GitHub API 验证（若存在）      | $(icon "$OUTCOME_CS03") |"
             echo "| TC-GM01 | \`GEMINI_API_KEY\`      | 是否存在（选填）               | $(icon "$OUTCOME_GM01") |"
             echo "| TC-GM02 | \`GEMINI_API_KEY\`      | 格式验证（若存在）             | $(icon "$OUTCOME_GM02") |"
             echo "| TC-GM03 | \`GEMINI_API_KEY\`      | Google AI API 验证（若存在）  | $(icon "$OUTCOME_GM03") |"
