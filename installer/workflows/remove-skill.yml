@@ -1,20 +1,20 @@
-# 技能移除工作流程：从指定 issue 的工作区移除技能。
-name: '🗑️ 移除技能'
-run-name: "技能移除: ${{ inputs.skill_name }} | req:${{ inputs.request_id }}"
+# Skill removal workflow: removes a skill from the workspace of the specified issue.
+name: '🗑️ Remove Skill'
+run-name: "Remove skill: ${{ inputs.skill_name }} | req:${{ inputs.request_id }}"
 
 on:
   workflow_dispatch:
     inputs:
       skill_name:
-        description: '技能名称'
+        description: 'Skill name'
         required: true
         type: string
       issue_number:
-        description: '目标 issue 编号'
+        description: 'Target issue number'
         required: true
         type: string
       request_id:
-        description: '请求 ID（用于 Core 通知追踪）'
+        description: 'Request ID (for Core notification tracking)'
         required: false
         type: string
 
@@ -38,8 +38,8 @@ jobs:
     timeout-minutes: 10
     steps:
 
-      # ── Step 1: 验证输入参数 ──────────────────────────────────────
-      - name: 验证输入参数
+      # ── Step 1: Validate input parameters ─────────────────────────────
+      - name: Validate input parameters
         shell: bash
         run: |
           set -euo pipefail
@@ -54,15 +54,15 @@ jobs:
           echo "skill_name=${SKILL_NAME}"
           echo "issue_number=${ISSUE_NUMBER}"
 
-      # ── Step 2: 签出仓库 ──────────────────────────────────────────
-      - name: 签出仓库
+      # ── Step 2: Checkout repository ──────────────────────────────────
+      - name: Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ env.PUSH_TOKEN }}
 
-      # ── Step 3: 切换到 issue 分支并移除技能 ────────────────────────
-      - name: 切换到 issue 分支并移除技能
+      # ── Step 3: Switch to issue branch and remove skill ─────────────
+      - name: Switch to issue branch and remove skill
         shell: bash
         run: |
           set -euo pipefail
@@ -76,7 +76,7 @@ jobs:
 
           git fetch --no-tags origin "${TARGET_BRANCH}" || {
             echo "REMOVE_FAILED=true" >> "$GITHUB_ENV"
-            echo "REMOVE_ERROR=分支 ${TARGET_BRANCH} 不存在" >> "$GITHUB_ENV"
+            echo "REMOVE_ERROR=branch ${TARGET_BRANCH} does not exist" >> "$GITHUB_ENV"
             exit 0
           }
 
@@ -84,7 +84,7 @@ jobs:
 
           if [[ ! -d "${SKILL_PATH}" ]]; then
             echo "REMOVE_FAILED=true" >> "$GITHUB_ENV"
-            echo "REMOVE_ERROR=技能 '${SKILL_NAME}' 未安装在 ${TARGET_BRANCH}" >> "$GITHUB_ENV"
+            echo "REMOVE_ERROR=skill '${SKILL_NAME}' is not installed on ${TARGET_BRANCH}" >> "$GITHUB_ENV"
             exit 0
           fi
 
@@ -110,16 +110,16 @@ jobs:
               echo "REMOVE_RESULT=success" >> "$GITHUB_ENV"
             else
               echo "REMOVE_FAILED=true" >> "$GITHUB_ENV"
-              echo "REMOVE_ERROR=推送到 ${TARGET_BRANCH} 失败" >> "$GITHUB_ENV"
+              echo "REMOVE_ERROR=push to ${TARGET_BRANCH} failed" >> "$GITHUB_ENV"
             fi
           fi
 
-      # ── Step 4: 检查移除结果 ───────────────────────────────────
-      - name: 检查移除结果
+      # ── Step 4: Check removal result ──────────────────────────────
+      - name: Check removal result
         if: always() && !cancelled()
         shell: bash
         run: |
           if [[ "${REMOVE_FAILED:-}" == "true" ]]; then
-            echo "::error::技能移除失败: ${REMOVE_ERROR:-未知错误}"
+            echo "::error::skill removal failed: ${REMOVE_ERROR:-unknown error}"
             exit 1
           fi

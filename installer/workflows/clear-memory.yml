@@ -1,14 +1,14 @@
-name: 🧹 清除小龙虾记忆
+name: 🧹 Clear Lobster Memory
 
 on:
   workflow_dispatch:
     inputs:
       active_issue:
-        description: 目前作用中的 issue number
+        description: Currently active issue number
         required: true
         type: string
 
-run-name: "🧹 清除小龙虾记忆 #${{ inputs.active_issue }}"
+run-name: "🧹 Clear Lobster Memory #${{ inputs.active_issue }}"
 
 concurrency:
   group: clear-memory-${{ github.repository }}-${{ inputs.active_issue }}
@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   clear-memory:
-    name: 🧹 清除小龙虾记忆
+    name: 🧹 Clear Lobster Memory
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -87,9 +87,9 @@ jobs:
         if: always()
         run: |
           {
-            echo "### 🧹 清除小龙虾记忆"
+            echo "### 🧹 Clear Lobster Memory"
             echo
-            echo "| 项目 | 值 |"
+            echo "| Field | Value |"
             echo "| --- | --- |"
             echo "| Issue | \`#${ISSUE_NUMBER}\` |"
             echo "| Branch | \`${TARGET_BRANCH}\` |"

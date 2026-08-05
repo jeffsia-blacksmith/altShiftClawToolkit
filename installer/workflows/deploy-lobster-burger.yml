@@ -217,8 +217,8 @@ jobs:
             "${RUNNER_TEMP}/github-claw-worker-package.zip" \
             -d "${RUNNER_TEMP}/github-claw-worker-package"
 
-          # altShiftClawCore 套件仅含 GitHubClawCore/ 与 Terraform/（不含 actions/）；
-          # 若未来套件加入 actions/ 才复制，避免不存在时报错。
+          # The altShiftClawCore package only contains GitHubClawCore/ and Terraform/ (not actions/);
+          # only copy actions/ if the package adds it in the future, to avoid errors when it does not exist.
           if [ -d "${RUNNER_TEMP}/github-claw-worker-package/actions" ]; then
             cp -R \
               "${RUNNER_TEMP}/github-claw-worker-package/actions/." \
@@ -241,7 +241,7 @@ jobs:
           TOOLKIT_REPO="https://github.com/jeffsia-blacksmith/altShiftClawToolkit.git"
           TOOLKIT_DIR="${RUNNER_TEMP}/altShiftClawToolkit"
           LOCAL_TEMPLATE_DIR="${GITHUB_WORKSPACE}/templates"
-          # 单一权威源：installer/templates（与 AdminPage seed 同源，避免 templates/ 与 installer/templates 分叉）
+          # Single source of truth: installer/templates (same source as AdminPage seed, avoiding a fork between templates/ and installer/templates)
           TOOLKIT_TEMPLATE_SRC="${TOOLKIT_DIR}/installer/templates"
 
           mkdir -p "${LOCAL_TEMPLATE_DIR}"
@@ -251,14 +251,14 @@ jobs:
           )
 
           if [[ "${#INSTALLED_TEMPLATES[@]}" -eq 0 ]]; then
-            echo "没有侦测到已安装 templates/*，略过 altShiftClawToolkit 同步。"
+            echo "No installed templates/* detected, skipping altShiftClawToolkit sync."
             exit 0
           fi
 
           git clone --depth 1 "$TOOLKIT_REPO" "$TOOLKIT_DIR"
 
           if [[ ! -d "${TOOLKIT_TEMPLATE_SRC}" ]]; then
-            echo "::error::altShiftClawToolkit 缺少 installer/templates"
+            echo "::error::altShiftClawToolkit is missing installer/templates"
             exit 1
           fi
 
@@ -287,21 +287,21 @@ jobs:
           done
 
           {
-            echo "### 模板同步结果（altShiftClawToolkit）"
+            echo "### Template Sync Result (altShiftClawToolkit)"
             echo ""
             if (( ${#updated_templates[@]} > 0 )); then
-              echo "#### 已更新模板"
+              echo "#### Updated templates"
               for template_name in "${updated_templates[@]}"; do
                 echo "- ${template_name}"
               done
               echo ""
             else
-              echo "- 本次无可更新的已安装模板。"
+              echo "- No installed templates could be updated this time."
               echo ""
             fi
 
             if (( ${#skipped_templates[@]} > 0 )); then
-              echo "#### 已略过模板（名称不在 toolkit，视为自订模板）"
+              echo "#### Skipped templates (name not in toolkit, treated as custom templates)"
               for template_name in "${skipped_templates[@]}"; do
                 echo "- ${template_name}"
               done
@@ -347,8 +347,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # 设置 repo variable；空值跳过，避免 GitHub API 422 "missing required key: value"
-          # （PROFILE_NAME / PERSONALITY 等为 optional，autoupdate 等不传 profile inputs 时为空）
+          # Set repo variables; skip empty values to avoid GitHub API 422 "missing required key: value"
+          # (PROFILE_NAME / PERSONALITY etc. are optional and are empty when autoupdate does not pass profile inputs)
           set_var_if_nonempty() {
             local name="$1" val="$2"
             if [[ -n "${val}" ]]; then
@@ -449,13 +449,13 @@ jobs:
               "${STORED_WORKER_URL}" \
               "${STORED_GITHUBCLAW_WORKER_URL}"
           )"; then
-            echo "✅ 侦测到既有 Worker：${matched_worker_name}"
+            echo "✅ Detected existing Worker: ${matched_worker_name}"
           else
             match_status=$?
             if [[ "$match_status" -ne 1 ]]; then
               exit "$match_status"
             fi
-            echo "ℹ️ 找不到既有 Worker，将使用 canonical 名称建立或接续部署。"
+            echo "ℹ️ No existing Worker found; will create or continue deploy with the canonical name."
             matched_worker_name=""
           fi
 
@@ -536,7 +536,7 @@ jobs:
           WORKERS_SUBDOMAIN: ${{ steps.workers_subdomain.outputs.subdomain }}
         run: |
           set -euo pipefail
-          # 空值跳过，避免 GitHub API 422（与 Sync GitHub settings 同一防护）
+          # Skip empty values to avoid GitHub API 422 (same guard as Sync GitHub settings)
           set_var_if_nonempty() {
             local name="$1" val="$2"
             if [[ -n "${val}" ]]; then
@@ -553,7 +553,7 @@ jobs:
           WORKER_URL: ${{ steps.tf_outputs.outputs.worker_url }}
         run: |
           set -euo pipefail
-          echo "⏳ 等待 Cloudflare Worker health check..."
+          echo "⏳ Waiting for Cloudflare Worker health check..."
           MAX_RETRIES=20
           RETRY_INTERVAL=3
           WORKER_ENDPOINT="${WORKER_URL%/}/health"
@@ -562,12 +562,12 @@ jobs:
             response=""
             if response="$(curl --fail-with-body --show-error --silent --max-time 10 "${WORKER_ENDPOINT}")"; then
               if jq -e '.ok == true and .service == "githubclaw-core"' <<<"${response}" >/dev/null 2>&1; then
-                echo "✅ Worker health check 通过，耗时约 $(( (i - 1) * RETRY_INTERVAL )) 秒"
+                echo "✅ Worker health check passed, took about $(( (i - 1) * RETRY_INTERVAL )) seconds"
                 exit 0
               fi
             fi
             last_response="${response:-"(empty response)"}"
-            echo "  尝试 $i/$MAX_RETRIES：Worker health check 尚未通过，${RETRY_INTERVAL} 秒后重试..."
+            echo "  Attempt $i/$MAX_RETRIES: Worker health check not passed yet, retrying in ${RETRY_INTERVAL} seconds..."
             sleep $RETRY_INTERVAL
           done
           echo "::error::Worker health check failed at ${WORKER_ENDPOINT}. Last response: ${last_response:0:500}"
@@ -593,33 +593,8 @@ jobs:
           )"
 
           if [[ "$(echo "${response}" | jq -r '.ok // false')" != "true" ]]; then
-            echo "::error::Telegram webhook 设定失败: $(echo "${response}" | jq -r '.description // "unknown error"')"
+            echo "::error::Telegram webhook configuration failed: $(echo "${response}" | jq -r '.description // "unknown error"')"
             exit 1
-          fi
-
-          echo "Setting up Telegram bot commands..."
-          # Set English default commands
-          cmd_response_en="$(
-            curl --silent \
-              -X POST \
-              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setMyCommands" \
-              -H "Content-Type: application/json" \
-              -d '{"commands":[{"command":"start","description":"🚀 Initialize and view claw list"},{"command":"list","description":"📋 List all active claws"},{"command":"status","description":"📊 Show current claw status summary"},{"command":"current","description":"🦞 Show current active claw"},{"command":"llm","description":"🧠 Setup AI provider and model"},{"command":"skills","description":"🛠️ Install and manage agent skills"},{"command":"templates","description":"📄 Install lobster templates"},{"command":"help","description":"❓ Show usage instructions and help"},{"command":"new","description":"➕ Create a new claw"},{"command":"edit","description":"✏️ Edit current claw"},{"command":"close","description":"🔒 Close current claw"},{"command":"clear","description":"🧹 Clear current claw memory"},{"command":"schedules","description":"⏰ List all schedules"},{"command":"workflow","description":"🔄 Check workflow status"},{"command":"enable","description":"▶️ Enable current claw"},{"command":"disable","description":"⏸️ Disable current claw"},{"command":"autoupdate","description":"⬆️ Update lobster core"},{"command":"version","description":"🏷️ Check core version"}]}'
-          )"
-          if [[ "$(echo "${cmd_response_en}" | jq -r '.ok // false')" != "true" ]]; then
-            echo "::warning::Telegram default (EN) bot commands 设定失败: $(echo "${cmd_response_en}" | jq -r '.description // "unknown error"')"
-          fi
-
-          # Set Chinese (zh) commands
-          cmd_response_zh="$(
-            curl --silent \
-              -X POST \
-              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setMyCommands" \
-              -H "Content-Type: application/json" \
-              -d '{"language_code":"zh","commands":[{"command":"start","description":"🚀 初始化并查看小龙虾列表"},{"command":"list","description":"📋 列出所有值班中的小龙虾"},{"command":"status","description":"📊 显示目前小龙虾状态摘要"},{"command":"current","description":"🦞 显示目前值班中的小龙虾"},{"command":"llm","description":"🧠 设定 AI 供应商与模型"},{"command":"skills","description":"🛠️ 安装与管理小龙虾技能"},{"command":"templates","description":"📄 安装小龙虾范本"},{"command":"help","description":"❓ 显示所有指令说明"},{"command":"new","description":"➕ 建立新的小龙虾"},{"command":"edit","description":"✏️ 编辑目前的小龙虾"},{"command":"close","description":"🔒 关闭目前的小龙虾"},{"command":"clear","description":"🧹 清除目前小龙虾的记忆"},{"command":"schedules","description":"⏰ 列出所有排程"},{"command":"workflow","description":"🔄 查询小龙虾任务状态"},{"command":"enable","description":"▶️ 启用目前的小龙虾"},{"command":"disable","description":"⏸️ 停用目前的小龙虾"},{"command":"autoupdate","description":"⬆️ 更新龙虾堡核心"},{"command":"version","description":"🏷️ 查询龙虾堡核心版本"}]}'
-          )"
-          if [[ "$(echo "${cmd_response_zh}" | jq -r '.ok // false')" != "true" ]]; then
-            echo "::warning::Telegram Chinese (ZH) bot commands 设定失败: $(echo "${cmd_response_zh}" | jq -r '.description // "unknown error"')"
           fi
 
       - name: Publish summary
@@ -636,9 +611,9 @@ jobs:
           schedules_db_uuid="${SCHEDULES_DB_UUID:-"-"}"
 
           {
-            echo "### 部署龙虾堡"
+            echo "### Deploy Lobster Burger"
             echo
-            echo "| 项目 | 值 |"
+            echo "| Field | Value |"
             echo "| --- | --- |"
             echo "| Repository | \`${GITHUB_REPOSITORY}\` |"
             echo "| Applied Worker | \`${applied_worker_name}\` |"
