@@ -60,13 +60,13 @@ jobs:
           ref: main
           path: templates-source
           sparse-checkout: |
-            templates/${{ env.TEMPLATE_NAME }}
+            installer/templates/${{ env.TEMPLATE_NAME }}
 
       - name: 验证范本存在
         shell: bash
         run: |
           set -euo pipefail
-          test -d "templates-source/templates/${TEMPLATE_NAME}"
+          test -d "templates-source/installer/templates/${TEMPLATE_NAME}"
 
       - name: 同步范本到 main 分支
         shell: bash
@@ -82,10 +82,10 @@ jobs:
 
           INSTALL_PATH="templates/${TEMPLATE_NAME}"
           mkdir -p "${INSTALL_PATH}"
-          rsync -a --delete "templates-source/templates/${TEMPLATE_NAME}/" "${INSTALL_PATH}/"
+          rsync -a --delete "templates-source/installer/templates/${TEMPLATE_NAME}/" "${INSTALL_PATH}/"
 
           # 同步范本额外的 workflow 档案到 .github/workflows/
-          TEMPLATE_WF_DIR="templates-source/templates/${TEMPLATE_NAME}/.github/workflows"
+          TEMPLATE_WF_DIR="templates-source/installer/templates/${TEMPLATE_NAME}/.github/workflows"
           if [[ -d "${TEMPLATE_WF_DIR}" ]]; then
             mkdir -p ".github/workflows"
             shopt -s nullglob
