@@ -43,7 +43,29 @@ fi
 ESCAPED_QUERY=$(printf '%s\n' "$QUERY" | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g')
 
 # Call Felo API
-curl -s -X POST https://openapi.felo.ai/v2/chat \
+RESPONSE=$(curl -s -X POST https://openapi.felo.ai/v2/chat \
   -H "Authorization: Bearer $FELO_API_KEY" \
   -H "Content-Type: application/json" \
-  -d "{\"query\": \"$ESCAPED_QUERY\"}"
+  -d "{\"query\": \"$ESCAPED_QUERY\"}")
+
+# Format response: unwrap the `data` envelope and print answer, query analysis and resources.
+# Fall back to raw JSON if jq is unavailable.
+if command -v jq &> /dev/null; then
+  STATUS=$(printf '%s' "$RESPONSE" | jq -r '.status // empty')
+  if [[ -n "$STATUS" && "$STATUS" != "200" ]]; then
+    printf '%s\n' "$RESPONSE" | jq .
+    exit 1
+  fi
+
+  printf '%s\n' "$RESPONSE" | jq -r '
+    "## Answer\n" +
+    (.data.answer // empty) +
+    "\n\n## Query Analysis" +
+    "\nOptimized search terms: " +
+    (.data.query_analysis.queries | join(", ") // "") +
+    "\n\n## Resources" +
+    ((.data.resources // []) | map("\n- [" + .title + "](" + .link + ")") | join(""))
+  '
+else
+  printf '%s\n' "$RESPONSE"
+fi

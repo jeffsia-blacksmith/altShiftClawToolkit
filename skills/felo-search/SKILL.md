@@ -2,7 +2,6 @@
 name: felo-search
 description: "Felo AI real-time web search for questions requiring current/live information. Triggers on current events, news, trends, real-time data, information queries, location queries, how-to guides, shopping, or when Claude's knowledge may be outdated."
 ---
-
 # Felo Search Skill
 
 ## When to Use
@@ -19,6 +18,7 @@ Trigger this skill for questions requiring current or real-time information:
 - **Any question where Claude's knowledge may be outdated**
 
 **Trigger words:**
+
 - 简体中文: 最近、什么、哪里、怎么样、如何、查、搜、找、推荐、比较、新闻、天气
 - 繁体中文: 最近、什么、哪里、怎么样、如何、查、搜、找、推荐、比较、新闻、天气
 - 日本语: 最近、何、どこ、どう、検索、探す、おすすめ、比较、ニュース、天気
@@ -27,6 +27,7 @@ Trigger this skill for questions requiring current or real-time information:
 **Explicit commands:** `/felo-search`, "search with felo", "felo search"
 
 **Do NOT use for:**
+
 - Code questions about the user's codebase (unless asking about external libraries/docs)
 - Pure mathematical calculations or logical reasoning
 - Questions about files in the current project
@@ -46,16 +47,19 @@ Trigger this skill for questions requiring current or real-time information:
 Set the `FELO_API_KEY` environment variable:
 
 **Linux/macOS:**
+
 ```bash
 export FELO_API_KEY="your-api-key-here"
 ```
 
 **Windows (PowerShell):**
+
 ```powershell
 $env:FELO_API_KEY="your-api-key-here"
 ```
 
 **Windows (CMD):**
+
 ```cmd
 set FELO_API_KEY=your-api-key-here
 ```
@@ -73,29 +77,37 @@ bash .agents/skills/felo-search/scripts/search.sh "USER_QUERY_HERE"
 > ⚠️ **路径安全**：skill 脚本位于 **repo 根目录**的 `.agents/skills/` 下。若 cwd 不在 repo root，请先执行 `git rev-parse --show-toplevel` 取得绝对路径，再 `cd` 到该路径后执行。**禁止**在指令中使用 `$(...)` 语法（会被 Copilot CLI 安全过滤器挡下）。
 
 **Notes:**
+
 - Replace `USER_QUERY_HERE` with the actual user query
 - The script handles API key validation, JSON escaping, and API calls
 - Supports all special characters, Unicode (Chinese, Japanese, etc.), and quotes
 
 ### Parse and Format Response
 
-The API returns JSON with this structure:
+The API returns JSON wrapped in a `data` envelope:
+
 ```json
 {
-  "answer": "AI-generated answer text",
-  "query_analysis": ["optimized query 1", "optimized query 2"]
+  "status": 200,
+  "code": "OK",
+  "data": {
+    "id": "...",
+    "message_id": "...",
+    "answer": "AI-generated answer text",
+    "query_analysis": { "queries": ["optimized query 1", "optimized query 2"] },
+    "resources": [ { "link": "...", "title": "...", "snippet": "..." } ]
+  },
+  "request_id": "..."
 }
 ```
 
-Present the response to the user in this format:
+- `answer` is under `data.answer`
+- `query_analysis` is an **object** `{ "queries": [...] }`, not a bare array
+- `data.resources` is a list of cited sources (link, title, snippet)
 
-```
-## Answer
-[Display the answer field]
-
-## Query Analysis
-Optimized search terms: [list query_analysis items]
-```
+The search script (`search.sh`) already unwraps the envelope and prints a formatted
+`## Answer` / `## Query Analysis` / `## Resources` block when `jq` is available.
+If `jq` is missing it prints the raw JSON. Present the script's output to the user.
 
 ## Complete Examples
 
@@ -104,6 +116,7 @@ Optimized search terms: [list query_analysis items]
 **User asks:** "What's the weather in Tokyo today?"
 
 **Expected response format:**
+
 ```
 ## Answer
 Tokyo weather today: Sunny, 22°C (72°F). High of 25°C, low of 18°C.
@@ -115,6 +128,7 @@ Optimized search terms: Tokyo weather today, 东京 天気 今日
 ```
 
 **Bash command:**
+
 ```bash
 bash .agents/skills/felo-search/scripts/search.sh "What's the weather in Tokyo today?"
 ```
@@ -124,6 +138,7 @@ bash .agents/skills/felo-search/scripts/search.sh "What's the weather in Tokyo t
 **User asks:** "What's new in Hangzhou recently?"
 
 **Expected response format:**
+
 ```
 ## Answer
 Recent news in Hangzhou: Asian Games venue upgrades completed, West Lake night tours launched, new metro lines opened. Details...
@@ -133,6 +148,7 @@ Optimized search terms: Hangzhou recent news, Hangzhou events, 杭州 最近 新
 ```
 
 **Bash command:**
+
 ```bash
 bash .agents/skills/felo-search/scripts/search.sh "What's new in Hangzhou recently"
 ```
@@ -142,6 +158,7 @@ bash .agents/skills/felo-search/scripts/search.sh "What's new in Hangzhou recent
 **User asks:** "What are the best things to do in Taipei?"
 
 **Bash command:**
+
 ```bash
 bash .agents/skills/felo-search/scripts/search.sh "What are the best things to do in Taipei"
 ```
@@ -151,6 +168,7 @@ bash .agents/skills/felo-search/scripts/search.sh "What are the best things to d
 **User asks:** "Popular restaurants in Tokyo?"
 
 **Bash command:**
+
 ```bash
 bash .agents/skills/felo-search/scripts/search.sh "Popular restaurants in Tokyo"
 ```
@@ -196,6 +214,7 @@ To use this skill, you need to set up your Felo API Key:
 **Authentication:** Bearer token in Authorization header (from `FELO_API_KEY` environment variable)
 
 **Request format:**
+
 ```json
 {
   "query": "user's search query"
@@ -203,12 +222,22 @@ To use this skill, you need to set up your Felo API Key:
 ```
 
 **Response format:**
+
 ```json
 {
-  "answer": "AI-generated comprehensive answer",
-  "query_analysis": ["optimized query 1", "optimized query 2"]
+  "status": 200,
+  "code": "OK",
+  "data": {
+    "answer": "AI-generated comprehensive answer",
+    "query_analysis": { "queries": ["optimized query 1", "optimized query 2"] },
+    "resources": [ { "link": "...", "title": "...", "snippet": "..." } ]
+  },
+  "request_id": "..."
 }
 ```
+
+Note: the top-level `data` wrapper must be unwrapped; `query_analysis` is an object
+with a `queries` array; `resources` lists cited sources.
 
 ## Important Notes
 
