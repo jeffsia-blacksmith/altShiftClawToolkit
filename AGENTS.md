@@ -3,7 +3,8 @@
 ## Project Structure & Module Organization
 
 - `skills/`: standalone Agent Skills with `SKILL.md`, `README.md`, and `githubclaw.json`; add `scripts/`, `src/`, `references/`, or `assets/` only when needed.
-- `templates/`: reusable agent or system templates, usually with `AGENTS.md` or `SYSTEM.md` plus `githubclaw.json`.
+- `installer/`: seed payload planted into an instance repo — `installer/workflows/` (management workflows) and `installer/templates/`, the **single source of truth** for templates (each template is `AGENTS.md` + `githubclaw.json` + `.pi/`).
+- `templates/`: **generated** legacy compatibility mirror of `installer/templates/`. Never edit it by hand — `.github/workflows/mirror-templates.yml` rebuilds it on every push and asserts it stays byte-identical. Instances installed before 2026-08-05 `git clone` this repo at run time and read `<toolkit>/templates`, so the directory must keep existing.
 - `actions/`: composite GitHub Actions and reusable workflow assets. Each action has `action.yml` and `README.md`.
 - `workers/telegram-bot/`: Bun/Node Cloudflare Worker source, tests, scripts, migrations, and deployment config.
 
