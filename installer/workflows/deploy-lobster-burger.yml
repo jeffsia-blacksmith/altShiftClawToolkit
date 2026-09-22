@@ -241,8 +241,10 @@ jobs:
           TOOLKIT_REPO="https://github.com/jeffsia-blacksmith/altShiftClawToolkit.git"
           TOOLKIT_DIR="${RUNNER_TEMP}/altShiftClawToolkit"
           LOCAL_TEMPLATE_DIR="${GITHUB_WORKSPACE}/templates"
-          # Single source of truth: installer/templates (same source as AdminPage seed, avoiding a fork between templates/ and installer/templates)
-          TOOLKIT_TEMPLATE_SRC="${TOOLKIT_DIR}/installer/templates"
+          # Single source of truth: installer/templates (same source as AdminPage seed, avoiding a fork
+          # between templates/ and installer/templates). templates/ is a legacy compatibility mirror kept
+          # for instances whose planted workflow still reads it — accept either, newest first.
+          TEMPLATE_SRC_CANDIDATES=("installer/templates" "templates")
 
           mkdir -p "${LOCAL_TEMPLATE_DIR}"
 
@@ -257,10 +259,30 @@ jobs:
 
           git clone --depth 1 "$TOOLKIT_REPO" "$TOOLKIT_DIR"
 
-          if [[ ! -d "${TOOLKIT_TEMPLATE_SRC}" ]]; then
-            echo "::error::altShiftClawToolkit is missing installer/templates"
-            exit 1
+          TOOLKIT_TEMPLATE_SRC=""
+          for candidate in "${TEMPLATE_SRC_CANDIDATES[@]}"; do
+            if [[ -d "${TOOLKIT_DIR}/${candidate}" ]]; then
+              TOOLKIT_TEMPLATE_SRC="${TOOLKIT_DIR}/${candidate}"
+              break
+            fi
+          done
+
+          # Never hard-fail here. This step runs *before* "Commit synced workflows", so failing it
+          # would also block the only channel that ships updated workflows back to existing
+          # instances — leaving them permanently unable to self-heal. Warn and continue instead:
+          # the deploy still commits the refreshed package workflows below.
+          if [[ -z "${TOOLKIT_TEMPLATE_SRC}" ]]; then
+            echo "::warning::altShiftClawToolkit has none of [${TEMPLATE_SRC_CANDIDATES[*]}] — skipping template sync, deploy continues."
+            {
+              echo "### Template Sync Result (altShiftClawToolkit)"
+              echo ""
+              echo "- ⚠️ Skipped: no upstream template directory found (\`${TEMPLATE_SRC_CANDIDATES[*]}\`)."
+              echo "- The worker package was still refreshed and committed."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
+
+          echo "Using toolkit template source: ${TOOLKIT_TEMPLATE_SRC#"${TOOLKIT_DIR}/"}"
 
           readarray -t TOOLKIT_TEMPLATES < <(
             find "${TOOLKIT_TEMPLATE_SRC}" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort || true

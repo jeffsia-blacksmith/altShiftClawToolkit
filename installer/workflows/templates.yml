@@ -59,17 +59,37 @@ jobs:
           repository: ${{ env.TEMPLATES_SOURCE_REPO }}
           ref: main
           path: templates-source
-          sparse-checkout: |
-            installer/templates/${{ env.TEMPLATE_NAME }}
 
-      - name: Verify template exists
+      # installer/templates is the single source of truth; templates/ is a legacy compatibility
+      # mirror kept for instances whose planted workflow still reads it. Resolve at run time and
+      # accept either, so an upstream directory move can never silently break this sync again
+      # (a hard-coded sparse-checkout of one path is what broke it before).
+      - name: Resolve template source path
+        id: template_src
         shell: bash
         run: |
           set -euo pipefail
-          test -d "templates-source/installer/templates/${TEMPLATE_NAME}"
+
+          for candidate in "installer/templates" "templates"; do
+            if [[ -d "templates-source/${candidate}/${TEMPLATE_NAME}" ]]; then
+              echo "path=${candidate}" >> "$GITHUB_OUTPUT"
+              echo "Resolved template source: ${candidate}/${TEMPLATE_NAME}"
+              exit 0
+            fi
+          done
+
+          echo "::error::template '${TEMPLATE_NAME}' not found in ${TEMPLATES_SOURCE_REPO}@main"
+          echo "Available templates:"
+          for candidate in "installer/templates" "templates"; do
+            [[ -d "templates-source/${candidate}" ]] || continue
+            find "templates-source/${candidate}" -mindepth 1 -maxdepth 1 -type d -printf '  - %f\n' | sort
+          done
+          exit 1
 
       - name: Sync template to main branch
         shell: bash
+        env:
+          TEMPLATE_SRC: ${{ steps.template_src.outputs.path }}
         run: |
           set -euo pipefail
 
@@ -80,12 +100,13 @@ jobs:
           git fetch --no-tags origin main
           git checkout -B main origin/main
 
+          TEMPLATE_SOURCE_DIR="templates-source/${TEMPLATE_SRC}/${TEMPLATE_NAME}"
           INSTALL_PATH="templates/${TEMPLATE_NAME}"
           mkdir -p "${INSTALL_PATH}"
-          rsync -a --delete "templates-source/installer/templates/${TEMPLATE_NAME}/" "${INSTALL_PATH}/"
+          rsync -a --delete "${TEMPLATE_SOURCE_DIR}/" "${INSTALL_PATH}/"
 
           # Sync any extra template workflow files to .github/workflows/
-          TEMPLATE_WF_DIR="templates-source/installer/templates/${TEMPLATE_NAME}/.github/workflows"
+          TEMPLATE_WF_DIR="${TEMPLATE_SOURCE_DIR}/.github/workflows"
           if [[ -d "${TEMPLATE_WF_DIR}" ]]; then
             mkdir -p ".github/workflows"
             shopt -s nullglob
@@ -110,6 +131,8 @@ jobs:
       - name: Summary
         if: always()
         shell: bash
+        env:
+          TEMPLATE_SRC: ${{ steps.template_src.outputs.path }}
         run: |
           {
             echo "### 📚 Template Sync Result"
@@ -117,5 +140,6 @@ jobs:
             echo "| Field | Value |"
             echo "| --- | --- |"
             echo "| Template | \`${TEMPLATE_NAME}\` |"
+            echo "| Source | \`${TEMPLATE_SRC:-unresolved}\` |"
             echo "| Target | \`templates/${TEMPLATE_NAME}\` |"
           } >> "$GITHUB_STEP_SUMMARY"

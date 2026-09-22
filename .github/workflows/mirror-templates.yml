@@ -1,0 +1,94 @@
+name: 🔁 Mirror installer/templates
+
+run-name: "🔁 Mirror installer/templates -> templates"
+
+# installer/templates is the single source of truth. templates/ is a *legacy
+# compatibility mirror* that must keep existing (byte-identical) for a while:
+# instances installed before 2026-08-05 still have a planted workflow that reads
+# <toolkit>/templates at run time, and a missing directory made that step exit 1.
+# Because that step runs before "Commit synced workflows", a hard failure also
+# blocked the channel that ships fixed workflows back to those instances, so they
+# could never self-heal. This workflow makes the mirror impossible to drift, and
+# therefore makes that class of dead-lock impossible to reintroduce.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "installer/templates/**"
+      - "templates/**"
+      - ".github/workflows/mirror-templates.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mirror-templates-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    name: 🔁 Mirror templates
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+
+      - name: Mirror installer/templates -> templates
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -d "installer/templates" ]]; then
+            echo "::error::installer/templates is missing — it is the single source of truth."
+            exit 1
+          fi
+
+          # Rebuild the mirror from scratch so upstream deletions are mirrored too.
+          rm -rf templates
+          mkdir -p templates
+          cp -R installer/templates/. templates/
+
+          # Invariant: the mirror is byte-identical to the source of truth.
+          if diff -rq installer/templates templates; then
+            echo "Mirror verified: identical to installer/templates."
+          else
+            echo "::error::mirror verification failed after copy"
+            exit 1
+          fi
+
+      - name: Commit mirror if changed
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A -- templates
+
+          if git diff --cached --quiet; then
+            echo "No mirror changes to commit"
+            exit 0
+          fi
+
+          git commit -m "chore(templates): mirror installer/templates -> templates"
+          git push origin HEAD:main
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "### 🔁 templates mirror"
+            echo
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Source of truth | \`installer/templates\` |"
+            echo "| Mirror | \`templates\` (legacy compatibility) |"
+            echo "| Invariant | \`diff -rq installer/templates templates\` is empty |"
+          } >> "$GITHUB_STEP_SUMMARY"
